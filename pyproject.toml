@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "loom-context"
+version = "0.1.0"
+description = "Architecture Context Engine for AI-First Engineering"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "J. Adrian Ruiz C.", email = "153795808+jadruiz@users.noreply.github.com" },
+]
+keywords = [
+    "ai",
+    "architecture",
+    "context",
+    "clean-architecture",
+    "code-quality",
+    "developer-tools",
+    "engineering",
+    "hexagonal",
+    "linting",
+    "llm",
+    "loom",
+    "naming-conventions",
+    "project-scaffolding",
+    "software-architecture",
+    "static-analysis",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+    "pathspec>=0.12",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "mypy>=1.0",
+    "build>=1.0",
+    "twine>=5.0",
+]
+
+[project.scripts]
+loom = "loom_context.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jadruiz/Loom-Context"
+Repository = "https://github.com/jadruiz/Loom-Context"
+Documentation = "https://github.com/jadruiz/Loom-Context/blob/main/docs/INDEX.md"
+Issues = "https://github.com/jadruiz/Loom-Context/issues"
+Changelog = "https://github.com/jadruiz/Loom-Context/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/loom_context"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "UP007",   # Use X | Y (we need Optional for 3.9 compat)
+    "UP045",   # Use X | None (we need Optional for 3.9 compat)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["loom_context"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
