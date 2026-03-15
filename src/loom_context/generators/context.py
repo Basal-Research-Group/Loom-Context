@@ -18,6 +18,7 @@ class ContextGenerator:
         self.context_dir = context_dir
         self.env = Environment(
             loader=FileSystemLoader(str(TEMPLATES_DIR)),
+            autoescape=False,  # noqa: S701 — generating .md, not HTML
             trim_blocks=True,
             lstrip_blocks=True,
         )
@@ -134,8 +135,7 @@ class ContextGenerator:
         suffix_patterns = code.get("suffix_patterns", [])
         if suffix_patterns:
             rules["naming"]["files"]["suffix_patterns"] = [
-                {"suffix": sp["suffix"], "pattern": sp["pattern"]}
-                for sp in suffix_patterns
+                {"suffix": sp["suffix"], "pattern": sp["pattern"]} for sp in suffix_patterns
             ]
 
         # Prefix patterns as rules
@@ -168,10 +168,8 @@ class ContextGenerator:
         if arch_docs:
             lines.append("## Architecture Documentation\n")
             for doc in arch_docs:
-                title = doc['title'] or doc['path']
-                lines.append(
-                    f"- **{title}** (`{doc['path']}`, {doc['size_kb']}KB)"
-                )
+                title = doc["title"] or doc["path"]
+                lines.append(f"- **{title}** (`{doc['path']}`, {doc['size_kb']}KB)")
                 if doc["sections"]:
                     for section in doc["sections"][:5]:
                         lines.append(f"  - {section}")

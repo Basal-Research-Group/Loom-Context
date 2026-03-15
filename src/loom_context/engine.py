@@ -22,7 +22,7 @@ class LoomEngine:
     """Central orchestrator for Loom-Context."""
 
     def __init__(self, root: str | Path) -> None:
-        self.config = LoomConfig(root)
+        self.config = LoomConfig(Path(root))
         self.file_filter = FileFilter(self.config.root)
 
     def scan(self) -> dict[str, Any]:
@@ -59,9 +59,7 @@ class LoomEngine:
 
         # Generate all context files
         ctx_gen = ContextGenerator(self.config.context_dir)
-        generated = ctx_gen.generate_all(scan_result, index_data)
-
-        return generated
+        return ctx_gen.generate_all(scan_result, index_data)
 
     def generate_prompt(self) -> str:
         """Generate master AI prompt from existing .context/ files."""

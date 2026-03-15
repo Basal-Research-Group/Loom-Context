@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
-# Project type detection: (marker_file_or_pattern, project_type)
 from typing import Any, Optional
 
 from loom_context.scanners.base import BaseScanner
 from loom_context.security.filter import FileFilter
 
+# Project type detection: (marker_file, json_key_reserved, project_type)
 PROJECT_MARKERS: list[tuple[str, Optional[str], str]] = [
-    # (filename, json_key_to_check, project_type)
     ("app.config.js", None, "react-native-expo"),
     ("app.config.ts", None, "react-native-expo"),
     ("expo-env.d.ts", None, "react-native-expo"),
@@ -331,7 +329,9 @@ class StructureScanner(BaseScanner):
         for entry in entries:
             if entry.is_dir():
                 if entry.name.startswith(".") or entry.name in {
-                    "node_modules", "__pycache__", ".git",
+                    "node_modules",
+                    "__pycache__",
+                    ".git",
                 }:
                     continue
                 if self.file_filter.is_excluded(entry):
