@@ -43,7 +43,7 @@ class StructureAuditor:
     def audit(self) -> list[Violation]:
         """Run structural audit and return violations."""
         if not self.rules and not self.load_rules():
-                return []
+            return []
 
         boundaries = self.rules.get("architecture", {}).get("layer_boundaries", {})
         if not boundaries:
@@ -68,17 +68,19 @@ class StructureAuditor:
             for imp, line_num in imports:
                 target_layer = self._resolve_import_layer(imp, boundaries)
                 if target_layer and target_layer in forbidden:
-                    violations.append(Violation(
-                        file=str(rel),
-                        line=line_num,
-                        rule="layer-boundary",
-                        message=(
-                            f"Layer violation: '{current_layer}' imports from "
-                            f"'{target_layer}' (import: {imp})"
-                        ),
-                        severity="error",
-                        suggestion=f"Use a port/interface from '{current_layer}' layer instead",
-                    ))
+                    violations.append(
+                        Violation(
+                            file=str(rel),
+                            line=line_num,
+                            rule="layer-boundary",
+                            message=(
+                                f"Layer violation: '{current_layer}' imports from "
+                                f"'{target_layer}' (import: {imp})"
+                            ),
+                            severity="error",
+                            suggestion=f"Use a port/interface from '{current_layer}' layer instead",
+                        )
+                    )
 
         return violations
 
@@ -112,9 +114,7 @@ class StructureAuditor:
 
         return imports
 
-    def _resolve_import_layer(
-        self, import_path: str, boundaries: dict[str, Any]
-    ) -> Optional[str]:
+    def _resolve_import_layer(self, import_path: str, boundaries: dict[str, Any]) -> Optional[str]:
         """Resolve an import path to its architectural layer."""
         # Handle aliases first
         for alias, target in self.import_aliases.items():

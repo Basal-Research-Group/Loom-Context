@@ -71,7 +71,7 @@ class DocsScanner(BaseScanner):
                 and f.suffix.lower() in {".md", ".mdx", ".rst", ".txt"}
                 and f.name.lower() not in {"license", "license.md"}
             ):
-                    docs.append(f)
+                docs.append(f)
 
         # docs/ directory
         docs_dir = self.root / "docs"
@@ -160,17 +160,20 @@ class DocsScanner(BaseScanner):
         # Table status items
         for match in re.finditer(
             r"\|\s*(.+?)\s*\|\s*(done|complete|completado|hecho|✅)\s*\|",
-            content, re.IGNORECASE,
+            content,
+            re.IGNORECASE,
         ):
             items.append({"name": match.group(1).strip(), "status": "done"})
         for match in re.finditer(
             r"\|\s*(.+?)\s*\|\s*(pending|pendiente|todo|⏳)\s*\|",
-            content, re.IGNORECASE,
+            content,
+            re.IGNORECASE,
         ):
             items.append({"name": match.group(1).strip(), "status": "pending"})
         for match in re.finditer(
             r"\|\s*(.+?)\s*\|\s*(partial|parcial|in.?progress|🔄)\s*\|",
-            content, re.IGNORECASE,
+            content,
+            re.IGNORECASE,
         ):
             items.append({"name": match.group(1).strip(), "status": "partial"})
 

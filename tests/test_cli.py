@@ -144,8 +144,12 @@ class TestEngine:
 
         # Check all files generated
         expected_files = [
-            "index.json", "architecture.md", "naming.md",
-            "directory-map.md", "stack.json", "rules.json",
+            "index.json",
+            "architecture.md",
+            "naming.md",
+            "directory-map.md",
+            "stack.json",
+            "rules.json",
             "plans-summary.md",
         ]
         for fname in expected_files:
@@ -222,7 +226,7 @@ class TestCLI:
         result = runner.invoke(main, ["prompt", str(tmp_project), "-o", outfile])
         assert result.exit_code == 0
         assert Path(outfile).exists()
-        content = Path(outfile).read_text()
+        content = Path(outfile).read_text(encoding="utf-8")
         assert "Project Context" in content
 
     def test_prompt_no_context_fails(self, tmp_path: Path) -> None:
@@ -243,7 +247,7 @@ class TestNamingAuditor:
 
         # Add a file with interface missing I prefix
         bad_file = tmp_project / "src" / "domain" / "ports" / "BadInterface.ts"
-        bad_file.write_text('export interface UserRepository { findAll(): void; }\n')
+        bad_file.write_text("export interface UserRepository { findAll(): void; }\n")
 
         engine = LoomEngine(tmp_project)
         engine.init()
@@ -284,7 +288,7 @@ class TestStructureAuditor:
         bad_file = tmp_project / "src" / "domain" / "entities" / "BadEntity.ts"
         bad_file.write_text(
             'import { UserRepository } from "@infrastructure/repositories/UserRepository";\n'
-            'export class BadEntity {}\n'
+            "export class BadEntity {}\n"
         )
 
         engine = LoomEngine(tmp_project)
@@ -298,8 +302,7 @@ class TestStructureAuditor:
         boundary_violations = [v for v in violations if v.rule == "layer-boundary"]
         assert len(boundary_violations) > 0
         assert any(
-            "domain" in v.message and "infrastructure" in v.message
-            for v in boundary_violations
+            "domain" in v.message and "infrastructure" in v.message for v in boundary_violations
         )
 
     def test_passes_valid_imports(self, tmp_project: Path) -> None:
@@ -317,8 +320,7 @@ class TestStructureAuditor:
         # The fixture's infrastructure/repositories/UserRepository.ts imports from domain
         # This should be allowed (infrastructure CAN import from domain)
         infra_to_domain = [
-            v for v in violations
-            if "infrastructure" in v.file and "domain" in v.message
+            v for v in violations if "infrastructure" in v.file and "domain" in v.message
         ]
         assert len(infra_to_domain) == 0
 

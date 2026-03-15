@@ -27,7 +27,7 @@ def tmp_project(tmp_path: Path) -> Path:
     )
     (src / "domain" / "ports" / "IUserRepository.ts").write_text(
         'import { IUser } from "../entities/User";\n'
-        'export interface IUserRepository { findById(id: string): Promise<IUser>; }\n'
+        "export interface IUserRepository { findById(id: string): Promise<IUser>; }\n"
     )
 
     # Create infrastructure layer
@@ -58,7 +58,7 @@ def tmp_project(tmp_path: Path) -> Path:
     core.mkdir()
     (core / "services").mkdir()
     (src / "core" / "services" / "AuthService.ts").write_text(
-        'export class AuthService { async login() { return true; } }\n'
+        "export class AuthService { async login() { return true; } }\n"
     )
 
     # package.json

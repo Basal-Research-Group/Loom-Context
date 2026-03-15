@@ -13,11 +13,19 @@ from loom_context.security.filter import FileFilter
 
 # File extensions to analyze
 CODE_EXTENSIONS = {
-    ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
-    ".py", ".pyi",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+    ".py",
+    ".pyi",
     ".rs",
     ".go",
-    ".java", ".kt", ".scala",
+    ".java",
+    ".kt",
+    ".scala",
     ".cs",
     ".rb",
     ".php",
@@ -33,12 +41,35 @@ UPPER_SNAKE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 # Suffix patterns that indicate architectural role
 ROLE_SUFFIXES = [
-    "Service", "Repository", "Adapter", "Mapper", "Controller",
-    "Provider", "Factory", "Builder", "Handler", "Middleware",
-    "Guard", "Pipe", "Interceptor", "Resolver", "Validator",
-    "Strategy", "Observer", "Command", "Query", "Event",
-    "Renderer", "Generator", "Registry", "Manager", "Listener",
-    "UseCase", "Interactor", "Presenter", "ViewModel",
+    "Service",
+    "Repository",
+    "Adapter",
+    "Mapper",
+    "Controller",
+    "Provider",
+    "Factory",
+    "Builder",
+    "Handler",
+    "Middleware",
+    "Guard",
+    "Pipe",
+    "Interceptor",
+    "Resolver",
+    "Validator",
+    "Strategy",
+    "Observer",
+    "Command",
+    "Query",
+    "Event",
+    "Renderer",
+    "Generator",
+    "Registry",
+    "Manager",
+    "Listener",
+    "UseCase",
+    "Interactor",
+    "Presenter",
+    "ViewModel",
 ]
 
 # Prefix patterns
@@ -143,9 +174,7 @@ class CodeScanner(BaseScanner):
             "dominant_style": dominant,
             "confidence": round(confidence, 2),
             "distribution": (
-                {k: round(v / total, 2) for k, v in case_counts.items()}
-                if total > 0
-                else {}
+                {k: round(v / total, 2) for k, v in case_counts.items()} if total > 0 else {}
             ),
         }
 
@@ -182,8 +211,7 @@ class CodeScanner(BaseScanner):
 
         if interfaces:
             i_prefix_count = sum(
-                1 for i in interfaces
-                if i.startswith("I") and len(i) > 1 and i[1].isupper()
+                1 for i in interfaces if i.startswith("I") and len(i) > 1 and i[1].isupper()
             )
             result["interfaces"] = {
                 "format": self._dominant_case(interfaces),
@@ -219,12 +247,14 @@ class CodeScanner(BaseScanner):
             matches = [f for f in files if f.stem.endswith(suffix)]
             if len(matches) >= 2:
                 examples = [f.name for f in matches[:3]]
-                patterns.append({
-                    "suffix": suffix,
-                    "pattern": f"{{Name}}{suffix}{matches[0].suffix}",
-                    "count": len(matches),
-                    "examples": examples,
-                })
+                patterns.append(
+                    {
+                        "suffix": suffix,
+                        "pattern": f"{{Name}}{suffix}{matches[0].suffix}",
+                        "count": len(matches),
+                        "examples": examples,
+                    }
+                )
 
         return sorted(patterns, key=lambda p: p["count"], reverse=True)
 
@@ -238,12 +268,14 @@ class CodeScanner(BaseScanner):
             if prefix == "I":
                 # Check interfaces in code
                 matches = [
-                    f for f in files
+                    f
+                    for f in files
                     if f.stem.startswith("I") and len(f.stem) > 1 and f.stem[1].isupper()
                 ]
             elif prefix == "use":
                 matches = [
-                    f for f in files
+                    f
+                    for f in files
                     if f.stem.startswith("use") and len(f.stem) > 3 and f.stem[3].isupper()
                 ]
             else:
@@ -251,13 +283,15 @@ class CodeScanner(BaseScanner):
 
             if len(matches) >= 2:
                 examples = [f.name for f in matches[:3]]
-                patterns.append({
-                    "prefix": prefix,
-                    "description": description,
-                    "pattern": f"{prefix}{{Name}}{matches[0].suffix}",
-                    "count": len(matches),
-                    "examples": examples,
-                })
+                patterns.append(
+                    {
+                        "prefix": prefix,
+                        "description": description,
+                        "pattern": f"{prefix}{{Name}}{matches[0].suffix}",
+                        "count": len(matches),
+                        "examples": examples,
+                    }
+                )
 
         return sorted(patterns, key=lambda p: p["count"], reverse=True)
 

@@ -14,9 +14,7 @@ def generate_quick_rules(scan_result: dict[str, Any]) -> list[str]:
     for layer, config in boundaries.items():
         forbidden = config.get("forbidden_imports", [])
         if forbidden:
-            rules.append(
-                f"Layer boundary: {layer} MUST NOT import from {', '.join(forbidden)}"
-            )
+            rules.append(f"Layer boundary: {layer} MUST NOT import from {', '.join(forbidden)}")
 
     # Naming conventions
     code_naming = scan_result.get("code", {}).get("code_naming", {})

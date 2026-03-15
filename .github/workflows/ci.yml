@@ -99,7 +99,7 @@ jobs:
           pip install pip-audit
 
       - name: Audit dependencies
-        run: pip-audit --require-hashes=false -r <(pip freeze)
+        run: pip freeze > requirements-audit.txt && pip-audit -r requirements-audit.txt
         shell: bash
 
   build:

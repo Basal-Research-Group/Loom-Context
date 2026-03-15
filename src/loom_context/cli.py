@@ -30,10 +30,12 @@ def init(path: str) -> None:
     from loom_context.engine import LoomEngine
 
     root = Path(path).resolve()
-    console.print(Panel(
-        f"[bold blue]Loom Context Engine[/bold blue] v{__version__}",
-        subtitle="Architecture Context for AI Agents",
-    ))
+    console.print(
+        Panel(
+            f"[bold blue]Loom Context Engine[/bold blue] v{__version__}",
+            subtitle="Architecture Context for AI Agents",
+        )
+    )
     console.print(f"\n  Scanning [cyan]{root}[/cyan]...\n")
 
     start = time.time()
@@ -69,6 +71,7 @@ def init(path: str) -> None:
 
     # Quick rules preview
     from loom_context.generators.index import generate_quick_rules
+
     quick_rules = generate_quick_rules(scan)
     if quick_rules:
         console.print(f"\n  Quick Rules ({len(quick_rules)}):")
@@ -126,11 +129,13 @@ def prompt(path: str, to_stdout: bool, output_file: Optional[str]) -> None:
         click.echo(prompt_text)
     else:
         # Print to terminal with formatting
-        console.print(Panel(
-            f"Master prompt generated: [bold]{len(prompt_text)}[/bold] characters, "
-            f"[bold]{len(prompt_text.splitlines())}[/bold] lines",
-            title="Loom Prompt",
-        ))
+        console.print(
+            Panel(
+                f"Master prompt generated: [bold]{len(prompt_text)}[/bold] characters, "
+                f"[bold]{len(prompt_text.splitlines())}[/bold] lines",
+                title="Loom Prompt",
+            )
+        )
         console.print("\nUse [cyan]loom prompt --stdout[/cyan] to pipe to clipboard or file.")
         console.print("Use [cyan]loom prompt -o prompt.md[/cyan] to save to file.")
 
