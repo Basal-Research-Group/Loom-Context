@@ -87,22 +87,49 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "F",    # pyflakes
-    "I",    # isort
-    "N",    # pep8-naming
-    "W",    # pycodestyle warnings
-    "UP",   # pyupgrade
-    "B",    # flake8-bugbear
-    "SIM",  # flake8-simplify
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "I",     # isort (import sorting)
+    "N",     # pep8-naming
+    "W",     # pycodestyle warnings
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "SIM",   # flake8-simplify
+    "S",     # flake8-bandit (security)
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T20",   # flake8-print (no print() in library code)
+    "RET",   # flake8-return
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # flake8-eradicate (commented-out code)
+    "RUF",   # ruff-specific rules
 ]
 ignore = [
     "UP007",   # Use X | Y (we need Optional for 3.9 compat)
     "UP045",   # Use X | None (we need Optional for 3.9 compat)
+    "S101",    # Use of assert (needed in tests)
+    "T201",    # print() allowed in CLI output module
+    "PTH123",  # open() vs Path.open() — both are fine
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # assert is fine in tests
+    "S603",    # subprocess calls in tests
+    "S607",    # partial executable path in tests
+]
+"src/loom_context/cli.py" = [
+    "T201",    # print/click.echo is the CLI's job
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["loom_context"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
 
 [tool.mypy]
 python_version = "3.9"
@@ -110,3 +137,12 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 check_untyped_defs = true
+
+[tool.coverage.run]
+source = ["loom_context"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 80
