@@ -1,0 +1,70 @@
+# Naming Conventions
+
+## File Naming
+
+{% if file_naming %}
+- **Dominant style:** {{ file_naming.get('dominant_style', 'unknown') }} ({{ (file_naming.get('confidence', 0) * 100) | int }}% of files)
+{% if file_naming.get('distribution') %}
+- Distribution: {% for style, pct in file_naming.distribution.items() %}{{ style }}: {{ (pct * 100) | int }}% {% endfor %}
+
+{% endif %}
+{% endif %}
+
+## Suffix Patterns
+
+These patterns indicate architectural roles. New files MUST follow these conventions.
+
+{% if suffix_patterns %}
+| Pattern | Suffix | Count | Examples |
+|---------|--------|-------|----------|
+{% for sp in suffix_patterns %}
+| `{{ sp.pattern }}` | {{ sp.suffix }} | {{ sp.count }} | {{ sp.examples | join(', ') }} |
+{% endfor %}
+{% else %}
+No consistent suffix patterns detected.
+{% endif %}
+
+## Prefix Patterns
+
+{% if prefix_patterns %}
+| Prefix | Description | Pattern | Count | Examples |
+|--------|-------------|---------|-------|----------|
+{% for pp in prefix_patterns %}
+| `{{ pp.prefix }}` | {{ pp.description }} | `{{ pp.pattern }}` | {{ pp.count }} | {{ pp.examples | join(', ') }} |
+{% endfor %}
+{% else %}
+No consistent prefix patterns detected.
+{% endif %}
+
+## Code-Level Naming
+
+{% if code_naming %}
+{% if code_naming.get('interfaces') %}
+- **Interfaces:** {{ code_naming.interfaces.format }}{% if code_naming.interfaces.get('prefix') and code_naming.interfaces.prefix != 'none' %}, MUST use `{{ code_naming.interfaces.prefix }}` prefix{% endif %} ({{ code_naming.interfaces.count }} found)
+{% endif %}
+{% if code_naming.get('classes') %}
+- **Classes:** {{ code_naming.classes.format }} ({{ code_naming.classes.count }} found)
+{% endif %}
+{% if code_naming.get('functions') %}
+- **Functions:** {{ code_naming.functions.format }} ({{ code_naming.functions.count }} found)
+{% endif %}
+{% if code_naming.get('enums') %}
+- **Enums:** {{ code_naming.enums.format }} ({{ code_naming.enums.count }} found)
+{% endif %}
+{% else %}
+No code-level naming patterns analyzed yet.
+{% endif %}
+
+## Import Aliases
+
+{% if import_aliases %}
+| Alias | Maps to |
+|-------|---------|
+{% for alias, target in import_aliases.items() %}
+| `{{ alias }}` | `{{ target }}` |
+{% endfor %}
+
+Use these aliases in all imports. Never use relative paths that cross layer boundaries.
+{% else %}
+No import aliases configured.
+{% endif %}

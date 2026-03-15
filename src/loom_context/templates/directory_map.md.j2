@@ -1,0 +1,26 @@
+# Directory Map
+
+**Project type:** {{ project_type }}
+**Source root:** `{{ src_root }}/`
+
+```
+{% macro render_tree(tree, prefix="", depth=0) %}
+{% for name, info in tree.items() if not name.startswith('_') %}
+{% set annotation = info.get('_annotation', '') %}
+{% set file_count = info.get('_file_count', 0) %}
+{% set has_children = info.keys() | reject('equalto', '_annotation') | reject('equalto', '_file_count') | list | length > 0 %}
+{{ prefix }}{{ name }}/{% if annotation %}  # {{ annotation }}{% if file_count %} ({{ file_count }} files){% endif %}{% elif file_count %}  # ({{ file_count }} files){% endif %}
+
+{% if has_children and depth < 3 %}
+{{ render_tree(info, prefix + "  ", depth + 1) }}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+{{ render_tree(tree) }}
+```
+
+## Key Directories
+
+{% for name, info in tree.items() if not name.startswith('_') and info.get('_annotation') %}
+- **`{{ src_root }}/{{ name }}/`** - {{ info._annotation }}
+{% endfor %}

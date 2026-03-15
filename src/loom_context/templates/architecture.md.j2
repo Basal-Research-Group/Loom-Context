@@ -1,0 +1,59 @@
+# Architecture
+
+## Project Type
+{{ project_type }}
+
+## Architecture Patterns
+{% for pattern in architecture %}
+- **{{ pattern }}**
+{% endfor %}
+
+## Source Root
+`{{ src_root }}/`
+
+## Layer Boundaries
+
+These rules MUST be enforced. Any import that violates these boundaries is a bug.
+
+{% if boundaries %}
+| Layer | MUST NOT import from |
+|-------|---------------------|
+{% for layer, config in boundaries.items() %}
+| `{{ layer }}` | {{ config.get('forbidden_imports', []) | join(', ') }} |
+{% endfor %}
+{% else %}
+No explicit layer boundaries detected. Consider defining them in `.context/loom.json`.
+{% endif %}
+
+## Dependency Direction
+
+{% if 'clean-architecture' in architecture %}
+The dependency rule flows inward:
+```
+presentation → core → domain ← infrastructure
+```
+- **domain**: Pure business logic. Zero external dependencies.
+- **core**: Orchestration, state, DI. May reference domain.
+- **infrastructure**: Implements domain ports. May reference domain and core.
+- **presentation**: UI layer. May reference core and domain. MUST NOT reference infrastructure directly.
+{% elif 'hexagonal' in architecture %}
+```
+adapters → ports ← domain
+```
+- **domain**: Pure business logic.
+- **ports**: Contracts (interfaces) that domain exposes.
+- **adapters**: Concrete implementations of ports.
+{% elif 'mvc' in architecture %}
+```
+views → controllers → models
+```
+- **models**: Data and business logic.
+- **controllers**: Handle requests, coordinate models and views.
+- **views**: Presentation layer.
+{% elif 'layered' in architecture %}
+```
+controllers → services → repositories
+```
+{% else %}
+No standard architecture pattern detected. Define boundaries in `.context/loom.json`.
+{% endif %}
