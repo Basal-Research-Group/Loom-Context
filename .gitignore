@@ -1,4 +1,4 @@
-# Python
+# Python bytecode & packaging
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,39 +8,90 @@ __pycache__/
 dist/
 build/
 .eggs/
+*.whl
+*.tar.gz
+sdist/
+wheels/
+pip-wheel-metadata/
+MANIFEST
 
 # Virtual environments
 .venv/
 venv/
 env/
 ENV/
+.python-version
 
-# IDE
+# IDE & editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
-# Testing
+# Testing & coverage
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 coverage.xml
+*.cover
+.hypothesis/
+.nox/
+.tox/
 
-# Linting / Type checking
+# Linting & type checking
 .ruff_cache/
 .mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
 
-# OS
+# OS artifacts
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Secrets
+# Secrets & credentials
 .env
 .env.*
+.env.local
+.env.production
 *.pem
 *.key
+*.p12
+*.cert
+*.crt
+credentials*.json
+secrets*.json
+*_rsa
+id_rsa*
 
-# Loom output (optional - uncomment if you don't want to commit)
+# Build artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# Loom output (uncomment to exclude from version control)
 # .context/
