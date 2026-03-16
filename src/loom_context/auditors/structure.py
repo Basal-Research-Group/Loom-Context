@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
-from loom_context.auditors.naming import Violation
+from loom_context.models import Violation
 from loom_context.security.filter import FileFilter
 
 # Import patterns for different languages

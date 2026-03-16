@@ -57,19 +57,18 @@ class TestStructureScanner:
     def test_detects_clean_architecture(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        structure = result["structure"]
-        assert "clean-architecture" in structure["architecture"]
+        assert "clean-architecture" in result.structure.architecture
 
     def test_detects_project_type(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
         # Has react-native in deps
-        assert result["structure"]["project_type"] in {"react-native", "react"}
+        assert result.structure.project_type in {"react-native", "react"}
 
     def test_annotates_directories(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        tree = result["structure"]["directory_tree"]
+        tree = result.structure.directory_tree
         # Tree starts from src_root (which IS src/), so top-level keys are layers
         assert "domain" in tree
         assert tree["domain"]["_annotation"] != ""
@@ -79,8 +78,7 @@ class TestDependencyScanner:
     def test_parses_package_json(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        deps = result["deps"]
-        dep_names = {d["name"] for d in deps["dependencies"]}
+        dep_names = {d.name for d in result.deps.dependencies}
         assert "react" in dep_names
         assert "zustand" in dep_names
         assert "typescript" in dep_names
@@ -88,8 +86,7 @@ class TestDependencyScanner:
     def test_categorizes_deps(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        deps = result["deps"]
-        stack = deps["stack_summary"]
+        stack = result.deps.stack_summary
         assert "ui-framework" in stack
         assert "state-management" in stack
         assert "testing" in stack
@@ -99,39 +96,34 @@ class TestCodeScanner:
     def test_detects_naming(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        code = result["code"]
-        assert code["total_code_files"] > 0
-        assert "file_naming" in code
+        assert result.code.total_code_files > 0
+        assert result.code.file_naming is not None
 
     def test_detects_import_aliases(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        aliases = result["code"]["import_aliases"]
-        assert "@domain/*" in aliases
+        assert "@domain/*" in result.code.import_aliases
 
 
 class TestDocsScanner:
     def test_finds_docs(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        docs = result["docs"]
-        assert docs["doc_count"] > 0
-        assert docs["agents_md"] is not None
+        assert result.docs.doc_count > 0
+        assert result.docs.agents_md is not None
 
     def test_classifies_docs(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        doc_list = result["docs"]["docs"]
-        types = {d["type"] for d in doc_list}
+        types = {d.type for d in result.docs.docs}
         assert "architecture" in types or "plan" in types
 
     def test_extracts_status(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
         result = engine.scan()
-        doc_list = result["docs"]["docs"]
-        plan_docs = [d for d in doc_list if d["type"] == "plan"]
+        plan_docs = [d for d in result.docs.docs if d.type == "plan"]
         assert len(plan_docs) > 0
-        assert len(plan_docs[0]["status_items"]) > 0
+        assert len(plan_docs[0].status_items) > 0
 
 
 class TestEngine:
@@ -342,8 +334,8 @@ class TestEdgeCases:
 
         engine = LoomEngine(tmp_path)
         result = engine.scan()
-        assert result["deps"]["dependencies"] == []
-        assert result["deps"]["stack_summary"] == {}
+        assert result.deps.dependencies == []
+        assert result.deps.stack_summary == {}
 
     def test_python_project(self, tmp_path: Path) -> None:
         """Detect Python project from pyproject.toml."""
@@ -358,7 +350,7 @@ class TestEdgeCases:
 
         engine = LoomEngine(tmp_path)
         result = engine.scan()
-        assert result["structure"]["project_type"] == "python"
+        assert result.structure.project_type == "python"
 
     def test_secret_files_excluded(self, tmp_path: Path) -> None:
         """Secret files should never appear in scan results."""

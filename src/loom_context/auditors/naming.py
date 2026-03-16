@@ -4,25 +4,13 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
+from loom_context.models import Violation
 from loom_context.security.filter import FileFilter
 
 CODE_EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go"}
-
-
-@dataclass
-class Violation:
-    """A naming or structure violation."""
-
-    file: str
-    line: Optional[int]
-    rule: str
-    message: str
-    severity: str  # "error" | "warning" | "info"
-    suggestion: str = ""
 
 
 class NamingAuditor:

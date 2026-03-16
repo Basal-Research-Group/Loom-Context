@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from loom_context.auditors.naming import Violation
 from loom_context.git import GitHelper
+from loom_context.models import Violation
 
 
 @dataclass

@@ -4,16 +4,24 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from loom_context import __version__
-from loom_context.auditors.naming import NamingAuditor, Violation
-from loom_context.auditors.structure import StructureAuditor
 from loom_context.config import LoomConfig
 from loom_context.findings import FindingsStore
 from loom_context.generators.context import ContextGenerator
 from loom_context.generators.index import IndexGenerator
 from loom_context.generators.prompt import PromptGenerator
+from loom_context.models import (
+    CodeAnalysis,
+    Dependency,
+    DependencyInfo,
+    DocEntry,
+    DocsInventory,
+    ScanResult,
+    StructureFacts,
+    Violation,
+)
 from loom_context.mutations import MutationLog
 from loom_context.scanners.code import CodeScanner
 from loom_context.scanners.deps import DependencyScanner
@@ -30,41 +38,59 @@ class LoomEngine:
         self.config = LoomConfig(Path(root))
         self.file_filter = FileFilter(self.config.root)
 
-    def scan(self) -> dict[str, Any]:
-        """Run all scanners and return merged results."""
+    def scan(self) -> ScanResult:
+        """Run all scanners and return typed results."""
         structure_scanner = StructureScanner(self.config.root, self.file_filter)
         deps_scanner = DependencyScanner(self.config.root, self.file_filter)
         code_scanner = CodeScanner(self.config.root, self.file_filter)
         docs_scanner = DocsScanner(self.config.root, self.file_filter)
 
-        result: dict[str, Any] = {
-            "structure": structure_scanner.scan(),
-            "deps": deps_scanner.scan(),
-            "code": code_scanner.scan(),
-            "docs": docs_scanner.scan(),
-            "scanned_at": datetime.now(timezone.utc).isoformat(),
-        }
+        structure_raw = structure_scanner.scan()
+        deps_raw = deps_scanner.scan()
+        code_raw = code_scanner.scan()
+        docs_raw = docs_scanner.scan()
 
-        # Add project name from root dir
-        result["structure"]["project_name"] = self.config.root.name
+        # Add project name
+        structure_raw["project_name"] = self.config.root.name
 
-        return result
+        return ScanResult(
+            structure=StructureFacts(**structure_raw),
+            deps=DependencyInfo(
+                package_manager=deps_raw["package_manager"],
+                dependency_files=deps_raw.get("dependency_files", []),
+                dependencies=[Dependency(**d) for d in deps_raw["dependencies"]],
+                stack_summary=deps_raw["stack_summary"],
+            ),
+            code=CodeAnalysis(**code_raw),
+            docs=DocsInventory(
+                docs=[DocEntry(**d) for d in docs_raw["docs"]],
+                agents_md=docs_raw["agents_md"],
+                doc_count=docs_raw["doc_count"],
+                by_type=docs_raw["by_type"],
+            ),
+            scanned_at=datetime.now(timezone.utc).isoformat(),
+        )
 
-    def generate_context(self, scan_result: Optional[dict[str, Any]] = None) -> list[str]:
+    def generate_context(
+        self, scan_result: Optional[Union[ScanResult, dict[str, Any]]] = None
+    ) -> list[str]:
         """Generate all .context/ files from scan results."""
         if scan_result is None:
             scan_result = self.scan()
+
+        # Convert to dict for generators (backward compat)
+        scan_dict = scan_result.to_dict() if isinstance(scan_result, ScanResult) else scan_result
 
         self.config.ensure_context_dir()
 
         # Generate index
         index_gen = IndexGenerator()
-        index_data = index_gen.generate(scan_result, __version__)
+        index_data = index_gen.generate(scan_dict, __version__)
         index_data["generated_at"] = datetime.now(timezone.utc).isoformat()
 
         # Generate all context files
         ctx_gen = ContextGenerator(self.config.context_dir)
-        return ctx_gen.generate_all(scan_result, index_data)
+        return ctx_gen.generate_all(scan_dict, index_data)
 
     def generate_prompt(self) -> str:
         """Generate master AI prompt from existing .context/ files."""
@@ -73,6 +99,9 @@ class LoomEngine:
 
     def audit(self) -> list[Violation]:
         """Run all auditors and return violations."""
+        from loom_context.auditors.naming import NamingAuditor
+        from loom_context.auditors.structure import StructureAuditor
+
         file_filter = FileFilter(self.config.root)
 
         naming = NamingAuditor(self.config.root, file_filter)
