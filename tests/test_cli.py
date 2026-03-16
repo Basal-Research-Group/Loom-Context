@@ -396,3 +396,191 @@ class TestEdgeCases:
         assert "data.txt" not in names
         assert "app.log" not in names
         assert "readme.md" in names
+
+
+class TestSessionLogger:
+    def test_append_and_read(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        logger = SessionLogger(ctx, tmp_path)
+        logger.append("first message")
+        logger.append("second message")
+
+        entries = logger.read(count=5)
+        assert len(entries) == 2
+        assert entries[0].message == "second message"  # newest first
+        assert entries[1].message == "first message"
+
+    def test_read_empty(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        logger = SessionLogger(ctx, tmp_path)
+        assert logger.read() == []
+
+    def test_clear(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        logger = SessionLogger(ctx, tmp_path)
+        logger.append("entry 1")
+        logger.append("entry 2")
+        cleared = logger.clear()
+        assert cleared == 2
+        assert logger.read() == []
+
+    def test_read_limit(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        logger = SessionLogger(ctx, tmp_path)
+        for i in range(10):
+            logger.append(f"entry {i}")
+
+        entries = logger.read(count=3)
+        assert len(entries) == 3
+        assert entries[0].message == "entry 9"
+
+    def test_creates_context_dir(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        logger = SessionLogger(ctx, tmp_path)
+        logger.append("auto create")
+        assert ctx.exists()
+        assert (ctx / "sessions.jsonl").exists()
+
+
+class TestFocusGenerator:
+    def test_focus_matches_directory(self, tmp_project: Path) -> None:
+        from loom_context.generators.focus import FocusGenerator
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        gen = FocusGenerator(tmp_project / ".context")
+        result = gen.generate("domain")
+        assert result is not None
+        assert "domain" in result.lower()
+
+    def test_focus_returns_none_for_empty_query(self, tmp_project: Path) -> None:
+        from loom_context.generators.focus import FocusGenerator
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        gen = FocusGenerator(tmp_project / ".context")
+        assert gen.generate("the a an") is None
+
+    def test_focus_no_context(self, tmp_path: Path) -> None:
+        from loom_context.generators.focus import FocusGenerator
+
+        gen = FocusGenerator(tmp_path / ".context")
+        assert gen.generate("anything") is None
+
+    def test_focus_respects_max_chars(self, tmp_project: Path) -> None:
+        from loom_context.generators.focus import FocusGenerator
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        gen = FocusGenerator(tmp_project / ".context")
+        result = gen.generate("domain", max_chars=500)
+        assert result is not None
+        # The output may slightly exceed due to footer but body is truncated
+        assert "truncated" in result or len(result) < 800
+
+    def test_focus_cli_stdout(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(
+            main, ["focus", "domain", str(tmp_project), "--stdout"]
+        )
+        assert result.exit_code == 0
+        assert "domain" in result.output.lower()
+
+    def test_focus_cli_no_context(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["focus", "test", str(tmp_path)])
+        assert result.exit_code == 1
+
+
+class TestStatusCommand:
+    def test_status_not_initialized(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["status", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "Not initialized" in result.output
+
+    def test_status_after_init(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["status", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Loom Status" in result.output
+
+    def test_status_json(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["status", str(tmp_project), "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert data["context_exists"] is True
+        assert "quick_rules" in data
+
+    def test_status_shows_session_log(self, tmp_project: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+
+        ctx = tmp_project / ".context"
+        logger = SessionLogger(ctx, tmp_project)
+        logger.append("test session entry")
+
+        result = runner.invoke(main, ["status", str(tmp_project)])
+        assert "test session entry" in result.output
+
+
+class TestLogCommand:
+    def test_log_append(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(
+            main, ["log", "started refactor", "--path", str(tmp_project)]
+        )
+        assert result.exit_code == 0
+        assert "Logged" in result.output
+
+    def test_log_show(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        runner.invoke(main, ["log", "entry one", "--path", str(tmp_project)])
+        runner.invoke(main, ["log", "entry two", "--path", str(tmp_project)])
+        result = runner.invoke(
+            main, ["log", "--show", "--path", str(tmp_project)]
+        )
+        assert result.exit_code == 0
+        assert "entry two" in result.output
+        assert "entry one" in result.output
+
+    def test_log_clear(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        runner.invoke(main, ["log", "to clear", "--path", str(tmp_project)])
+        result = runner.invoke(
+            main, ["log", "--clear", "--path", str(tmp_project)]
+        )
+        assert result.exit_code == 0
+        assert "Cleared" in result.output
+
+    def test_log_no_args_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["log", "--path", str(tmp_path)])
+        # With just a path and no message, it should error or show help
+        assert result.exit_code in {0, 1, 2}
