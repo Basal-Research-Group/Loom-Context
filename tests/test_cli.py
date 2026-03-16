@@ -1023,6 +1023,49 @@ class TestDoctorCommand:
         assert "mutation log active" in result.output
 
 
+class TestCompactFormat:
+    def test_compact_prompt_smaller(self, tmp_project: Path) -> None:
+        """Compact prompt is significantly smaller than normal prompt."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+
+        normal = runner.invoke(main, ["prompt", str(tmp_project), "--stdout"])
+        compact = runner.invoke(main, ["prompt", str(tmp_project), "--stdout", "--compact"])
+
+        assert normal.exit_code == 0
+        assert compact.exit_code == 0
+        assert len(compact.output) < len(normal.output) * 0.5
+
+    def test_compact_prompt_has_structure(self, tmp_project: Path) -> None:
+        """Compact prompt contains key tags."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["prompt", str(tmp_project), "--stdout", "--compact"])
+        assert "CTX:" in result.output
+        assert "STATS:" in result.output
+
+    def test_compact_bundle(self, tmp_project: Path) -> None:
+        """Compact bundle works with --compact flag."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(
+            main, ["bundle", "domain", str(tmp_project), "--stdout", "--compact"]
+        )
+        assert result.exit_code == 0
+        assert "BUNDLE:" in result.output
+
+    def test_top_k_limits_sections(self, tmp_project: Path) -> None:
+        """--top-k limits bundle to N sections."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+
+        full = runner.invoke(main, ["bundle", "domain", str(tmp_project), "--stdout"])
+        top1 = runner.invoke(
+            main, ["bundle", "domain", str(tmp_project), "--stdout", "--top-k", "1"]
+        )
+        assert len(top1.output) < len(full.output)
+
+
 class TestExportCommand:
     def test_export_claude(self, tmp_project: Path) -> None:
         runner = CliRunner()
