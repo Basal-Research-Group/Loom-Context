@@ -21,6 +21,7 @@ class BundleBuilder:
         self.context_dir = context_dir
         self.root = root
         self._git = GitHelper(root)
+        self.last_candidates: list = []
 
     def build(
         self,
@@ -42,6 +43,8 @@ class BundleBuilder:
 
         if not candidates:
             return None
+
+        self.last_candidates = candidates
 
         # Read project metadata
         index = self._read_index()
