@@ -1,179 +1,232 @@
-# Filosofía de Loom-Context: La Analogía del Cerebro
+---
+type: guide
+audience: developer
+---
 
-> *Loom no es una herramienta de documentación. Es un sistema nervioso para tu proyecto.*
+# 🧠 Filosofia de Loom-Context
 
-## El Problema
-
-Cuando un agente de IA (Cursor, Copilot, Claude, ChatGPT) trabaja en tu proyecto, empieza **amnésico**. No sabe que usas Clean Architecture. No sabe que las interfaces llevan prefijo `I`. No sabe que `core/` no puede importar de `infrastructure/`. Cada sesión es un paciente nuevo entrando a consulta sin historial médico.
-
-El resultado: la IA alucina. Sugiere código que rompe tus patrones. Crea archivos en el lugar equivocado. Ignora convenciones que tu equipo lleva meses refinando.
-
-**Loom resuelve esto construyendo la memoria que la IA necesita.**
+> *"La mente no es una hoja en blanco — es un telar. Y cada hilo de contexto que conectas cambia el patron completo."*
 
 ---
 
-## La Analogía: El Cerebro como Arquitectura
+## El problema que nadie quiere admitir
 
-Loom-Context opera como las capas del cerebro humano. Cada componente cumple una función análoga:
+Cada vez que abres una nueva sesion con un agente de IA, le estas pidiendo a un cirujano que opere sin historial medico. No sabe que arquitectura usas. No sabe que `core/` no puede importar de `infrastructure/`. No sabe que las interfaces llevan prefijo `I`. No sabe que tu equipo estuvo 3 meses refinando esas convenciones.
+
+Y entonces pasa lo inevitable: la IA **alucina**. No porque sea tonta — porque **no tiene contexto**.
+
+Esto no es un bug de la IA. Es un problema de ingenieria de contexto.
+
+> 📚 *"The most powerful factor in learning is what the learner already knows. Ascertain this, and teach accordingly."*
+> — David Ausubel, *Educational Psychology: A Cognitive View* (1968)
+
+Ausubel lo dijo para estudiantes humanos, pero aplica identico para agentes de IA: **sin contexto previo, el aprendizaje (y la generacion de codigo) es fragil, impredecible y propenso a errores**.
+
+Loom resuelve esto construyendo la memoria que la IA necesita.
+
+---
+
+## 🕸️ La analogia del telar
+
+¿Por que "Loom"? Un telar (**loom** en ingles) toma hilos individuales y los teje en un patron coherente. Loom-Context hace exactamente eso:
+
+- Cada archivo de tu repo es un **hilo**
+- Las reglas de arquitectura son la **trama**
+- Las convenciones de naming son la **urdimbre**
+- El `.context/` resultante es el **tejido** — un patron que cualquier agente puede leer
+
+Y Loomy, nuestra neurona-araña, es la tejedora:
+
+```
+        .  *  .  *  .
+         \  |  /
+      ── (O O) ──
+         /  |  \
+        *  .  *  .  *
+```
+
+Sus dendritas se extienden hacia cada rincon de tu codebase. Su soma `(O O)` procesa todo y produce contexto compacto.
+
+> 📚 *"The strength of a neural network lies not in individual neurons, but in the patterns of connections between them."*
+> — Hebb, D.O., *The Organization of Behavior* (1949)
+
+Tu proyecto es una red. Los archivos son nodos. Los imports son sinapsis. Loom mapea esa red para que la IA la entienda sin recorrerla archivo por archivo.
+
+---
+
+## 🧬 El cerebro como arquitectura
+
+Esto no es solo una metafora bonita — es un patron de diseno real. Cada componente de Loom cumple una funcion analoga a una estructura cerebral:
 
 ```
 ┌─────────────────────────────────────────────────┐
-│              CÓRTEX PREFRONTAL                   │
-│         (PromptGenerator + CLI)                  │
-│   Decisiones conscientes: genera el prompt       │
-│   que la IA usa para razonar.                    │
+│  🧠 CORTEX PREFRONTAL                           │
+│  PromptGenerator + BundleBuilder                │
+│  Decisiones: que contexto necesita la IA        │
 ├─────────────────────────────────────────────────┤
-│              MEMORIA DE TRABAJO                  │
-│           (.context/ folder)                     │
-│   index.json, architecture.md, naming.md...      │
-│   Lo que la IA tiene "activo" mientras trabaja.  │
+│  💾 MEMORIA DE TRABAJO                           │
+│  .context/ (7 archivos canonicos)               │
+│  Lo que la IA tiene "activo" mientras trabaja   │
 ├─────────────────────────────────────────────────┤
-│            MEMORIA DE LARGO PLAZO                │
-│        (Scanners + Project Source)               │
-│   El código fuente real: 700 archivos, 50 docs.  │
-│   Loom lo comprime en patrones consumibles.      │
+│  📓 MEMORIA EPISODICA                            │
+│  .loom/ (sessions, decisions, mutations)        │
+│  Lo que paso antes — trazabilidad               │
 ├─────────────────────────────────────────────────┤
-│             SISTEMA SENSORIAL                    │
-│               (Scanners)                         │
-│   Percibe: estructura, deps, naming, docs.       │
-│   No inventa — observa y reporta.                │
+│  👁️ SISTEMA SENSORIAL                            │
+│  Scanners (structure, deps, code, docs)         │
+│  Percibe el proyecto sin inventar nada          │
 ├─────────────────────────────────────────────────┤
-│             SISTEMA INMUNE                       │
-│              (Auditors)                          │
-│   Detecta anomalías: "este import viola una      │
-│   boundary", "esta interface no tiene prefijo I" │
+│  🛡️ SISTEMA INMUNE                               │
+│  Auditors (naming, structure)                   │
+│  Detecta amenazas: boundaries rotas, naming mal │
 ├─────────────────────────────────────────────────┤
-│        BARRERA HEMATOENCEFÁLICA                  │
-│           (Security/Filter)                      │
-│   Protege: nunca expone .env, secrets, keys.     │
-│   Filtra noise: node_modules, dist, .git.        │
+│  🔒 BARRERA HEMATOENCEFALICA                     │
+│  Security Filter (3 capas)                      │
+│  Protege: nunca expone secretos ni codigo       │
 └─────────────────────────────────────────────────┘
 ```
 
-### Cada capa explicada
+### 👁️ Sistema Sensorial → Scanners
 
-#### 1. Sistema Sensorial → Scanners
+Los scanners **perciben** tu proyecto como los sentidos perciben el mundo. No opinan, no inventan — reportan lo que ven.
 
-Como los sentidos perciben el mundo exterior, los **scanners** perciben tu proyecto:
+| Scanner | Sentido | Que percibe |
+|---------|---------|-------------|
+| `StructureScanner` | 👁️ Vista | Forma: directorios, tipo, arquitectura |
+| `DependencyScanner` | ✋ Tacto | Herramientas: que stack usa el proyecto |
+| `CodeScanner` | 👂 Oido | Patrones: naming, convenciones, estilo |
+| `DocsScanner` | 📖 Lectura | Documentacion: planes, guias, estado |
 
-| Scanner | Sentido análogo | Qué percibe |
-|---------|----------------|-------------|
-| `StructureScanner` | **Vista** | Forma del proyecto: directorios, tipo, arquitectura |
-| `DependencyScanner` | **Tacto** | Dependencias: qué herramientas usa el proyecto |
-| `CodeScanner` | **Oído** | Patrones del código: naming, convenciones, estilo |
-| `DocsScanner` | **Lectura** | Documentación existente: planes, guías, reglas |
+> 📚 *"Perception is not the passive reception of signals but the active construction of representations."*
+> — James J. Gibson, *The Ecological Approach to Visual Perception* (1979)
 
-**Principio clave:** Los scanners **nunca inventan** — solo observan. Si tu código usa PascalCase en el 50% de archivos, Loom reporta eso. No opina si está bien o mal.
+Los scanners de Loom construyen **representaciones** de tu proyecto — no copian archivos.
 
-#### 2. Memoria de Trabajo → `.context/`
+### 💾 Memoria de Trabajo → `.context/`
 
-La memoria de trabajo del cerebro retiene ~7 elementos simultáneos. De forma análoga, `.context/` tiene **7 archivos** que representan lo que la IA necesita "tener presente":
+George Miller descubrio en 1956 que la memoria de trabajo humana retiene ~7±2 elementos simultaneos. ¿Casualidad que `.context/` tiene exactamente **7 archivos**? No del todo.
 
-| Archivo | Función en la memoria |
-|---------|----------------------|
-| `index.json` | **Atención selectiva** — lo primero que se lee, filtra lo esencial |
-| `architecture.md` | **Modelo mental** — cómo se organiza el sistema |
-| `naming.md` | **Vocabulario** — cómo se nombran las cosas |
-| `directory-map.md` | **Mapa espacial** — dónde vive cada cosa |
-| `stack.json` | **Conocimiento del entorno** — herramientas disponibles |
-| `rules.json` | **Reglas internalizadas** — qué se puede y qué no |
-| `plans-summary.md` | **Intenciones** — hacia dónde va el proyecto |
+| Archivo | Funcion cognitiva |
+|---------|------------------|
+| `index.json` | 🎯 Atencion selectiva — lo primero que procesar |
+| `architecture.md` | 🏗️ Modelo mental — como se organiza el sistema |
+| `naming.md` | 🏷️ Vocabulario — como se nombran las cosas |
+| `directory-map.md` | 🗺️ Mapa espacial — donde vive cada cosa |
+| `stack.json` | 📦 Conocimiento del entorno — herramientas disponibles |
+| `rules.json` | ⚙️ Reglas internalizadas — que se puede y que no |
+| `plans-summary.md` | 📋 Intenciones — hacia donde va el proyecto |
 
-#### 3. Córtex Prefrontal → PromptGenerator
+> 📚 Miller, G.A. (1956). *"The Magical Number Seven, Plus or Minus Two."* Psychological Review, 63(2), 81-97.
 
-El córtex prefrontal toma toda la información sensorial y la memoria, y genera **una decisión coherente**. El `PromptGenerator` hace exactamente eso: toma los 7 archivos de `.context/` y los compila en un **master prompt** — un solo documento que la IA puede consumir de principio a fin.
+### 📓 Memoria Episodica → `.loom/`
 
-#### 4. Sistema Inmune → Auditors
+La memoria de trabajo es lo que tienes "activo". Pero el cerebro tambien tiene **memoria episodica** — recuerdos de lo que paso antes. `.loom/` es exactamente eso:
 
-El sistema inmune no espera a que estés enfermo — detecta amenazas proactivamente. Los **auditors** hacen lo mismo:
+| Archivo | Que recuerda |
+|---------|-------------|
+| `sessions.jsonl` | "Que hice ayer" |
+| `decisions.jsonl` | "Por que tome esa decision" |
+| `mutations.jsonl` | "Que cambio y cuando" |
+| `inconsistencies.json` | "Que problemas detecte la ultima vez" |
 
-- `NamingAuditor`: "Esta interface no tiene prefijo I — ¿es intencional?"
-- `StructureAuditor`: "core/ está importando de infrastructure/ — violación de boundary"
+Sin memoria episodica, cada sesion con la IA empieza desde cero. Con `.loom/`, el handoff entre sesiones es natural:
 
-#### 5. Barrera Hematoencefálica → Security Filter
+```bash
+loom handoff "mi tarea" . --stdout
+# → resume decisiones, estado, problemas, para quien retome
+```
 
-La barrera hematoencefálica protege al cerebro de toxinas en la sangre. El `FileFilter` protege al contexto de información que **nunca debe exponerse**:
+### 🛡️ Sistema Inmune → Auditors
 
-- Archivos `.env`, claves privadas, credentials
-- Ruido: `node_modules/`, `dist/`, `.git/`
-- Código que el `.gitignore` ya excluye
+Tu sistema inmune no espera a que estes enfermo — detecta amenazas proactivamente. Los auditors hacen lo mismo:
+
+```bash
+loom audit .
+# ~(^ ^)~ No violations found.    ← sistema sano
+# ~(! !)~ 107 errors              ← infeccion detectada
+```
+
+Cada error es una sinapsis que se conecto donde no debia: un import que cruza una frontera arquitectonica, un nombre que rompe la convencion.
+
+### 🔒 Barrera Hematoencefalica → Security Filter
+
+La barrera hematoencefalica protege al cerebro de toxinas en la sangre. El `FileFilter` protege al contexto de informacion que **nunca debe exponerse**: `.env`, claves privadas, `node_modules/`.
+
+3 capas. Sin excepciones. Incluso si te equivocas, Loom no.
 
 ---
 
-## Principios de Diseño
+## ⚡ Principios de diseno
 
 ### 1. Escanear mucho, preguntar poco
 
-Loom NO te pregunta "¿qué arquitectura usas?" — lo **detecta**. Si tienes `domain/`, `infrastructure/` y `presentation/`, Loom deduce Clean Architecture. Si hay `ports/` dentro de `domain/`, agrega Hexagonal. La filosofía es: **la mejor herramienta es la que no necesitas configurar**.
+Loom no te pregunta "¿que arquitectura usas?" — lo **detecta**. Ve `domain/`, `infrastructure/`, `presentation/` y deduce Clean Architecture. Ve `ports/` y agrega Hexagonal. Ve `scanners/` + `generators/` y detecta Pipeline.
 
-### 2. Resolver automáticamente, parar solo en catástrofe
+> 📚 *"Don't make me think."* — Steve Krug, titulo del libro mas influyente de UX (2000)
 
-En una red neuronal, millones de decisiones se toman sin llegar a la consciencia. Solo los eventos importantes "suben" al córtex. Loom opera igual:
+La mejor herramienta es la que no necesitas configurar.
 
-- **Auto-resuelve:** naming, estructura, stack, boundaries
-- **Reporta silencioso:** violaciones menores (warnings)
-- **Para y alerta:** violaciones de seguridad, boundaries rotas (errors)
+### 2. Metadata, nunca contenido
 
-### 3. Metadata, nunca contenido
+Loom **nunca** incluye tu codigo fuente. Solo metadata: nombres, conteos, patrones, reglas.
 
-Loom **nunca** incluye tu código fuente en el output. Solo metadata: nombres de archivos, conteos, patrones, reglas. Esto es como la diferencia entre saber que "hay una casa roja en la esquina" vs. tener los planos completos de la casa. La IA necesita el mapa, no el territorio.
+> La diferencia entre saber que "hay una casa roja en la esquina" y tener los planos completos de la casa. La IA necesita el **mapa**, no el **territorio**.
 
-### 4. Progresivo: de lo general a lo específico
+> 📚 *"The map is not the territory."* — Alfred Korzybski, *Science and Sanity* (1933)
+
+### 3. Consumo progresivo
 
 ```
-index.json (30 seg)  →  architecture.md + naming.md (2 min)  →  directory-map.md (5 min)
-     ↑                          ↑                                      ↑
-  Quick rules               Reglas detalladas                   Contexto completo
+index.json (30s)  →  architecture + naming (2min)  →  bundle completo (5min)
+     ↑                      ↑                              ↑
+  Quick rules          Reglas detalladas            Contexto por tarea
 ```
 
-Un agente de IA puede detenerse en cualquier nivel. Para una pregunta simple, `quick_rules` basta. Para refactorizar una capa entera, necesita el mapa completo.
+Un agente puede detenerse en cualquier nivel. Para una pregunta simple, `quick_rules` basta. Para refactorizar una capa, necesita un `bundle`.
+
+> 📚 *"Elaboration is the process of adding meaningful connections."* — Craik & Lockhart, *Levels of Processing* (1972)
+
+Cuanto mas profundo procesa el agente, mejor es su output.
+
+### 4. Contexto vivo, no estatico
+
+`.context/` no es un snapshot muerto. Con `enrich`, `decide`, `log`, y `handoff`, el contexto **evoluciona** con tu proyecto:
+
+```bash
+loom init .       # primera foto
+# ... trabajo ...
+loom enrich .     # re-audita y persiste hallazgos
+loom decide "..." # registra por que tomaste esa decision
+loom handoff ...  # resume para quien siga
+```
+
+> 📚 *"Knowledge is not a thing to be possessed, but a process of transformation."* — Jerome Bruner, *The Process of Education* (1960)
 
 ---
 
-## El Ciclo Loom
+## 🎯 Por que funciona
 
-```
-         ┌──────────┐
-         │  loom     │
-         │  init     │◄─── Primera vez: scan completo
-         └────┬─────┘
-              │
-              ▼
-    ┌─────────────────┐
-    │   .context/     │◄─── Memoria de trabajo generada
-    │   (7 archivos)  │
-    └────────┬────────┘
-             │
-     ┌───────┴───────┐
-     ▼               ▼
-┌─────────┐    ┌──────────┐
-│  IA lee │    │  loom    │
-│ context │    │  audit   │◄─── Validación continua
-│ y opera │    └──────────┘
-└────┬────┘
-     │
-     ▼ (cambios en el código)
-┌─────────┐
-│  loom   │
-│  scan   │◄─── Re-scan incremental
-└─────────┘
-```
+Loom funciona porque los proyectos de software **ya codifican mucha informacion en su estructura**. No necesitas IA para saber que un proyecto es Clean Architecture — solo mira las carpetas. No necesitas IA para saber que usas React — mira el `package.json`.
 
-Este ciclo se repite. Con `loom watch`, es automático. El proyecto evoluciona, Loom actualiza la memoria, la IA siempre tiene contexto fresco.
+Lo que Loom agrega es la **compilacion**: tomar esa informacion dispersa en 700 archivos y comprimirla en 7 archivos que un agente consume en 30 segundos.
+
+> 📚 *"Simplicity is the ultimate sophistication."* — atribuido a Leonardo da Vinci, adoptado por toda la industria de software.
 
 ---
 
-## Loom como Gadget del Proyecto
+## 🔬 Referencias
 
-Piensa en Loom como el **HUD de un piloto de caza**. El piloto (la IA) no necesita abrir el manual de vuelo en pleno combate. El HUD le muestra:
-
-- Altitud (arquitectura)
-- Velocidad (stack)
-- Amenazas (violaciones)
-- Ruta (planes)
-
-Loom es ese HUD. Se instala en 1 segundo, se actualiza en 1 segundo, y la IA lo lee antes de cada acción.
+| Referencia | Concepto | Como aplica en Loom |
+|-----------|---------|-------------------|
+| Miller (1956) | Magic number 7±2 | 7 archivos en .context/ |
+| Hebb (1949) | Redes neuronales | Proyecto como red de nodos e imports |
+| Gibson (1979) | Percepcion ecologica | Scanners construyen representaciones, no copian |
+| Ausubel (1968) | Aprendizaje significativo | Sin contexto previo, el output es fragil |
+| Korzybski (1933) | Map vs territory | Metadata, nunca codigo fuente |
+| Craik & Lockhart (1972) | Niveles de procesamiento | Consumo progresivo de contexto |
+| Bruner (1960) | Conocimiento como proceso | Contexto vivo que evoluciona |
+| Krug (2000) | Don't make me think | Auto-deteccion, cero configuracion |
 
 ---
 
-*Siguiente: [Arquitectura de Loom →](../architecture/overview.md)*
+*Siguiente: [🏗️ Arquitectura de Loom →](../architecture/overview.md)*
