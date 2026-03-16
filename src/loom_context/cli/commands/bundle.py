@@ -18,6 +18,8 @@ from loom_context.cli import console
 @click.option("--stdout", "to_stdout", is_flag=True, help="Print to stdout")
 @click.option("--output", "-o", "output_file", help="Write to file")
 @click.option("--max-chars", default=12000, help="Target max characters")
+@click.option("--top-k", default=0, help="Max number of sections to include (0=unlimited)")
+@click.option("--token-budget", default=0, help="Approx token budget (0=use max-chars)")
 @click.option("--save", "do_save", is_flag=True, help="Save to .context/bundles/")
 def bundle(
     task: str,
@@ -25,6 +27,8 @@ def bundle(
     to_stdout: bool,
     output_file: Optional[str],
     max_chars: int,
+    top_k: int,
+    token_budget: int,
     do_save: bool,
 ) -> None:
     """Generate a task-specific context bundle."""
@@ -38,12 +42,15 @@ def bundle(
         console.print(f"  {LOOMY_FAIL} [red]No .context/ found.[/red] Run 'loom init' first.")
         sys.exit(1)
 
+    # Token budget: ~4 chars per token (rough estimate)
+    effective_chars = token_budget * 4 if token_budget > 0 else max_chars
+
     console.print(f'  {LOOMY_THINKING} Weaving bundle for [cyan]"{task}"[/cyan]...')
 
     builder = BundleBuilder(context_dir, root)
 
     if do_save:
-        result = builder.save(task, max_chars=max_chars)
+        result = builder.save(task, max_chars=effective_chars, top_k=top_k)
         if result is None:
             msg = "No relevant context found for this task."
             console.print(f"  {LOOMY_CURIOUS} [yellow]{msg}[/yellow]")
@@ -55,7 +62,7 @@ def bundle(
         console.print(f"    [green]+[/green] {manifest_path.relative_to(root)}")
         return
 
-    build_result = builder.build(task, max_chars=max_chars)
+    build_result = builder.build(task, max_chars=effective_chars, top_k=top_k)
     if build_result is None:
         msg = "No relevant context found for this task."
         console.print(f"  {LOOMY_CURIOUS} [yellow]{msg}[/yellow]")
