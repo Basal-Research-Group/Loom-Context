@@ -21,8 +21,10 @@ from loom_context.cli.commands import (  # noqa: E402
     audit,
     bundle,
     decide,
+    doctor,
     enrich,
     focus,
+    handoff,
     init,
     log,
     plan,
@@ -44,3 +46,5 @@ main.add_command(status.status)
 main.add_command(enrich.enrich)
 main.add_command(decide.decide)
 main.add_command(bundle.bundle)
+main.add_command(handoff.handoff)
+main.add_command(doctor.doctor)

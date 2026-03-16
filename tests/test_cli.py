@@ -960,6 +960,69 @@ class TestDecideCommand:
         assert result.exit_code in {0, 1, 2}
 
 
+class TestHandoffCommand:
+    def test_handoff_stdout(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["handoff", "refactor auth", str(tmp_project), "--stdout"])
+        assert result.exit_code == 0
+        assert "Handoff" in result.output
+        assert "refactor auth" in result.output
+
+    def test_handoff_save(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["handoff", "domain layer", str(tmp_project), "--save"])
+        assert result.exit_code == 0
+        handoff_path = tmp_project / ".context" / "handoffs" / "domain-layer.md"
+        assert handoff_path.exists()
+        content = handoff_path.read_text()
+        assert "domain layer" in content
+
+    def test_handoff_no_context_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["handoff", "test", str(tmp_path)])
+        assert result.exit_code == 1
+
+    def test_handoff_includes_state(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        runner.invoke(main, ["log", "session note", "-p", str(tmp_project)])
+        runner.invoke(
+            main,
+            ["decide", "use ports", "-r", "decouple", "-p", str(tmp_project)],
+        )
+        result = runner.invoke(main, ["handoff", "architecture", str(tmp_project), "--stdout"])
+        assert result.exit_code == 0
+        assert "session note" in result.output
+        assert "use ports" in result.output
+
+
+class TestDoctorCommand:
+    def test_doctor_initialized(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["doctor", str(tmp_project)])
+        assert result.exit_code == 0
+        assert ".context/ exists" in result.output
+        assert "index.json valid" in result.output
+
+    def test_doctor_not_initialized(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "missing" in result.output
+
+    def test_doctor_checks_loom_files(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["doctor", str(tmp_project)])
+        assert result.exit_code == 0
+        assert ".loom/ exists" in result.output
+        assert "findings persisted" in result.output
+        assert "mutation log active" in result.output
+
+
 class TestBundleCommand:
     def test_bundle_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
