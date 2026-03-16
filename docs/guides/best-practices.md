@@ -1,20 +1,39 @@
-# Buenas Practicas
+---
+type: guide
+audience: user
+---
 
-> *Loom es tan util como el flujo de trabajo donde lo integras.*
+# 📐 Buenas Practicas
 
-## Para el Ingeniero Individual
+## TL;DR
 
-### 1. Inicia cada sesion con Loom
+Loom es mas util cuando lo integras en tu flujo diario: scan al empezar, bundle antes de cada tarea, enrich al terminar, handoff para retomar.
+
+---
+
+## 👤 Para el Ingeniero Individual
+
+### 1. 🔄 Flujo diario con Loom
 
 ```bash
-loom scan .                       # Actualiza contexto
-loom prompt . --stdout | pbcopy   # Copia al portapapeles
-# Pega en tu IA antes de empezar a trabajar
+# Al empezar
+loom status .                              # ver estado
+loom scan .                                # refrescar contexto
+
+# Antes de una tarea
+loom bundle "mi tarea" . --stdout          # contexto enfocado
+loom export . --agent claude               # exportar para tu agente
+
+# Durante el trabajo
+loom decide "..." -r "..." -s architecture # registrar decisiones
+loom log "progreso" -p .                   # anotar sesion
+
+# Al terminar
+loom enrich .                              # re-auditar y persistir
+loom handoff "mi tarea" . --save           # handoff para manana
 ```
 
-**Por que:** La IA arranca con contexto completo en lugar de descubrir tu proyecto archivo por archivo.
-
-### 2. Audita antes de commit
+### 2. ✅ Audita antes de commit
 
 ```bash
 loom audit .
@@ -22,146 +41,113 @@ git add .
 git commit -m "feat: add payment flow"
 ```
 
-**Por que:** Detecta violaciones de boundaries y naming antes de que lleguen al PR.
+> 💡 Detecta violaciones de boundaries y naming antes de que lleguen al PR.
 
-### 3. Usa watch durante desarrollo activo
+### 3. 📦 Usa bundle en vez de prompt completo
 
 ```bash
-loom watch . --interval 60 &     # Background, cada minuto
-# ... desarrolla normalmente ...
+# Mal: prompt completo (35KB de contexto)
+loom prompt . --stdout | pbcopy
+
+# Bien: bundle enfocado (2-4KB de contexto relevante)
+loom bundle "refactorizar auth" . --stdout | pbcopy
 ```
 
-**Por que:** `.context/` siempre esta fresco. Si cambias la estructura, la IA lo sabe.
+> 📉 93% menos tokens, misma precision para la tarea.
+
+### 4. 💡 Registra decisiones, no solo codigo
+
+```bash
+loom decide "migrar a repository pattern" -r "desacoplar persistencia de core" -s architecture
+```
+
+> Un agente que lea tu handoff sabe POR QUE se tomo una decision, no solo QUE se cambio.
 
 ---
 
-## Para Equipos
+## 👥 Para Equipos
 
-### 1. Commitea `.context/` (en proyectos privados)
+### 1. 📂 Commitea `.context/` (en proyectos privados)
 
 ```bash
-# NO agregues .context/ a .gitignore
 git add .context/
 git commit -m "chore: update Loom context"
 ```
 
-**Beneficio:** Todo el equipo (y sus IAs) comparten el mismo entendimiento del proyecto.
+> Todo el equipo (y sus IAs) comparten el mismo entendimiento del proyecto.
 
-### 2. Agrega `loom scan` al CI/CD
+### 2. 🤖 Agrega `loom audit` al CI
 
 ```yaml
 # .github/workflows/lint.yml
-- name: Update Loom context
+- name: Audit architecture
   run: |
     pip install loom-context
-    loom scan .
-
-- name: Audit architecture
-  run: loom audit .
+    loom audit .
 ```
 
-**Beneficio:** PRs que violan boundaries se rechazan automaticamente.
+> PRs que violan boundaries se rechazan automaticamente.
 
-### 3. Personaliza con `.context/loom.json` (v0.1: parcial)
+### 3. 🤝 Usa handoff para rotaciones
 
-Crea `.context/loom.json` para overrides basicos del equipo. En v0.1, Loom lee `project_type` de este archivo para forzar la deteccion:
+```bash
+# Dev A al terminar su turno
+loom handoff "sprint task" . --save
 
-```json
-{
-  "project_type": "react-native-expo"
-}
+# Dev B al empezar
+cat .context/handoffs/sprint-task.md
 ```
 
-> **Roadmap v0.2:** Se planea soporte para `extra_rules`, `audit_exceptions` y reglas personalizadas. Por ahora, `loom.json` solo soporta `project_type` override.
+### 4. 🩺 Doctor en CI
 
-### 4. Documenta las excepciones
-
-Si `loom audit` reporta violaciones que son **intencionales** (como el bootstrap/DI que importa de infrastructure para hacer wiring), documentalas como comentarios en el codigo:
-
-```typescript
-// LOOM-EXCEPTION: layer-boundary
-// Bootstrap is the DI wiring point — must access all layers to register bindings
-import { UserRepository } from '@infrastructure/repositories/UserRepository';
+```bash
+loom doctor .
 ```
 
-Esto no suprime el reporte de Loom (aun), pero documenta la intencion para el equipo y para futuras versiones que lean estos marcadores.
+> Detecta .loom/ faltante, contexto stale, archivos corruptos.
 
 ---
 
-## Para la IA
+## 🤖 Para la IA
 
-### 1. Lee `index.json` primero
-
-Instruccion recomendada para tu system prompt:
+### Instrucciones recomendadas para tu system prompt
 
 ```
-Antes de sugerir cualquier codigo, lee .context/index.json.
-Respeta los quick_rules sin excepcion.
-Si mi peticion viola alguna regla, dimelo antes de escribir codigo.
+1. Lee .context/index.json primero. Respeta quick_rules sin excepcion.
+2. Consulta .context/directory-map.md antes de crear archivos nuevos.
+3. Verifica naming en .context/naming.md antes de nombrar clases o funciones.
+4. Consulta .context/stack.json — no sugieras librerias que contradigan el stack.
+5. Si mi peticion viola alguna regla, dimelo antes de escribir codigo.
 ```
 
-### 2. Consulta `directory-map.md` antes de crear archivos
-
-```
-Cuando necesites crear un archivo nuevo, consulta .context/directory-map.md
-para ubicarlo en el directorio correcto segun la arquitectura del proyecto.
-```
-
-### 3. Verifica naming contra `naming.md`
-
-```
-Antes de nombrar una clase, interface, hook o archivo, consulta
-.context/naming.md para seguir las convenciones detectadas.
-```
-
-### 4. No asumas versiones — consulta `stack.json`
-
-```
-No sugieras sintaxis obsoleta. Consulta .context/stack.json para
-saber las versiones exactas de cada tecnologia.
-```
+O mejor: usa `loom export . --agent claude` y dale ese archivo directamente.
 
 ---
 
-## Anti-Patrones (que NO hacer)
+## ❌ Anti-Patrones
 
-### No edites `.context/` manualmente
-
-Los archivos generados se sobreescriben en cada `loom scan`. Si necesitas personalizar, usa `.context/loom.json`.
-
-### No ignores los boundaries
-
-Si `loom audit` reporta un `ERROR` de layer-boundary, no lo ignores. Es una violacion real de tu arquitectura. La solucion correcta es:
-- Crear una interfaz/puerto en la capa correcta
-- Inyectar la implementacion via DI
-- O documentar la excepcion si es intencional
-
-### No generes el prompt una vez y lo olvides
-
-El contexto envejece. Cada vez que:
-- Agregas un directorio nuevo
-- Instalas una dependencia
-- Cambias una convencion
-
-...necesitas `loom scan` para actualizar.
-
-### No uses Loom como documentacion unica
-
-`.context/` es un **complemento** a tu documentacion real. Es lo que la IA necesita, no lo que un nuevo ingeniero necesita. Para onboarding humano, sigue manteniendo tu `docs/` y `README.md`.
+| Anti-patron | Por que es malo | Que hacer |
+|-------------|----------------|-----------|
+| Editar `.context/` manualmente | Se sobreescribe en cada scan | Usar `.context/loom.json` para overrides |
+| Ignorar boundary errors | Son violaciones reales | Crear puerto/interfaz o documentar excepcion |
+| Generar prompt una vez y olvidar | El contexto envejece | `loom scan` frecuente o `loom watch` |
+| Usar Loom como unica documentacion | `.context/` es para IAs, no para humanos | Mantener `docs/` y `README.md` |
+| Prompt completo para tareas puntuales | Desperdicio de tokens | Usar `loom bundle` o `loom focus` |
 
 ---
 
-## Checklist de Integracion
+## ✅ Checklist de Integracion
 
-- [ ] `pip install loom-context` en tu entorno
+- [ ] `pip install loom-context`
 - [ ] `loom init .` en la raiz del proyecto
-- [ ] Revisar `.context/index.json` — verificar que la deteccion es correcta
-- [ ] Revisar `.context/architecture.md` — confirmar boundaries
-- [ ] Decidir: commitear `.context/` o `.gitignore`
-- [ ] Agregar `loom scan` a tu flujo pre-commit o CI
-- [ ] Pegar `loom prompt --stdout` en tu primer mensaje a la IA
-- [ ] Opcionalmente: `loom watch` durante desarrollo
+- [ ] Revisar `.context/index.json` — deteccion correcta
+- [ ] Revisar `.context/architecture.md` — boundaries correctos
+- [ ] `loom doctor .` — todo verde
+- [ ] Decidir: `.context/` en git o en `.gitignore`
+- [ ] Agregar `.loom/` a `.gitignore`
+- [ ] Agregar `loom audit` al CI
+- [ ] Primer tarea con `loom bundle "tarea" --stdout`
 
 ---
 
-*Siguiente: [Flujo de Datos →](../diagrams/data-flow.md)*
+*Siguiente: [🧠 Filosofia →](./philosophy.md)*
