@@ -36,6 +36,14 @@ En ~1 segundo, genera `.context/` con 7 archivos que cualquier LLM puede consumi
 | [Seguridad](./guides/security.md) | Cómo Loom protege tu código |
 | [Buenas Prácticas](./guides/best-practices.md) | Patrones recomendados para equipos |
 
+### Planes
+| Plan | Descripción |
+|------|-------------|
+| [Roadmap v0.2 - v0.4](./plans/roadmap-v0.2-v0.4.md) | Evolución de bundles, retrieval local, export a agentes y workspace opcional |
+| [Estrategia de IA Local](./plans/ai-integration-strategy.md) | Cómo integrar modelos abiertos sin perder el núcleo determinista de Loom |
+| [Plan de Release Piloto](./plans/release-pilot-plan.md) | Qué liberar ahora, cómo probarlo en un proyecto real y qué validar antes de ampliar alcance |
+| [Plan de Release 0.1.1](./plans/release-0.1.1-plan.md) | Release recomendado para adopción temprana, con checklist, Go/No-Go y validación piloto |
+
 ### Diagramas
 | Diagrama | Descripción |
 |----------|-------------|
