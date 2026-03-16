@@ -20,7 +20,7 @@ Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./s
 | v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
 | v0.2.2 | Completado | Bundles + handoff + doctor | [archive](./archive/v0.2.2/delivery.md) |
 | v0.3.0 | Planificado | Retrieval local opcional (embeddings) | [v0.3.0/delivery.md](./v0.3.0/delivery.md) |
-| v0.4.0 | Planificado | Export a agentes + watch incremental | [v0.4.0/delivery.md](./v0.4.0/delivery.md) |
+| v0.4.0 | Completado (parcial) | Export a 4 agentes (watch postergado) | [archive](./archive/v0.4.0/delivery.md) |
 
 ---
 
