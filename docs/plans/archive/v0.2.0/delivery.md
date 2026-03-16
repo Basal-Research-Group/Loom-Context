@@ -1,7 +1,7 @@
 ---
 type: delivery
 version: "0.2.0"
-status: released
+status: archived
 prerequisite: "0.1.0"
 scope: engine, cli, infra
 languages: [python]
