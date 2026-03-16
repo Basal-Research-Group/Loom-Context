@@ -301,3 +301,36 @@ Con frontmatter parsing:
 ### Regla
 
 El frontmatter es opcional. Docs sin frontmatter siguen funcionando con heuristicas. Pero docs con frontmatter dan mejor contexto.
+
+---
+
+## Ciclo de vida de un delivery
+
+| Fase | status en frontmatter | Entregables | Accion |
+|------|----------------------|-------------|--------|
+| Creacion | `planned` | Todos `- [ ]` | Escribir plan |
+| Implementacion | `in-progress` | Se van marcando `- [x]` | Desarrollar |
+| Release | `released` | Todos `- [x]` | Merge + tag + PyPI |
+| Archivo | `archived` | No se modifica | Mover a `docs/plans/archive/vX.Y.Z/` |
+
+### Reglas de archivado
+
+- Un delivery se archiva cuando la **siguiente** version se publica
+- Un delivery archivado es un registro historico — no se modifica
+- El frontmatter cambia a `status: archived`
+- Se mueve a `docs/plans/archive/vX.Y.Z/delivery.md`
+
+### Progress en frontmatter
+
+Agregar campo `progress` para tracking rapido:
+
+```yaml
+---
+type: delivery
+version: "0.2.0"
+status: in-progress
+progress: 12/12
+---
+```
+
+Actualizar manualmente al marcar entregables.

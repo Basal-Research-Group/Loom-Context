@@ -1,11 +1,12 @@
 ---
 type: delivery
 version: "0.2.0"
-status: in-progress
+status: released
 prerequisite: "0.1.0"
 scope: engine, cli, infra
 languages: [python]
-patterns: [template-method, observer]
+patterns: [template-method, append-only-log, snapshot, facade]
+progress: 12/12
 ---
 
 # v0.2.0 — Contexto Vivo y Audit Integrado
