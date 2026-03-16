@@ -2,6 +2,14 @@
 
 > Objetivo: usar modelos abiertos para mejorar seleccion, resumen y handoff, sin convertir a Loom en una herramienta dependiente de LLMs.
 
+## Estado (2026-03-16)
+
+La IA esta postergada a v0.3.0. Las decisiones aqui siguen vigentes pero no se implementan hasta tener:
+
+- contratos tipados (v0.2.1)
+- bundles heuristicos funcionando (v0.2.2)
+- evidencia medible de que las heuristicas no alcanzan
+
 ## Decision Principal
 
 La IA no debe reemplazar scanners, generators ni auditors. Debe operar encima de ellos.
