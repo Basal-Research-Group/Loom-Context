@@ -93,5 +93,12 @@ temp/
 *.bak
 *.orig
 
+# AI tool local config (user-specific, not project rules)
+/.claude/
+/CLAUDE.md
+.copilot/
+.codeium/
+.continue/
+
 # Loom output (uncomment to exclude from version control)
 # .context/
