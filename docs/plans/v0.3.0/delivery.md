@@ -1,7 +1,7 @@
 ---
 type: delivery
 version: "0.3.0"
-status: planned
+status: deferred
 prerequisite: "0.2.2"
 scope: infra, generator
 languages: [python]
@@ -10,9 +10,20 @@ patterns: [strategy, adapter, policy]
 
 # v0.3.0 — Retrieval Local Opcional
 
+> Estado: POSTERGADO — se implementara solo con evidencia de que heuristicas no alcanzan.
+
 ## TL;DR
 
 Agrega embeddings locales como capa opcional para mejorar la precision de seleccion en bundles. Fallback a heuristicas si no hay modelo. Se instala con `pip install loom-context[ai]`. Solo se implementa si hay evidencia de que las heuristicas no alcanzan.
+
+## Por que se postergo
+
+Las heuristicas de bundle (implementadas en v0.2.0) producen bundles 93% mas pequenos que el prompt completo y seleccionan contexto relevante en Akana (674 archivos). No hay evidencia de que embeddings mejorarian el resultado. Ademas, `sentence-transformers` trae PyTorch (~2GB), rompiendo el principio de ligereza.
+
+Se activara cuando:
+- se documenten 10+ tareas reales con archivos esperados
+- precision@k baseline heuristico sea medido
+- haya evidencia concreta de que heuristicas fallan en proyectos grandes
 
 ---
 
