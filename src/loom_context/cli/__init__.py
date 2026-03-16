@@ -23,6 +23,7 @@ from loom_context.cli.commands import (  # noqa: E402
     decide,
     doctor,
     enrich,
+    export,
     focus,
     handoff,
     init,
@@ -48,3 +49,4 @@ main.add_command(decide.decide)
 main.add_command(bundle.bundle)
 main.add_command(handoff.handoff)
 main.add_command(doctor.doctor)
+main.add_command(export.export_cmd, name="export")
