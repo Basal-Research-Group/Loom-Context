@@ -40,7 +40,9 @@ def audit(path: str) -> None:
     all_violations = naming_violations + structure_violations
 
     if not all_violations:
-        console.print("  [green]No violations found.[/green]")
+        from loom_context.brand import LOOMY_HAPPY
+
+        console.print(f"  {LOOMY_HAPPY} [green]No violations found.[/green]")
         return
 
     table = Table(title="Audit Results")

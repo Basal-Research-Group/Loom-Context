@@ -31,10 +31,12 @@ def status(path: str, as_json: bool) -> None:
         console.print("  [red]Not initialized.[/red] Run 'loom init .' first.")
         return
 
+    from loom_context.brand import LOOMY_SMALL
+
     arch = ", ".join(st.architecture) if st.architecture else "unknown"
     console.print(
         Panel(
-            f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
+            f"  {LOOMY_SMALL}  [bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
             title="Loom Status",
         )
     )

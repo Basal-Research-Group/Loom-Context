@@ -42,5 +42,12 @@ def enrich(path: str) -> None:
     else:
         console.print("  Audit  [green]clean[/green]")
 
+    from loom_context.brand import LOOMY_ALERT, LOOMY_HAPPY
+
     console.print("  Findings persisted to [green].loom/inconsistencies.json[/green]")
-    console.print(f"\n  Done in [bold]{elapsed:.1f}s[/bold]")
+
+    if errors:
+        console.print(f"\n  {LOOMY_ALERT} [dim]threads to untangle[/dim]")
+    else:
+        console.print(f"\n  {LOOMY_HAPPY} [dim]context enriched[/dim]")
+    console.print(f"  Done in [bold]{elapsed:.1f}s[/bold]")

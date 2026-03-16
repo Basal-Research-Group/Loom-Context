@@ -133,7 +133,7 @@ class TestFrontmatterParsing:
         docs = tmp_path / "docs"
         docs.mkdir()
         (docs / "my-plan.md").write_text(
-            "---\ntype: delivery\nversion: \"1.0.0\"\nstatus: planned\n---\n\n# My Plan\n"
+            '---\ntype: delivery\nversion: "1.0.0"\nstatus: planned\n---\n\n# My Plan\n'
         )
         engine = LoomEngine(tmp_path)
         result = engine.scan()
