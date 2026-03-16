@@ -1,3 +1,10 @@
+---
+type: architecture
+scope: infra, generator
+status: deferred
+target_version: "0.3.0"
+---
+
 # Estrategia de Integracion de IA Local
 
 > Objetivo: usar modelos abiertos para mejorar seleccion, resumen y handoff, sin convertir a Loom en una herramienta dependiente de LLMs.

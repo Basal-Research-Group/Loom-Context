@@ -1,8 +1,39 @@
+---
+type: changelog
+---
+
 # Changelog
 
 All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased] — v0.2.0
+
+### Added
+- `.loom/` directory for live operational state (separate from canonical `.context/`)
+- `loom enrich` command: re-audit, regenerate context, persist findings
+- `loom decide` command: record/show/clear architectural decisions
+- `FindingsStore`: persists audit results in `.loom/inconsistencies.json`
+- `DecisionLog`: append-only decision records in `.loom/decisions.jsonl`
+- `MutationLog`: tracks context changes in `.loom/mutations.jsonl`
+- `GitHelper`: shared git utility class (DRY refactor)
+- Audit integrated in `loom init` (non-blocking, shows summary)
+- Session migration from `.context/` to `.loom/`
+- 22 new tests (78 total)
+- Per-version delivery plans in `docs/plans/vX.Y.Z/`
+- `docs/plans/scope.md`: product scope definition
+- `docs/plans/format.md`: standard document format with frontmatter
+
+### Changed
+- `SessionLogger` now writes to `.loom/sessions.jsonl` (was `.context/`)
+- `loom log` uses `.loom/` instead of `.context/`
+- `loom status` reads findings, decisions, sessions from `.loom/`
+- `engine.py` gains `audit()` and `enrich()` methods
+- `config.py` gains `loom_dir` and `ensure_loom_dir()`
+
+### Removed
+- Duplicated git command logic in session.py (replaced by GitHelper)
 
 ## [0.1.0] - 2026-03-14
 

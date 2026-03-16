@@ -1,3 +1,9 @@
+---
+type: architecture
+languages: [python]
+patterns: [clean-pipeline, clean-architecture]
+---
+
 # Plan de Hardening Arquitectonico
 
 > Objetivo: preparar Loom-Context para crecer hacia bundles, handoff, retrieval local y export a agentes sin degradar mantenibilidad, testeabilidad ni claridad del dominio.

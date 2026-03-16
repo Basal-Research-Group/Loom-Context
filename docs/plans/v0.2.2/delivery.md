@@ -1,3 +1,12 @@
+---
+type: delivery
+version: "0.2.2"
+status: planned
+prerequisite: "0.2.1"
+scope: generator, cli
+languages: [python]
+---
+
 # v0.2.2 — Bundles, Manifests y Handoff
 
 > Estado: PLANIFICADO

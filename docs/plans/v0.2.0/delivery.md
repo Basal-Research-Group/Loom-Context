@@ -1,3 +1,12 @@
+---
+type: delivery
+version: "0.2.0"
+status: in-progress
+prerequisite: "0.1.0"
+scope: engine, cli, infra
+languages: [python]
+---
+
 # v0.2.0 — Contexto Vivo y Audit Integrado
 
 > Estado: EN DEVELOP, pendiente pruebas locales y release

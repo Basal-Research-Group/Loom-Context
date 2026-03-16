@@ -1,3 +1,7 @@
+---
+type: scope
+---
+
 # Scope de Loom-Context
 
 ## Que es Loom

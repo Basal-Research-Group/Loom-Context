@@ -1,3 +1,12 @@
+---
+type: delivery
+version: "0.3.0"
+status: planned
+prerequisite: "0.2.2"
+scope: infra, generator
+languages: [python]
+---
+
 # v0.3.0 — Retrieval Local Opcional
 
 > Estado: PLANIFICADO

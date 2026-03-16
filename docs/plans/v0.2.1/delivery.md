@@ -1,3 +1,12 @@
+---
+type: delivery
+version: "0.2.1"
+status: planned
+prerequisite: "0.2.0"
+scope: engine, scanner, cli
+languages: [python]
+---
+
 # v0.2.1 — Contratos Tipados y CLI Modular
 
 > Estado: PLANIFICADO

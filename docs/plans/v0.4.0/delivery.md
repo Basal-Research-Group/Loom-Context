@@ -1,3 +1,12 @@
+---
+type: delivery
+version: "0.4.0"
+status: planned
+prerequisite: "0.3.0"
+scope: cli, infra
+languages: [python]
+---
+
 # v0.4.0 — Export a Agentes y Watch Incremental
 
 > Estado: PLANIFICADO

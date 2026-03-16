@@ -1,3 +1,8 @@
+---
+type: roadmap
+versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0", "0.4.0"]
+---
+
 # Roadmap v0.2 - v0.4
 
 > Objetivo: evolucionar Loom-Context desde generador global de `.context/` hacia compilador de contexto por tarea, sin perder su nucleo deterministic-first ni convertirlo en un editor de markdown.

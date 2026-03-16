@@ -1,3 +1,7 @@
+---
+type: code-of-conduct
+---
+
 # Code of Conduct
 
 ## Our Standard
