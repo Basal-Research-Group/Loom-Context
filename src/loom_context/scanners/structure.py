@@ -63,6 +63,13 @@ ARCHITECTURE_PATTERNS: dict[str, list[set[str]]] = {
         {"controllers", "services", "repositories"},
         {"api", "services", "data"},
     ],
+    "pipeline": [
+        {"scanners", "generators"},
+        {"scanners", "generators", "auditors"},
+        {"parsers", "transformers", "emitters"},
+        {"extractors", "processors", "loaders"},
+        {"collectors", "analyzers", "reporters"},
+    ],
 }
 
 # Semantic annotations for directory names
@@ -95,7 +102,7 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "routing": "App routing configuration",
     "routes": "Route definitions",
     "state": "State management",
-    "store": "State store",
+    "store": "State store / persistence layer",
     "slices": "State slices",
     "actions": "State actions/thunks",
     "selectors": "State selectors/queries",
@@ -111,6 +118,15 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "definitions": "Schema/table definitions",
     "migrations": "Database migrations",
     "seeds": "Database seed data",
+    "scanners": "Input scanners (pipeline pattern)",
+    "generators": "Output generators (pipeline pattern)",
+    "auditors": "Rule validators (pipeline pattern)",
+    "parsers": "Input parsers (pipeline pattern)",
+    "transformers": "Data transformers (pipeline pattern)",
+    "emitters": "Output emitters (pipeline pattern)",
+    "extractors": "Data extractors (ETL pattern)",
+    "processors": "Data processors (ETL pattern)",
+    "loaders": "Data loaders (ETL pattern)",
     "utils": "Utility functions",
     "helpers": "Helper functions",
     "lib": "Shared library code",
@@ -146,7 +162,6 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "tracking": "Event tracking",
     "error": "Error handling",
     "devtools": "Development tools/debug utilities",
-    "generators": "Code/data generators",
     "strategies": "Strategy pattern implementations",
     "filters": "Data filters",
     "rules": "Business/validation rules",
@@ -278,6 +293,17 @@ class StructureScanner(BaseScanner):
             for entry in src_root.iterdir():
                 if entry.is_dir() and entry.name not in {".git", "node_modules", "__pycache__"}:
                     dirs.add(entry.name)
+
+        # If only one dir exists and it looks like a Python package, look inside it
+        if len(dirs) == 1:
+            pkg_name = next(iter(dirs))
+            pkg_dir = src_root / pkg_name
+            init_file = pkg_dir / "__init__.py"
+            if init_file.exists():
+                for entry in pkg_dir.iterdir():
+                    if entry.is_dir() and entry.name not in {"__pycache__"}:
+                        dirs.add(entry.name)
+
         return dirs
 
     def _detect_architecture(self, top_dirs: set[str]) -> list[str]:
