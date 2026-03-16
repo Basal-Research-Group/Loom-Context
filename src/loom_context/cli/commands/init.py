@@ -1,0 +1,80 @@
+"""loom init: scan project and create .context/ folder."""
+
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
+import click
+from rich.panel import Panel
+from rich.table import Table
+
+from loom_context import __version__
+from loom_context.cli import console
+
+
+@click.command()
+@click.argument("path", default=".", type=click.Path(exists=True))
+def init(path: str) -> None:
+    """Scan project and create .context/ folder with all context files."""
+    from loom_context.engine import LoomEngine
+    from loom_context.generators.index import generate_quick_rules
+
+    root = Path(path).resolve()
+    console.print(
+        Panel(
+            f"[bold blue]Loom Context Engine[/bold blue] v{__version__}",
+            subtitle="Architecture Context for AI Agents",
+        )
+    )
+    console.print(f"\n  Scanning [cyan]{root}[/cyan]...\n")
+
+    start = time.time()
+    engine = LoomEngine(root)
+    result = engine.init()
+    elapsed = time.time() - start
+
+    scan = result["scan_result"]
+
+    # Summary table
+    table = Table(show_header=False, box=None, padding=(0, 2))
+    table.add_column("Key", style="bold")
+    table.add_column("Value")
+
+    table.add_row("Project Type", scan.structure.project_type)
+    table.add_row("Architecture", ", ".join(scan.structure.architecture))
+    table.add_row("Files Scanned", str(scan.structure.total_files))
+    table.add_row("Code Files", str(scan.code.total_code_files))
+    table.add_row("Docs Found", str(scan.docs.doc_count))
+    table.add_row("Dependencies", str(len(scan.deps.dependencies)))
+    table.add_row("Package Manager", scan.deps.package_manager)
+
+    console.print(table)
+
+    # Generated files
+    console.print("\n  Generated [green].context/[/green]")
+    for fname in result["generated_files"]:
+        console.print(f"    [green]+[/green] {fname}")
+
+    # Quick rules preview
+    quick_rules = generate_quick_rules(scan.to_dict())
+    if quick_rules:
+        console.print(f"\n  Quick Rules ({len(quick_rules)}):")
+        for rule in quick_rules[:5]:
+            console.print(f"    [yellow]>[/yellow] {rule}")
+        if len(quick_rules) > 5:
+            console.print(f"    ... and {len(quick_rules) - 5} more")
+
+    # Audit findings
+    audit = result.get("audit", {})
+    errors = audit.get("errors", 0)
+    warnings = audit.get("warnings", 0)
+    if errors or warnings:
+        console.print(
+            f"\n  Audit  [red]{errors} errors[/red], [yellow]{warnings} warnings[/yellow]"
+        )
+        console.print("  Run [cyan]loom audit[/cyan] for details.")
+    else:
+        console.print("\n  Audit  [green]clean[/green]")
+
+    console.print(f"\n  Done in [bold]{elapsed:.1f}s[/bold]\n")
