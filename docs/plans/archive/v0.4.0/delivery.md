@@ -1,7 +1,8 @@
 ---
 type: delivery
 version: "0.4.0"
-status: in-progress
+status: archived
+progress: 5/7
 prerequisite: "0.2.2"
 scope: cli, infra
 languages: [python]
@@ -85,11 +86,12 @@ context/                         # material humano, NO generado por Loom
 
 ## Entregables
 
-- [ ] `loom export --agent claude|cursor|codex|generic`
-- [ ] `loom watch --events` (file system events)
-- [ ] `loom workspace init` (opcional)
-- [ ] invalidacion de bundles stale
-- [ ] snippets listos para 2+ agentes
+- [x] `loom export --agent claude|cursor|codex|generic` (4 adapters)
+- [x] exports write to `.context/exports/` (no overwrite user files)
+- [x] Adapter + Registry pattern for extensibility
+- [x] 5 tests de export
+- [ ] `loom watch --events` (requiere `watchfiles` dep — postergado)
+- [ ] `loom workspace init` (opcional — postergado)
 
 ## Criterios de salida
 

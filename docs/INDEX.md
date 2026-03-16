@@ -56,7 +56,7 @@ loom init .
 | v0.2.1 | Completado | Contratos, CLI modular, pipeline, Loomy | [archive](plans/archive/v0.2.1/delivery.md) |
 | v0.2.2 | Completado | Bundles + handoff + doctor | [archive](plans/archive/v0.2.2/delivery.md) |
 | v0.3.0 | Planificado | Retrieval local opcional | [delivery](plans/v0.3.0/delivery.md) |
-| v0.4.0 | Planificado | Export a agentes + watch incremental | [delivery](plans/v0.4.0/delivery.md) |
+| v0.4.0 | Completado | Export a 4 agentes (watch postergado) | [archive](plans/archive/v0.4.0/delivery.md) |
 
 ### Estrategias transversales
 
