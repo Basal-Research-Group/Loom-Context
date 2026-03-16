@@ -8,7 +8,7 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] — v0.2.0
+## [0.2.0] - 2026-03-16
 
 ### Added
 - `.loom/` directory for live operational state (separate from canonical `.context/`)
@@ -34,6 +34,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Removed
 - Duplicated git command logic in session.py (replaced by GitHelper)
+- Monolithic `cli.py` (566 lines) replaced by `cli/` package
+
+### Architecture (Hardening Phases A + B)
+- **Typed contracts**: `ScanResult`, `StructureFacts`, `DependencyInfo`, `CodeAnalysis`, `DocsInventory`, `DocEntry`, `Dependency` (all `frozen=True`)
+- **Violation severity**: `str` changed to `Literal["error", "warning", "info"]`
+- **CLI modular**: 11 command files in `cli/commands/`, each < 80 lines
+- **models.py**: single source of truth for domain models
+- Delivery lifecycle: planned -> in-progress -> released -> archived
+
+[0.2.0]: https://github.com/jadruiz/Loom-Context/releases/tag/v0.2.0
 
 ## [0.1.0] - 2026-03-14
 
