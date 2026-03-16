@@ -71,7 +71,9 @@ def decide(
         console.print('  Usage: loom decide "decision summary" -r "rationale"')
         sys.exit(1)
 
+    from loom_context.brand import LOOMY_WINK
+
     entry = log.append(summary, rationale, scope)
     branch_info = f" ({entry.branch})" if entry.branch else ""
-    console.print(f"  [green]+[/green] Decision recorded{branch_info}  [{scope}]")
+    console.print(f"  {LOOMY_WINK} Decision recorded{branch_info}  [{scope}]")
     console.print(f'    "{summary}"')

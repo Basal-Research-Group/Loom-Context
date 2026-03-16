@@ -17,14 +17,20 @@ from loom_context.cli import console
 @click.argument("path", default=".", type=click.Path(exists=True))
 def init(path: str) -> None:
     """Scan project and create .context/ folder with all context files."""
-    from loom_context.brand import LOOMY_ALERT, LOOMY_HAPPY, loomy_banner
+    from loom_context.brand import (
+        LOOMY_ALERT,
+        LOOMY_CURIOUS,
+        LOOMY_HAPPY,
+        LOOMY_THINKING,
+        loomy_banner,
+    )
     from loom_context.engine import LoomEngine
     from loom_context.generators.index import generate_quick_rules
 
     root = Path(path).resolve()
     banner = loomy_banner(__version__)
     console.print(Panel(banner, subtitle="Architecture Context for AI Agents"))
-    console.print(f"\n  Scanning [cyan]{root}[/cyan]...\n")
+    console.print(f"\n  {LOOMY_THINKING} Scanning [cyan]{root}[/cyan]...\n")
 
     start = time.time()
     engine = LoomEngine(root)
@@ -75,7 +81,9 @@ def init(path: str) -> None:
         console.print("\n  Audit  [green]clean[/green]")
 
     # Farewell
-    if errors:
+    if scan.structure.total_files == 0:
+        console.print(f"\n  {LOOMY_CURIOUS} [dim]empty project... nothing to weave yet[/dim]")
+    elif errors:
         console.print(f"\n  {LOOMY_ALERT} [dim]some threads need attention[/dim]")
     else:
         console.print(f"\n  {LOOMY_HAPPY} [dim]all threads connected[/dim]")

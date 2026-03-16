@@ -56,8 +56,10 @@ def log_cmd(message: Optional[str], path: str, do_show: bool, last_n: int, do_cl
         console.print('  Usage: loom log "your message here"')
         sys.exit(1)
 
+    from loom_context.brand import LOOMY_HAPPY
+
     entry = logger.append(message)
     branch_info = f" ({entry.branch})" if entry.branch else ""
-    console.print(f"  [green]+[/green] Logged{branch_info}")
+    console.print(f"  {LOOMY_HAPPY} Logged{branch_info}")
     if entry.modified_files:
         console.print(f"    Modified: {len(entry.modified_files)} files")

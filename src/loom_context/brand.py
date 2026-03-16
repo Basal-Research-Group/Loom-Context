@@ -11,7 +11,7 @@ def loomy_art() -> Text:
     art.append("        .  *  .  *  .\n", style="dim")
     art.append("         \\  |  /\n", style="magenta")
     art.append("      ── ", style="magenta")
-    art.append("(O)", style="bold bright_magenta")
+    art.append("(O O)", style="bold bright_magenta")
     art.append(" ──\n", style="magenta")
     art.append("         /  |  \\\n", style="magenta")
     art.append("        *  .  *  .  *", style="dim")
@@ -28,8 +28,30 @@ def loomy_banner(version: str) -> Text:
     return banner
 
 
-LOOMY_SMALL = "[magenta]~[bold bright_magenta](O)[/bold bright_magenta]~[/magenta]"
+# --- Loomy expressions ---
+# Each expression conveys a distinct emotional state.
+# Format: ~( eyes )~ with dendrites on each side.
 
-LOOMY_HAPPY = "[magenta]~[bold bright_magenta](^)[/bold bright_magenta]~[/magenta]"
+# Neutral — default, status dashboard, idle
+LOOMY = "[magenta]~[bold bright_magenta](O O)[/bold bright_magenta]~[/magenta]"
 
-LOOMY_ALERT = "[magenta]~[bold yellow](!)[/bold yellow]~[/magenta]"
+# Happy — clean audit, successful operation
+LOOMY_HAPPY = "[magenta]~[bold bright_magenta](^ ^)[/bold bright_magenta]~[/magenta]"
+
+# Alert — violations found, issues detected
+LOOMY_ALERT = "[magenta]~[bold yellow](! !)[/bold yellow]~[/magenta]"
+
+# Thinking — scanning, processing
+LOOMY_THINKING = "[magenta]~[bold bright_magenta](. .)[/bold bright_magenta]~[/magenta]"
+
+# Fail — command error, critical failure
+LOOMY_FAIL = "[magenta]~[bold red](x x)[/bold red]~[/magenta]"
+
+# Curious — first init, empty project, discovery
+LOOMY_CURIOUS = "[magenta]~[bold bright_magenta](? ?)[/bold bright_magenta]~[/magenta]"
+
+# Sleeping — stale context, needs rescan
+LOOMY_SLEEPING = "[magenta]~[bold dim](- -)[/bold dim]~[/magenta]"
+
+# Wink — easter egg, fun moments
+LOOMY_WINK = "[magenta]~[bold bright_magenta](^ o)[/bold bright_magenta]~[/magenta]"

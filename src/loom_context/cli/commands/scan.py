@@ -14,10 +14,11 @@ from loom_context.cli import console
 @click.argument("path", default=".", type=click.Path(exists=True))
 def scan(path: str) -> None:
     """Re-scan project and update .context/ files."""
+    from loom_context.brand import LOOMY_HAPPY, LOOMY_THINKING
     from loom_context.engine import LoomEngine
 
     root = Path(path).resolve()
-    console.print(f"  Scanning [cyan]{root}[/cyan]...")
+    console.print(f"  {LOOMY_THINKING} Scanning [cyan]{root}[/cyan]...")
 
     start = time.time()
     engine = LoomEngine(root)
@@ -25,5 +26,5 @@ def scan(path: str) -> None:
     generated = engine.generate_context(scan_result)
     elapsed = time.time() - start
 
-    console.print(f"  Updated {len(generated)} files in .context/")
+    console.print(f"  {LOOMY_HAPPY} Updated {len(generated)} files in .context/")
     console.print(f"  Done in [bold]{elapsed:.1f}s[/bold]")

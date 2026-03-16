@@ -21,7 +21,9 @@ def enrich(path: str) -> None:
     context_dir = root / ".context"
 
     if not context_dir.exists():
-        console.print("[red]Error:[/red] No .context/ found. Run 'loom init' first.")
+        from loom_context.brand import LOOMY_FAIL
+
+        console.print(f"  {LOOMY_FAIL} [red]No .context/ found.[/red] Run 'loom init' first.")
         sys.exit(1)
 
     console.print(f"  Enriching [cyan]{root}[/cyan]...\n")

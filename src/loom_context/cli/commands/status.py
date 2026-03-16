@@ -27,16 +27,17 @@ def status(path: str, as_json: bool) -> None:
         click.echo(json_mod.dumps(st.to_dict(), indent=2, ensure_ascii=False, default=str))
         return
 
-    if not st.context_exists:
-        console.print("  [red]Not initialized.[/red] Run 'loom init .' first.")
-        return
+    from loom_context.brand import LOOMY, LOOMY_FAIL, LOOMY_SLEEPING
 
-    from loom_context.brand import LOOMY_SMALL
+    if not st.context_exists:
+        console.print(f"  {LOOMY_FAIL} [red]Not initialized.[/red] Run 'loom init .' first.")
+        return
 
     arch = ", ".join(st.architecture) if st.architecture else "unknown"
     console.print(
         Panel(
-            f"  {LOOMY_SMALL}  [bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
+            f"  {LOOMY_SLEEPING if st.is_stale else LOOMY}  "
+            f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
             title="Loom Status",
         )
     )
