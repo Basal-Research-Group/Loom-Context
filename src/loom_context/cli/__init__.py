@@ -19,6 +19,7 @@ def main() -> None:
 # Register all commands
 from loom_context.cli.commands import (  # noqa: E402
     audit,
+    bundle,
     decide,
     enrich,
     focus,
@@ -42,3 +43,4 @@ main.add_command(log.log_cmd, name="log")
 main.add_command(status.status)
 main.add_command(enrich.enrich)
 main.add_command(decide.decide)
+main.add_command(bundle.bundle)

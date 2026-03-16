@@ -958,3 +958,63 @@ class TestDecideCommand:
         runner = CliRunner()
         result = runner.invoke(main, ["decide", "-p", str(tmp_path)])
         assert result.exit_code in {0, 1, 2}
+
+
+class TestBundleCommand:
+    def test_bundle_stdout(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(
+            main, ["bundle", "domain architecture", str(tmp_project), "--stdout"]
+        )
+        assert result.exit_code == 0
+        assert "domain" in result.output.lower()
+
+    def test_bundle_save(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["bundle", "domain layer", str(tmp_project), "--save"])
+        assert result.exit_code == 0
+        bundle_dir = tmp_project / ".context" / "bundles" / "domain-layer"
+        assert bundle_dir.exists()
+        assert (bundle_dir / "bundle.md").exists()
+        assert (bundle_dir / "manifest.json").exists()
+
+        manifest = json.loads((bundle_dir / "manifest.json").read_text())
+        assert manifest["task"] == "domain layer"
+        assert manifest["selection_strategy"] == "heuristic"
+        assert manifest["included_count"] > 0
+
+    def test_bundle_no_context_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["bundle", "test", str(tmp_path)])
+        assert result.exit_code == 1
+
+    def test_bundle_smaller_than_prompt(self, tmp_project: Path) -> None:
+        """Bundle should be significantly smaller than full prompt."""
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        prompt = engine.generate_prompt()
+
+        from loom_context.selector.bundle import BundleBuilder
+
+        builder = BundleBuilder(tmp_project / ".context", tmp_project)
+        result = builder.build("domain")
+        assert result is not None
+        content, _manifest = result
+        assert len(content) < len(prompt)
+
+    def test_bundle_manifest_has_metadata(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        from loom_context.selector.bundle import BundleBuilder
+
+        builder = BundleBuilder(tmp_project / ".context", tmp_project)
+        result = builder.build("architecture boundaries")
+        assert result is not None
+        _, manifest = result
+        assert manifest.task == "architecture boundaries"
+        assert manifest.loom_version == "0.2.0"
+        assert manifest.selection_strategy == "heuristic"
+        assert len(manifest.included_sections) > 0
