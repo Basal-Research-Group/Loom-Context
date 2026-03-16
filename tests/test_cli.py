@@ -1023,6 +1023,42 @@ class TestDoctorCommand:
         assert "mutation log active" in result.output
 
 
+class TestExportCommand:
+    def test_export_claude(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "claude"])
+        assert result.exit_code == 0
+        assert "Exported for claude" in result.output
+        assert (tmp_project / ".context" / "exports" / "CLAUDE.md").exists()
+
+    def test_export_cursor(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "cursor"])
+        assert result.exit_code == 0
+        assert (tmp_project / ".context" / "exports" / ".cursorrules").exists()
+
+    def test_export_codex(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "codex"])
+        assert result.exit_code == 0
+        assert (tmp_project / ".context" / "exports" / "AGENTS.md").exists()
+
+    def test_export_stdout(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "generic", "--stdout"])
+        assert result.exit_code == 0
+        assert "Project Context" in result.output
+
+    def test_export_no_context_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["export", str(tmp_path), "--agent", "claude"])
+        assert result.exit_code == 1
+
+
 class TestBundleCommand:
     def test_bundle_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
