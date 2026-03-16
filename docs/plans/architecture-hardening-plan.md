@@ -371,23 +371,45 @@ Agregar un nuevo scanner o generator no debe requerir tocar engine.py.
 - acoplar retrieval local al flujo base
 - esconder reglas de inclusion en helpers sin trazabilidad
 
-## Secuencia recomendada (actualizada)
+## Secuencia de implementacion (actualizada)
 
-1. ~~separacion `.context/` vs `.loom/`~~ HECHO
-2. ~~GitHelper compartido~~ HECHO
-3. ~~audit en init + enrich + decide~~ HECHO
-4. **contratos tipados** (Fase A) ← SIGUIENTE
-5. modularizacion del CLI (Fase B)
-6. pipelines y puertos (Fase C)
-7. bundles y handoff heuristico (v0.2.1)
-8. retrieval local opcional (v0.3.0)
-9. export y watch incremental (v0.4.0)
+### Completo
+
+| Paso | Fase | Version | Estado |
+|------|------|---------|--------|
+| 1 | D parcial | v0.2.0 | Hecho: .loom/ separado de .context/ |
+| 2 | — | v0.2.0 | Hecho: GitHelper compartido (Facade) |
+| 3 | — | v0.2.0 | Hecho: audit en init + enrich + decide |
+
+### Siguiente
+
+| Paso | Fase | Version | Que hacer |
+|------|------|---------|-----------|
+| 4 | A | v0.2.1 | Contratos tipados (ScanResult, StructureFacts, etc.) |
+| 5 | B | v0.2.1 | Modularizacion CLI (1 archivo por comando) |
+| 6 | — | v0.2.2 | Bundles + manifests + handoff (sobre contratos estables) |
+
+### Postergado (cuando se necesite)
+
+| Paso | Fase | Condicion para implementar |
+|------|------|---------------------------|
+| 7 | C: Pipelines/puertos | Cuando haya 6+ scanners o plugins externos |
+| 8 | D resto: Cache | Cuando haya embeddings (v0.3.0) |
+| 9 | E: IA | Cuando heuristicas demuestren ser insuficientes |
+
+### Por que Fase C se posterga
+
+El engine tiene 155 lineas y 4 scanners fijos. Agregar bundles no requiere registry ni pipeline builder — el selector es un consumidor de ScanResult, no un nuevo scanner. Introducir puertos abstractos y registry ahora seria abstraccion prematura. Se implementara cuando:
+
+- haya mas de 5 scanners
+- haya plugins externos
+- el engine supere 300 lineas
 
 ## Criterio final de exito
 
 La arquitectura estara lista cuando una nueva capability pueda agregarse:
 
 - creando un modulo nuevo
-- registrandolo en una fabrica o registry
-- sin editar mas de un punto de composicion
+- sin editar mas de 2 archivos existentes
 - con pruebas de unidad y contrato claras
+- sin romper output de `.context/`

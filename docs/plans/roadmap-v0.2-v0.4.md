@@ -246,22 +246,21 @@ El usuario no debe instalar stack pesado si solo quiere init, scan, audit o prom
 
 ## Orden de Implementacion (actualizado)
 
-```
-HECHO:
-  1. separacion .context/ vs .loom/
-  2. GitHelper compartido
-  3. audit en init + enrich + decide
-  4. 78 tests
+Alineado con [architecture-hardening-plan.md](./architecture-hardening-plan.md).
 
-SIGUIENTE:
-  5. pruebas locales v0.2.0 → release
-  6. contratos tipados (v0.2.1)
-  7. modularizacion CLI (v0.2.1)
-  8. bundles + manifests (v0.2.2)
-  9. evals baseline
-  10. embeddings locales (v0.3.0)
-  11. export + watch (v0.4.0)
-```
+| Paso | Version | Fase hardening | Que hacer | Referencia |
+|------|---------|---------------|-----------|------------|
+| 1-3 | v0.2.0 | D parcial | .loom/, GitHelper, audit en init | Hecho |
+| 4 | v0.2.0 | — | Probar localmente en proyecto real | Pendiente |
+| 5 | v0.2.0 | — | Release: bump, CHANGELOG, merge, tag | Pendiente |
+| 6 | v0.2.1 | A | Contratos tipados (ScanResult, etc.) | [delivery](v0.2.1/delivery.md) |
+| 7 | v0.2.1 | B | Modularizacion CLI | [delivery](v0.2.1/delivery.md) |
+| 8 | v0.2.2 | — | Bundles + manifests + handoff | [delivery](v0.2.2/delivery.md) |
+| 9 | pre-0.3 | — | Evals baseline heuristico | Prerequisito de v0.3.0 |
+| 10 | v0.3.0 | E | Embeddings opcionales (si se necesitan) | [delivery](v0.3.0/delivery.md) |
+| 11 | v0.4.0 | — | Export + watch incremental | [delivery](v0.4.0/delivery.md) |
+
+Fase C (pipelines/puertos) postergada hasta que haya 6+ scanners o plugins.
 
 ## Definicion de Exito
 
