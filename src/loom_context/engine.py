@@ -8,7 +8,6 @@ from typing import Any, Optional, Union
 
 from loom_context import __version__
 from loom_context.config import LoomConfig
-from loom_context.findings import FindingsStore
 from loom_context.generators.context import ContextGenerator
 from loom_context.generators.index import IndexGenerator
 from loom_context.generators.prompt import PromptGenerator
@@ -22,13 +21,14 @@ from loom_context.models import (
     StructureFacts,
     Violation,
 )
-from loom_context.mutations import MutationLog
 from loom_context.scanners.code import CodeScanner
 from loom_context.scanners.deps import DependencyScanner
 from loom_context.scanners.docs import DocsScanner
 from loom_context.scanners.structure import StructureScanner
 from loom_context.security.filter import FileFilter
-from loom_context.session import SessionLogger
+from loom_context.store.findings import FindingsStore
+from loom_context.store.mutations import MutationLog
+from loom_context.store.session import SessionLogger
 
 
 class LoomEngine:

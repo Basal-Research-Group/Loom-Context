@@ -392,7 +392,7 @@ class TestEdgeCases:
 
 class TestSessionLogger:
     def test_append_and_read(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -406,7 +406,7 @@ class TestSessionLogger:
         assert entries[1].message == "first message"
 
     def test_read_empty(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -414,7 +414,7 @@ class TestSessionLogger:
         assert logger.read() == []
 
     def test_clear(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -426,7 +426,7 @@ class TestSessionLogger:
         assert logger.read() == []
 
     def test_read_limit(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -439,7 +439,7 @@ class TestSessionLogger:
         assert entries[0].message == "entry 9"
 
     def test_creates_loom_dir(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         loom = tmp_path / ".loom"
         logger = SessionLogger(loom, tmp_path)
@@ -448,7 +448,7 @@ class TestSessionLogger:
         assert (loom / "sessions.jsonl").exists()
 
     def test_migrate_from_context(self, tmp_path: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         # Create old-style sessions in .context/
         ctx = tmp_path / ".context"
@@ -544,7 +544,7 @@ class TestStatusCommand:
         assert "quick_rules" in data
 
     def test_status_shows_session_log(self, tmp_project: Path) -> None:
-        from loom_context.session import SessionLogger
+        from loom_context.store.session import SessionLogger
 
         runner = CliRunner()
         runner.invoke(main, ["init", str(tmp_project)])
@@ -594,7 +594,7 @@ class TestLogCommand:
 class TestFindingsStore:
     def test_save_and_load(self, tmp_path: Path) -> None:
         from loom_context.auditors.naming import Violation
-        from loom_context.findings import FindingsStore
+        from loom_context.store.findings import FindingsStore
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -628,7 +628,7 @@ class TestFindingsStore:
         assert len(loaded.violations) == 2
 
     def test_load_empty(self, tmp_path: Path) -> None:
-        from loom_context.findings import FindingsStore
+        from loom_context.store.findings import FindingsStore
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -637,7 +637,7 @@ class TestFindingsStore:
 
     def test_has_findings(self, tmp_path: Path) -> None:
         from loom_context.auditors.naming import Violation
-        from loom_context.findings import FindingsStore
+        from loom_context.store.findings import FindingsStore
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -648,7 +648,7 @@ class TestFindingsStore:
         assert store.has_findings()
 
     def test_save_empty_violations(self, tmp_path: Path) -> None:
-        from loom_context.findings import FindingsStore
+        from loom_context.store.findings import FindingsStore
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -661,7 +661,7 @@ class TestFindingsStore:
 
 class TestDecisionLog:
     def test_append_and_read(self, tmp_path: Path) -> None:
-        from loom_context.decisions import DecisionLog
+        from loom_context.store.decisions import DecisionLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -677,7 +677,7 @@ class TestDecisionLog:
         assert entries[1].summary == "use repository pattern"
 
     def test_read_empty(self, tmp_path: Path) -> None:
-        from loom_context.decisions import DecisionLog
+        from loom_context.store.decisions import DecisionLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -685,7 +685,7 @@ class TestDecisionLog:
         assert log.read() == []
 
     def test_clear(self, tmp_path: Path) -> None:
-        from loom_context.decisions import DecisionLog
+        from loom_context.store.decisions import DecisionLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -697,7 +697,7 @@ class TestDecisionLog:
         assert log.read() == []
 
     def test_read_limit(self, tmp_path: Path) -> None:
-        from loom_context.decisions import DecisionLog
+        from loom_context.store.decisions import DecisionLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -712,7 +712,7 @@ class TestDecisionLog:
 
 class TestMutationLog:
     def test_record_and_read(self, tmp_path: Path) -> None:
-        from loom_context.mutations import MutationLog
+        from loom_context.store.mutations import MutationLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()
@@ -728,7 +728,7 @@ class TestMutationLog:
         assert "index.json" in entries[1].files_changed
 
     def test_read_empty(self, tmp_path: Path) -> None:
-        from loom_context.mutations import MutationLog
+        from loom_context.store.mutations import MutationLog
 
         loom = tmp_path / ".loom"
         loom.mkdir()

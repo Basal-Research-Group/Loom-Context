@@ -19,7 +19,7 @@ from loom_context.cli import console
 @click.option("--clear", "do_clear", is_flag=True, help="Clear session log")
 def log_cmd(message: Optional[str], path: str, do_show: bool, last_n: int, do_clear: bool) -> None:
     """Session memory: log progress between development sessions."""
-    from loom_context.session import SessionLogger
+    from loom_context.store.session import SessionLogger
 
     root = Path(path).resolve()
     loom_dir = root / ".loom"

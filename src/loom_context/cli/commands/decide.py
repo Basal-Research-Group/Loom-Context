@@ -35,7 +35,7 @@ def decide(
     do_clear: bool,
 ) -> None:
     """Record an architectural decision."""
-    from loom_context.decisions import DecisionLog
+    from loom_context.store.decisions import DecisionLog
 
     root = Path(path).resolve()
     loom_dir = root / ".loom"
