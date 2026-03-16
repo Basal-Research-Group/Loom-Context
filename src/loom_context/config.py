@@ -14,12 +14,14 @@ class LoomConfig:
 
     root: Path
     context_dir: Path = field(init=False)
+    loom_dir: Path = field(init=False)
     project_type: Optional[str] = None
     overrides: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.root = Path(self.root).resolve()
         self.context_dir = self.root / ".context"
+        self.loom_dir = self.root / ".loom"
         self._load_overrides()
 
     def _load_overrides(self) -> None:
@@ -34,3 +36,8 @@ class LoomConfig:
         """Create .context/ directory if it doesn't exist."""
         self.context_dir.mkdir(exist_ok=True)
         return self.context_dir
+
+    def ensure_loom_dir(self) -> Path:
+        """Create .loom/ directory if it doesn't exist."""
+        self.loom_dir.mkdir(exist_ok=True)
+        return self.loom_dir

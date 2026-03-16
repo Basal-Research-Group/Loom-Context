@@ -102,3 +102,11 @@ temp/
 
 # Loom output (uncomment to exclude from version control)
 # .context/
+
+# Loom runtime state and local agent/session artifacts
+.context/sessions.jsonl
+.context/cache/
+.context/tmp/
+
+# Loom live state (sessions, findings, decisions, mutations)
+.loom/
