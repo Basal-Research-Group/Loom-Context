@@ -2,16 +2,20 @@
 
 > Objetivo: evolucionar Loom-Context desde generador global de `.context/` hacia compilador de contexto por tarea, sin perder su nucleo deterministic-first ni convertirlo en un editor de markdown.
 
+## Scope
+
+Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./scope.md) para limites y direccion.
+
 ## Estado Actual (2026-03-16)
 
-| Version | Estado | Entregables |
-|---------|--------|-------------|
-| v0.1.0 | Publicado en PyPI | init, scan, prompt, audit, plan, watch, focus, log, status |
-| v0.2.0 | En develop, pendiente release | .loom/, audit en init, enrich, decide, GitHelper |
-| v0.2.1 | Planificado | Contratos tipados + modularizacion CLI |
-| v0.2.2 | Planificado | Bundles + manifests + handoff |
-| v0.3.0 | Planificado | Retrieval local opcional (embeddings) |
-| v0.4.0 | Planificado | Export a agentes + watch incremental |
+| Version | Estado | Entregables | Detalle |
+|---------|--------|-------------|---------|
+| v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch, focus, log, status | — |
+| v0.2.0 | En develop | .loom/, audit en init, enrich, decide, GitHelper | [v0.2.0/delivery.md](./v0.2.0/delivery.md) |
+| v0.2.1 | Planificado | Contratos tipados + CLI modular | [v0.2.1/delivery.md](./v0.2.1/delivery.md) |
+| v0.2.2 | Planificado | Bundles + manifests + handoff | [v0.2.2/delivery.md](./v0.2.2/delivery.md) |
+| v0.3.0 | Planificado | Retrieval local opcional (embeddings) | [v0.3.0/delivery.md](./v0.3.0/delivery.md) |
+| v0.4.0 | Planificado | Export a agentes + watch incremental | [v0.4.0/delivery.md](./v0.4.0/delivery.md) |
 
 ---
 
