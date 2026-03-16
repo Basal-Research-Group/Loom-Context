@@ -16,7 +16,8 @@ from loom_context.cli import console
 @click.argument("path", default=".", type=click.Path(exists=True))
 @click.option("--stdout", "to_stdout", is_flag=True, help="Print to stdout instead of file")
 @click.option("--output", "-o", "output_file", help="Write prompt to file")
-def prompt(path: str, to_stdout: bool, output_file: Optional[str]) -> None:
+@click.option("--compact", is_flag=True, help="Token-efficient compact format")
+def prompt(path: str, to_stdout: bool, output_file: Optional[str], compact: bool) -> None:
     """Generate master AI system prompt from .context/ files."""
     from loom_context.engine import LoomEngine
 
@@ -29,8 +30,14 @@ def prompt(path: str, to_stdout: bool, output_file: Optional[str]) -> None:
         console.print(f"  {LOOMY_FAIL} [red]No .context/ found.[/red] Run 'loom init' first.")
         sys.exit(1)
 
-    engine = LoomEngine(root)
-    prompt_text = engine.generate_prompt()
+    if compact:
+        from loom_context.selector.compact import CompactFormatter
+
+        formatter = CompactFormatter(context_dir)
+        prompt_text = formatter.format_all()
+    else:
+        engine = LoomEngine(root)
+        prompt_text = engine.generate_prompt()
 
     if output_file:
         Path(output_file).write_text(prompt_text, encoding="utf-8")
