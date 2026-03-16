@@ -63,6 +63,12 @@ class DocEntry:
     sections: list[str]
     status_items: list[dict[str, str]]
     size_kb: float
+    version: Optional[str] = None
+    doc_status: Optional[str] = None
+    scope: Optional[str] = None
+    prerequisite: Optional[str] = None
+    patterns: Optional[list[str]] = None
+    progress: Optional[str] = None
 
 
 @dataclass(frozen=True)

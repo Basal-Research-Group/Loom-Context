@@ -127,6 +127,47 @@ class TestDocsScanner:
         assert len(plan_docs[0].status_items) > 0
 
 
+class TestFrontmatterParsing:
+    def test_extracts_frontmatter_type(self, tmp_path: Path) -> None:
+        """Docs with frontmatter type override heuristic classification."""
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "my-plan.md").write_text(
+            "---\ntype: delivery\nversion: \"1.0.0\"\nstatus: planned\n---\n\n# My Plan\n"
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "my-plan" in d.path)
+        assert doc.type == "delivery"
+        assert doc.version == "1.0.0"
+        assert doc.doc_status == "planned"
+
+    def test_extracts_scope_and_patterns(self, tmp_path: Path) -> None:
+        """Frontmatter scope and patterns are extracted."""
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "arch.md").write_text(
+            "---\ntype: architecture\nscope: engine, cli\n"
+            "patterns: [strategy, adapter]\n---\n\n# Architecture\n"
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "arch" in d.path)
+        assert doc.type == "architecture"
+        assert doc.scope == "engine, cli"
+        assert doc.patterns == ["strategy", "adapter"]
+
+    def test_no_frontmatter_uses_heuristic(self, tmp_project: Path) -> None:
+        """Docs without frontmatter still classified by heuristic."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        # AGENTS.md should be classified without frontmatter
+        agent_docs = [d for d in result.docs.docs if "AGENTS" in d.path]
+        assert len(agent_docs) > 0
+        assert agent_docs[0].type == "agent-guidelines"
+        assert agent_docs[0].version is None
+
+
 class TestEngine:
     def test_full_init(self, tmp_project: Path) -> None:
         engine = LoomEngine(tmp_project)
