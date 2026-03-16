@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from loom_context.cli import main
@@ -163,6 +164,83 @@ class TestEngine:
         prompt = engine.generate_prompt()
         assert "Project Context" in prompt
         assert len(prompt) > 100
+
+
+class TestScanResult:
+    def test_to_dict_preserves_format(self, tmp_project: Path) -> None:
+        """ScanResult.to_dict() produces the same structure generators expect."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        data = result.to_dict()
+        assert "structure" in data
+        assert "deps" in data
+        assert "code" in data
+        assert "docs" in data
+        assert "scanned_at" in data
+        assert data["structure"]["project_type"] in {"react-native", "react"}
+        assert isinstance(data["deps"]["dependencies"], list)
+        assert isinstance(data["docs"]["docs"], list)
+
+    def test_frozen_immutability(self, tmp_project: Path) -> None:
+        """ScanResult and sub-dataclasses are immutable."""
+        from dataclasses import FrozenInstanceError
+
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        with pytest.raises(FrozenInstanceError):
+            result.structure = None  # type: ignore[misc]
+
+    def test_scan_result_typed_access(self, tmp_project: Path) -> None:
+        """ScanResult attributes are typed, not dict access."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        # Attribute access works
+        assert isinstance(result.structure.project_type, str)
+        assert isinstance(result.structure.architecture, list)
+        assert isinstance(result.deps.dependencies, list)
+        assert isinstance(result.code.total_code_files, int)
+        assert isinstance(result.docs.doc_count, int)
+        # Dependency is typed
+        if result.deps.dependencies:
+            dep = result.deps.dependencies[0]
+            assert isinstance(dep.name, str)
+            assert isinstance(dep.dev, bool)
+
+    def test_to_dict_roundtrip_generates_context(self, tmp_project: Path) -> None:
+        """ScanResult.to_dict() can be used by generators without error."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        generated = engine.generate_context(result)
+        assert len(generated) == 7
+        assert "index.json" in generated
+
+
+class TestPipelineDetection:
+    def test_detects_pipeline_architecture(self, tmp_path: Path) -> None:
+        """Projects with scanners + generators dirs detected as pipeline."""
+        src = tmp_path / "src" / "myapp"
+        src.mkdir(parents=True)
+        (src / "__init__.py").write_text("")
+        (src / "scanners").mkdir()
+        (src / "scanners" / "__init__.py").write_text("")
+        (src / "generators").mkdir()
+        (src / "generators" / "__init__.py").write_text("")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "pipeline" in result.structure.architecture
+
+    def test_detects_etl_pipeline(self, tmp_path: Path) -> None:
+        """Projects with extractors + processors + loaders detected as pipeline."""
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "extractors").mkdir()
+        (src / "processors").mkdir()
+        (src / "loaders").mkdir()
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "pipeline" in result.structure.architecture
 
 
 class TestCLI:
