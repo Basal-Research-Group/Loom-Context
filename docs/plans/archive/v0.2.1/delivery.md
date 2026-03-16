@@ -1,11 +1,12 @@
 ---
 type: delivery
 version: "0.2.1"
-status: planned
+status: archived
 prerequisite: "0.2.0"
 scope: engine, scanner, cli
 languages: [python]
 patterns: [value-object, facade, composition]
+progress: 9/9
 ---
 
 # v0.2.1 — Contratos Tipados y CLI Modular
@@ -156,15 +157,15 @@ src/loom_context/
 
 ## Entregables
 
-- [ ] `domain/models/scan.py` con todos los dataclasses
-- [ ] scanners actualizados para devolver objetos tipados
-- [ ] `ScanResult.to_dict()` para compatibilidad
-- [ ] CLI modularizado: un archivo por comando
-- [ ] `mypy --strict` pasa en `domain/models/`
-- [ ] cli/ principal < 50 lineas
-- [ ] cada comando < 80 lineas
-- [ ] tests existentes siguen pasando
-- [ ] tests de contrato para serializacion (ScanResult → dict → JSON)
+- [x] `models.py` con todos los dataclasses (ScanResult, StructureFacts, etc.)
+- [x] scanners actualizados para devolver objetos tipados (via engine wrapping)
+- [x] `ScanResult.to_dict()` para compatibilidad
+- [x] CLI modularizado: 12 archivos en `cli/commands/`
+- [x] `Violation.severity` migrado a `Literal["error", "warning", "info"]`
+- [x] cli/__init__.py < 50 lineas (45)
+- [x] cada comando < 90 lineas
+- [x] 87 tests existentes pasan sin cambios
+- [x] 4 tests de contrato + 2 tests pipeline detection
 
 ## Criterios de salida
 

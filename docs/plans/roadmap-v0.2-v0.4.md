@@ -16,9 +16,9 @@ Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./s
 | Version | Estado | Entregables | Detalle |
 |---------|--------|-------------|---------|
 | v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch, focus, log, status | — |
-| v0.2.0 | En develop | .loom/, audit en init, enrich, decide, GitHelper | [v0.2.0/delivery.md](./v0.2.0/delivery.md) |
-| v0.2.1 | Planificado | Contratos tipados + CLI modular | [v0.2.1/delivery.md](./v0.2.1/delivery.md) |
-| v0.2.2 | Planificado | Bundles + manifests + handoff | [v0.2.2/delivery.md](./v0.2.2/delivery.md) |
+| v0.2.0 | Completado | .loom/, audit en init, enrich, decide, GitHelper | [archive](./archive/v0.2.0/delivery.md) |
+| v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
+| v0.2.2 | En desarrollo | Bundles + handoff + doctor | [v0.2.2/delivery.md](./v0.2.2/delivery.md) |
 | v0.3.0 | Planificado | Retrieval local opcional (embeddings) | [v0.3.0/delivery.md](./v0.3.0/delivery.md) |
 | v0.4.0 | Planificado | Export a agentes + watch incremental | [v0.4.0/delivery.md](./v0.4.0/delivery.md) |
 
@@ -248,17 +248,17 @@ El usuario no debe instalar stack pesado si solo quiere init, scan, audit o prom
 
 Alineado con [architecture-hardening-plan.md](./architecture-hardening-plan.md).
 
-| Paso | Version | Fase hardening | Que hacer | Referencia |
-|------|---------|---------------|-----------|------------|
-| 1-3 | v0.2.0 | D parcial | .loom/, GitHelper, audit en init | Hecho |
-| 4 | v0.2.0 | — | Probar localmente en proyecto real | Pendiente |
-| 5 | v0.2.0 | — | Release: bump, CHANGELOG, merge, tag | Pendiente |
-| 6 | v0.2.1 | A | Contratos tipados (ScanResult, etc.) | [delivery](v0.2.1/delivery.md) |
-| 7 | v0.2.1 | B | Modularizacion CLI | [delivery](v0.2.1/delivery.md) |
-| 8 | v0.2.2 | — | Bundles + manifests + handoff | [delivery](v0.2.2/delivery.md) |
-| 9 | pre-0.3 | — | Evals baseline heuristico | Prerequisito de v0.3.0 |
-| 10 | v0.3.0 | E | Embeddings opcionales (si se necesitan) | [delivery](v0.3.0/delivery.md) |
-| 11 | v0.4.0 | — | Export + watch incremental | [delivery](v0.4.0/delivery.md) |
+| Paso | Version | Que hacer | Estado |
+|------|---------|-----------|--------|
+| 1-3 | v0.2.0 | .loom/, GitHelper, audit en init, enrich, decide | Completado |
+| 4-5 | v0.2.0 | Probado en Akana (674 archivos, 107 violaciones, 0.9s) | Completado |
+| 6 | v0.2.1 | Contratos tipados (models.py, ScanResult) | Completado |
+| 7 | v0.2.1 | CLI modular (12 comandos), store/ package | Completado |
+| 8 | v0.2.1 | Pipeline detection, frontmatter parsing, Loomy | Completado |
+| 9 | v0.2.2 | Bundle command con seleccion heuristica | Completado |
+| 10 | v0.2.2 | Handoff + doctor | En desarrollo |
+| 11 | v0.3.0 | Embeddings opcionales (si se necesitan) | Planificado |
+| 12 | v0.4.0 | Export + watch incremental | Planificado |
 
 Fase C (pipelines/puertos) postergada hasta que haya 6+ scanners o plugins.
 

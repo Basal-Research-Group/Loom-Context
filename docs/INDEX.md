@@ -45,15 +45,16 @@ loom init .
 | [Output .context/](guides/context-output.md) | Que genera Loom y como lo consume la IA |
 | [Seguridad](guides/security.md) | Como Loom protege tu codigo |
 | [Buenas practicas](guides/best-practices.md) | Patrones recomendados para equipos |
+| [Loomy](guides/loomy.md) | La mascota spider-neuron y sus expresiones |
 
 ### Planes de entrega (por version)
 
 | Version | Estado | Que entrega | Plan |
 |---------|--------|-------------|------|
 | v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch | — |
-| v0.2.0 | En develop | .loom/, audit en init, enrich, decide | [delivery](plans/v0.2.0/delivery.md) |
-| v0.2.1 | Planificado | Contratos tipados + CLI modular | [delivery](plans/v0.2.1/delivery.md) |
-| v0.2.2 | Planificado | Bundles + manifests + handoff | [delivery](plans/v0.2.2/delivery.md) |
+| v0.2.0 | Completado | .loom/, audit en init, enrich, decide | [archive](plans/archive/v0.2.0/delivery.md) |
+| v0.2.1 | Completado | Contratos, CLI modular, pipeline, Loomy | [archive](plans/archive/v0.2.1/delivery.md) |
+| v0.2.2 | En desarrollo | Bundles + handoff + doctor | [delivery](plans/v0.2.2/delivery.md) |
 | v0.3.0 | Planificado | Retrieval local opcional | [delivery](plans/v0.3.0/delivery.md) |
 | v0.4.0 | Planificado | Export a agentes + watch incremental | [delivery](plans/v0.4.0/delivery.md) |
 
