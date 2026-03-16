@@ -20,6 +20,7 @@ from loom_context.cli import console
 @click.option("--max-chars", default=12000, help="Target max characters")
 @click.option("--top-k", default=0, help="Max number of sections to include (0=unlimited)")
 @click.option("--token-budget", default=0, help="Approx token budget (0=use max-chars)")
+@click.option("--compact", is_flag=True, help="Token-efficient compact format")
 @click.option("--save", "do_save", is_flag=True, help="Save to .context/bundles/")
 def bundle(
     task: str,
@@ -29,6 +30,7 @@ def bundle(
     max_chars: int,
     top_k: int,
     token_budget: int,
+    compact: bool,
     do_save: bool,
 ) -> None:
     """Generate a task-specific context bundle."""
@@ -69,6 +71,13 @@ def bundle(
         sys.exit(1)
 
     content, manifest = build_result
+
+    # Compact mode: reformat for token efficiency
+    if compact:
+        from loom_context.selector.compact import CompactFormatter
+
+        formatter = CompactFormatter(context_dir)
+        content = formatter.format_for_task(task, builder.last_candidates or [])
 
     if output_file:
         Path(output_file).write_text(content, encoding="utf-8")
