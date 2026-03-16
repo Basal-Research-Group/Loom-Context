@@ -80,6 +80,18 @@ def init(path: str) -> None:
         if len(quick_rules) > 5:
             console.print(f"    ... and {len(quick_rules) - 5} more")
 
+    # Audit findings
+    audit = result.get("audit", {})
+    errors = audit.get("errors", 0)
+    warnings = audit.get("warnings", 0)
+    if errors or warnings:
+        console.print(
+            f"\n  Audit  [red]{errors} errors[/red], [yellow]{warnings} warnings[/yellow]"
+        )
+        console.print("  Run [cyan]loom audit[/cyan] for details.")
+    else:
+        console.print("\n  Audit  [green]clean[/green]")
+
     console.print(f"\n  Done in [bold]{elapsed:.1f}s[/bold]\n")
 
 
@@ -310,12 +322,13 @@ def focus(
     elif to_stdout:
         click.echo(result)
     else:
-        console.print(Panel(
-            f"Focused context for [bold]\"{query}\"[/bold]: "
-            f"[bold]{len(result)}[/bold] chars",
-            title="Loom Focus",
-        ))
-        console.print("\nUse [cyan]loom focus \"query\" --stdout[/cyan] to pipe output.")
+        console.print(
+            Panel(
+                f'Focused context for [bold]"{query}"[/bold]: [bold]{len(result)}[/bold] chars',
+                title="Loom Focus",
+            )
+        )
+        console.print('\nUse [cyan]loom focus "query" --stdout[/cyan] to pipe output.')
 
 
 @main.command(name="log")
@@ -324,15 +337,14 @@ def focus(
 @click.option("--show", "do_show", is_flag=True, help="Show recent entries")
 @click.option("--last", "last_n", type=int, default=5, help="Number of entries to show")
 @click.option("--clear", "do_clear", is_flag=True, help="Clear session log")
-def log_cmd(
-    message: Optional[str], path: str, do_show: bool, last_n: int, do_clear: bool
-) -> None:
+def log_cmd(message: Optional[str], path: str, do_show: bool, last_n: int, do_clear: bool) -> None:
     """Session memory: log progress between development sessions."""
     from loom_context.session import SessionLogger
 
     root = Path(path).resolve()
-    context_dir = root / ".context"
-    logger = SessionLogger(context_dir, root)
+    loom_dir = root / ".loom"
+    loom_dir.mkdir(exist_ok=True)
+    logger = SessionLogger(loom_dir, root)
 
     if do_clear:
         count = logger.clear()
@@ -350,7 +362,7 @@ def log_cmd(
             branch_info = f" {entry.branch}" if entry.branch else ""
             sha_info = f" ({entry.sha})" if entry.sha else ""
             console.print(f"  [dim]{ts}[/dim]{branch_info}{sha_info}")
-            console.print(f"    \"{entry.message}\"")
+            console.print(f'    "{entry.message}"')
             if entry.modified_files:
                 files = ", ".join(entry.modified_files[:5])
                 overflow = len(entry.modified_files) - 5
@@ -361,7 +373,7 @@ def log_cmd(
 
     if not message:
         console.print("[red]Error:[/red] Provide a message or use --show / --clear.")
-        console.print("  Usage: loom log \"your message here\"")
+        console.print('  Usage: loom log "your message here"')
         sys.exit(1)
 
     entry = logger.append(message)
@@ -394,10 +406,12 @@ def status(path: str, as_json: bool) -> None:
 
     # Header
     arch = ", ".join(st.architecture) if st.architecture else "unknown"
-    console.print(Panel(
-        f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
-        title="Loom Status",
-    ))
+    console.print(
+        Panel(
+            f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
+            title="Loom Status",
+        )
+    )
 
     # Scan freshness
     if st.last_scan:
@@ -429,10 +443,124 @@ def status(path: str, as_json: bool) -> None:
         if len(st.quick_rules) > 5:
             console.print(f"    ... +{len(st.quick_rules) - 5} more")
 
+    # Findings
+    if st.last_findings:
+        fe = st.last_findings.get("errors", 0)
+        fw = st.last_findings.get("warnings", 0)
+        if fe or fw:
+            console.print(f"  Findings  [red]{fe} errors[/red], [yellow]{fw} warnings[/yellow]")
+        else:
+            console.print("  Findings  [green]clean[/green]")
+
+    # Decisions
+    if st.decisions_count > 0:
+        console.print(f"  Decisions  {st.decisions_count} recorded")
+
     # Session log
     if st.recent_logs:
         console.print(f"\n  Session Log ({len(st.recent_logs)} recent):")
         for entry in st.recent_logs[:3]:
             ts = entry.timestamp[:16].replace("T", " ")
-            console.print(f"    [dim]{ts}[/dim] \"{entry.message}\"")
+            console.print(f'    [dim]{ts}[/dim] "{entry.message}"')
     console.print("")
+
+
+@main.command()
+@click.argument("path", default=".", type=click.Path(exists=True))
+def enrich(path: str) -> None:
+    """Enrich context: re-audit, refine rules, persist findings."""
+    from loom_context.engine import LoomEngine
+
+    root = Path(path).resolve()
+    context_dir = root / ".context"
+
+    if not context_dir.exists():
+        console.print("[red]Error:[/red] No .context/ found. Run 'loom init' first.")
+        sys.exit(1)
+
+    console.print(f"  Enriching [cyan]{root}[/cyan]...\n")
+
+    start = time.time()
+    engine = LoomEngine(root)
+    result = engine.enrich()
+    elapsed = time.time() - start
+
+    audit = result.get("audit", {})
+    errors = audit.get("errors", 0)
+    warnings = audit.get("warnings", 0)
+
+    console.print(f"  Updated {len(result['generated_files'])} files in .context/")
+
+    if errors or warnings:
+        console.print(f"  Audit  [red]{errors} errors[/red], [yellow]{warnings} warnings[/yellow]")
+    else:
+        console.print("  Audit  [green]clean[/green]")
+
+    console.print("  Findings persisted to [green].loom/inconsistencies.json[/green]")
+    console.print(f"\n  Done in [bold]{elapsed:.1f}s[/bold]")
+
+
+@main.command()
+@click.argument("summary", required=False)
+@click.option("--rationale", "-r", default="", help="Why this decision was made")
+@click.option(
+    "--scope",
+    "-s",
+    default="architecture",
+    type=click.Choice(["architecture", "naming", "deps", "security"]),
+    help="Decision scope",
+)
+@click.option("--path", "-p", default=".", type=click.Path(exists=True), help="Project path")
+@click.option("--show", "do_show", is_flag=True, help="Show recent decisions")
+@click.option("--last", "last_n", type=int, default=10, help="Number of entries to show")
+@click.option("--clear", "do_clear", is_flag=True, help="Clear all decisions")
+def decide(
+    summary: Optional[str],
+    rationale: str,
+    scope: str,
+    path: str,
+    do_show: bool,
+    last_n: int,
+    do_clear: bool,
+) -> None:
+    """Record an architectural decision."""
+    from loom_context.decisions import DecisionLog
+
+    root = Path(path).resolve()
+    loom_dir = root / ".loom"
+    loom_dir.mkdir(exist_ok=True)
+    log = DecisionLog(loom_dir, root)
+
+    if do_clear:
+        count = log.clear()
+        console.print(f"  Cleared {count} decisions.")
+        return
+
+    if do_show:
+        entries = log.read(count=last_n)
+        if not entries:
+            console.print("  No decisions recorded.")
+            return
+        console.print(f"\n  Decisions (last {len(entries)})\n")
+        for entry in entries:
+            ts = entry.timestamp[:19].replace("T", " ")
+            console.print(f"  [dim]{ts}[/dim]  [{entry.scope}]")
+            console.print(f"    [bold]{entry.summary}[/bold]")
+            if entry.rationale:
+                console.print(f"    [dim]Why: {entry.rationale}[/dim]")
+            branch_info = f" {entry.branch}" if entry.branch else ""
+            sha_info = f" ({entry.sha})" if entry.sha else ""
+            if branch_info or sha_info:
+                console.print(f"    [dim]{branch_info}{sha_info}[/dim]")
+            console.print("")
+        return
+
+    if not summary:
+        console.print("[red]Error:[/red] Provide a summary or use --show / --clear.")
+        console.print('  Usage: loom decide "decision summary" -r "rationale"')
+        sys.exit(1)
+
+    entry = log.append(summary, rationale, scope)
+    branch_info = f" ({entry.branch})" if entry.branch else ""
+    console.print(f"  [green]+[/green] Decision recorded{branch_info}  [{scope}]")
+    console.print(f'    "{summary}"')

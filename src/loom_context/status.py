@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
+from loom_context.decisions import DecisionLog
+from loom_context.findings import FindingsStore
 from loom_context.security.filter import FileFilter
 from loom_context.session import SessionEntry, SessionLogger
 
@@ -27,19 +29,21 @@ class ProjectStatus:
     audit_warnings: int = 0
     recent_logs: list[SessionEntry] = field(default_factory=list)
     quick_rules: list[str] = field(default_factory=list)
+    decisions_count: int = 0
+    last_findings: Optional[dict[str, Any]] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to JSON-serializable dict."""
-        from dataclasses import asdict
         return asdict(self)
 
 
 class StatusCollector:
-    """Collects project status from .context/ files without re-scanning."""
+    """Collects project status from .context/ and .loom/ files without re-scanning."""
 
     def __init__(self, root: Path) -> None:
         self.root = root
         self.context_dir = root / ".context"
+        self.loom_dir = root / ".loom"
 
     def collect(self) -> ProjectStatus:
         """Collect project status."""
@@ -57,16 +61,28 @@ class StatusCollector:
         )
 
         # Check staleness
-        status.is_stale, status.stale_file_count = self._check_staleness(
-            status.last_scan
-        )
+        status.is_stale, status.stale_file_count = self._check_staleness(status.last_scan)
 
-        # Audit violations count
+        # Audit violations count (live from code)
         status.audit_errors, status.audit_warnings = self._count_violations()
 
-        # Recent session logs
-        logger = SessionLogger(self.context_dir, self.root)
+        # Recent session logs (from .loom/)
+        logger = SessionLogger(self.loom_dir, self.root)
         status.recent_logs = logger.read(count=5)
+
+        # Persisted findings (from .loom/)
+        findings_store = FindingsStore(self.loom_dir, self.root)
+        findings = findings_store.load()
+        if findings:
+            status.last_findings = {
+                "errors": findings.errors,
+                "warnings": findings.warnings,
+                "timestamp": findings.timestamp,
+            }
+
+        # Decisions count (from .loom/)
+        decision_log = DecisionLog(self.loom_dir, self.root)
+        status.decisions_count = len(decision_log.read(count=1000))
 
         return status
 
@@ -80,9 +96,7 @@ class StatusCollector:
         except (json.JSONDecodeError, OSError):
             return {}
 
-    def _check_staleness(
-        self, last_scan: Optional[str]
-    ) -> tuple[bool, int]:
+    def _check_staleness(self, last_scan: Optional[str]) -> tuple[bool, int]:
         """Check if project files are newer than last scan."""
         if not last_scan:
             return True, 0
@@ -101,8 +115,19 @@ class StatusCollector:
         for filepath in file_filter.walk():
             # Only check source-like files for performance
             if filepath.suffix in {
-                ".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go",
-                ".java", ".kt", ".cs", ".rb", ".php", ".swift",
+                ".ts",
+                ".tsx",
+                ".js",
+                ".jsx",
+                ".py",
+                ".rs",
+                ".go",
+                ".java",
+                ".kt",
+                ".cs",
+                ".rb",
+                ".php",
+                ".swift",
             }:
                 try:
                     if filepath.stat().st_mtime > scan_ts:

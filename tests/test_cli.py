@@ -402,9 +402,9 @@ class TestSessionLogger:
     def test_append_and_read(self, tmp_path: Path) -> None:
         from loom_context.session import SessionLogger
 
-        ctx = tmp_path / ".context"
-        ctx.mkdir()
-        logger = SessionLogger(ctx, tmp_path)
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
         logger.append("first message")
         logger.append("second message")
 
@@ -416,17 +416,17 @@ class TestSessionLogger:
     def test_read_empty(self, tmp_path: Path) -> None:
         from loom_context.session import SessionLogger
 
-        ctx = tmp_path / ".context"
-        ctx.mkdir()
-        logger = SessionLogger(ctx, tmp_path)
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
         assert logger.read() == []
 
     def test_clear(self, tmp_path: Path) -> None:
         from loom_context.session import SessionLogger
 
-        ctx = tmp_path / ".context"
-        ctx.mkdir()
-        logger = SessionLogger(ctx, tmp_path)
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
         logger.append("entry 1")
         logger.append("entry 2")
         cleared = logger.clear()
@@ -436,9 +436,9 @@ class TestSessionLogger:
     def test_read_limit(self, tmp_path: Path) -> None:
         from loom_context.session import SessionLogger
 
-        ctx = tmp_path / ".context"
-        ctx.mkdir()
-        logger = SessionLogger(ctx, tmp_path)
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
         for i in range(10):
             logger.append(f"entry {i}")
 
@@ -446,14 +446,34 @@ class TestSessionLogger:
         assert len(entries) == 3
         assert entries[0].message == "entry 9"
 
-    def test_creates_context_dir(self, tmp_path: Path) -> None:
+    def test_creates_loom_dir(self, tmp_path: Path) -> None:
         from loom_context.session import SessionLogger
 
-        ctx = tmp_path / ".context"
-        logger = SessionLogger(ctx, tmp_path)
+        loom = tmp_path / ".loom"
+        logger = SessionLogger(loom, tmp_path)
         logger.append("auto create")
-        assert ctx.exists()
-        assert (ctx / "sessions.jsonl").exists()
+        assert loom.exists()
+        assert (loom / "sessions.jsonl").exists()
+
+    def test_migrate_from_context(self, tmp_path: Path) -> None:
+        from loom_context.session import SessionLogger
+
+        # Create old-style sessions in .context/
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        old_path = ctx / "sessions.jsonl"
+        old_path.write_text('{"timestamp":"2024-01-01","message":"old entry"}\n')
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
+        migrated = logger.migrate_from_context(ctx)
+
+        assert migrated
+        assert not old_path.exists()
+        entries = logger.read()
+        assert len(entries) == 1
+        assert entries[0].message == "old entry"
 
 
 class TestFocusGenerator:
@@ -498,9 +518,7 @@ class TestFocusGenerator:
     def test_focus_cli_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
         runner.invoke(main, ["init", str(tmp_project)])
-        result = runner.invoke(
-            main, ["focus", "domain", str(tmp_project), "--stdout"]
-        )
+        result = runner.invoke(main, ["focus", "domain", str(tmp_project), "--stdout"])
         assert result.exit_code == 0
         assert "domain" in result.output.lower()
 
@@ -539,8 +557,9 @@ class TestStatusCommand:
         runner = CliRunner()
         runner.invoke(main, ["init", str(tmp_project)])
 
-        ctx = tmp_project / ".context"
-        logger = SessionLogger(ctx, tmp_project)
+        loom = tmp_project / ".loom"
+        loom.mkdir(exist_ok=True)
+        logger = SessionLogger(loom, tmp_project)
         logger.append("test session entry")
 
         result = runner.invoke(main, ["status", str(tmp_project)])
@@ -551,9 +570,7 @@ class TestLogCommand:
     def test_log_append(self, tmp_project: Path) -> None:
         runner = CliRunner()
         runner.invoke(main, ["init", str(tmp_project)])
-        result = runner.invoke(
-            main, ["log", "started refactor", "--path", str(tmp_project)]
-        )
+        result = runner.invoke(main, ["log", "started refactor", "--path", str(tmp_project)])
         assert result.exit_code == 0
         assert "Logged" in result.output
 
@@ -562,9 +579,7 @@ class TestLogCommand:
         runner.invoke(main, ["init", str(tmp_project)])
         runner.invoke(main, ["log", "entry one", "--path", str(tmp_project)])
         runner.invoke(main, ["log", "entry two", "--path", str(tmp_project)])
-        result = runner.invoke(
-            main, ["log", "--show", "--path", str(tmp_project)]
-        )
+        result = runner.invoke(main, ["log", "--show", "--path", str(tmp_project)])
         assert result.exit_code == 0
         assert "entry two" in result.output
         assert "entry one" in result.output
@@ -573,9 +588,7 @@ class TestLogCommand:
         runner = CliRunner()
         runner.invoke(main, ["init", str(tmp_project)])
         runner.invoke(main, ["log", "to clear", "--path", str(tmp_project)])
-        result = runner.invoke(
-            main, ["log", "--clear", "--path", str(tmp_project)]
-        )
+        result = runner.invoke(main, ["log", "--clear", "--path", str(tmp_project)])
         assert result.exit_code == 0
         assert "Cleared" in result.output
 
@@ -583,4 +596,254 @@ class TestLogCommand:
         runner = CliRunner()
         result = runner.invoke(main, ["log", "--path", str(tmp_path)])
         # With just a path and no message, it should error or show help
+        assert result.exit_code in {0, 1, 2}
+
+
+class TestFindingsStore:
+    def test_save_and_load(self, tmp_path: Path) -> None:
+        from loom_context.auditors.naming import Violation
+        from loom_context.findings import FindingsStore
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        store = FindingsStore(loom, tmp_path)
+
+        violations = [
+            Violation(
+                file="src/bad.ts",
+                line=10,
+                rule="interface-prefix",
+                message="Missing I prefix",
+                severity="warning",
+                suggestion="Add I prefix",
+            ),
+            Violation(
+                file="src/worse.ts",
+                line=5,
+                rule="layer-boundary",
+                message="Domain imports infra",
+                severity="error",
+            ),
+        ]
+        findings = store.save(violations)
+        assert findings.errors == 1
+        assert findings.warnings == 1
+
+        loaded = store.load()
+        assert loaded is not None
+        assert loaded.errors == 1
+        assert loaded.warnings == 1
+        assert len(loaded.violations) == 2
+
+    def test_load_empty(self, tmp_path: Path) -> None:
+        from loom_context.findings import FindingsStore
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        store = FindingsStore(loom, tmp_path)
+        assert store.load() is None
+
+    def test_has_findings(self, tmp_path: Path) -> None:
+        from loom_context.auditors.naming import Violation
+        from loom_context.findings import FindingsStore
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        store = FindingsStore(loom, tmp_path)
+        assert not store.has_findings()
+
+        store.save([Violation(file="x.ts", line=1, rule="r", message="m", severity="warning")])
+        assert store.has_findings()
+
+    def test_save_empty_violations(self, tmp_path: Path) -> None:
+        from loom_context.findings import FindingsStore
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        store = FindingsStore(loom, tmp_path)
+        findings = store.save([])
+        assert findings.errors == 0
+        assert findings.warnings == 0
+        assert not store.has_findings()
+
+
+class TestDecisionLog:
+    def test_append_and_read(self, tmp_path: Path) -> None:
+        from loom_context.decisions import DecisionLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = DecisionLog(loom, tmp_path)
+
+        log.append("use repository pattern", "decouple persistence", "architecture")
+        log.append("add I prefix to interfaces", "consistency", "naming")
+
+        entries = log.read(count=10)
+        assert len(entries) == 2
+        assert entries[0].summary == "add I prefix to interfaces"  # newest first
+        assert entries[0].scope == "naming"
+        assert entries[1].summary == "use repository pattern"
+
+    def test_read_empty(self, tmp_path: Path) -> None:
+        from loom_context.decisions import DecisionLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = DecisionLog(loom, tmp_path)
+        assert log.read() == []
+
+    def test_clear(self, tmp_path: Path) -> None:
+        from loom_context.decisions import DecisionLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = DecisionLog(loom, tmp_path)
+        log.append("decision 1", "reason", "architecture")
+        log.append("decision 2", "reason", "deps")
+        cleared = log.clear()
+        assert cleared == 2
+        assert log.read() == []
+
+    def test_read_limit(self, tmp_path: Path) -> None:
+        from loom_context.decisions import DecisionLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = DecisionLog(loom, tmp_path)
+        for i in range(5):
+            log.append(f"decision {i}", "reason", "architecture")
+
+        entries = log.read(count=2)
+        assert len(entries) == 2
+        assert entries[0].summary == "decision 4"
+
+
+class TestMutationLog:
+    def test_record_and_read(self, tmp_path: Path) -> None:
+        from loom_context.mutations import MutationLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = MutationLog(loom, tmp_path)
+
+        log.record("init", ["index.json", "rules.json"], "initialized with 2 files")
+        log.record("enrich", ["rules.json"], "enriched after 1 error")
+
+        entries = log.read(count=10)
+        assert len(entries) == 2
+        assert entries[0].action == "enrich"  # newest first
+        assert entries[1].action == "init"
+        assert "index.json" in entries[1].files_changed
+
+    def test_read_empty(self, tmp_path: Path) -> None:
+        from loom_context.mutations import MutationLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        log = MutationLog(loom, tmp_path)
+        assert log.read() == []
+
+
+class TestInitWithAudit:
+    def test_init_creates_loom_dir(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        result = engine.init()
+
+        assert (tmp_project / ".loom").exists()
+        assert "audit" in result
+        assert "errors" in result["audit"]
+        assert "warnings" in result["audit"]
+
+    def test_init_persists_findings(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        findings_path = tmp_project / ".loom" / "inconsistencies.json"
+        assert findings_path.exists()
+        data = json.loads(findings_path.read_text())
+        assert "errors" in data
+        assert "warnings" in data
+        assert "violations" in data
+
+    def test_init_records_mutation(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        mutations_path = tmp_project / ".loom" / "mutations.jsonl"
+        assert mutations_path.exists()
+        lines = [ln for ln in mutations_path.read_text().splitlines() if ln.strip()]
+        assert len(lines) == 1
+        data = json.loads(lines[0])
+        assert data["action"] == "init"
+
+    def test_init_shows_audit_in_cli(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["init", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Audit" in result.output
+
+
+class TestEnrichCommand:
+    def test_enrich_basic(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["enrich", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Updated" in result.output
+        assert "Findings persisted" in result.output
+
+    def test_enrich_no_context_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["enrich", str(tmp_path)])
+        assert result.exit_code == 1
+
+    def test_enrich_persists_findings(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        engine.enrich()
+
+        findings_path = tmp_project / ".loom" / "inconsistencies.json"
+        assert findings_path.exists()
+
+        mutations_path = tmp_project / ".loom" / "mutations.jsonl"
+        lines = [ln for ln in mutations_path.read_text().splitlines() if ln.strip()]
+        # At least 2: init + enrich
+        assert len(lines) >= 2
+        last = json.loads(lines[-1])
+        assert last["action"] == "enrich"
+
+
+class TestDecideCommand:
+    def test_decide_basic(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            ["decide", "use repository pattern", "-r", "decouple persistence", "-p", str(tmp_path)],
+        )
+        assert result.exit_code == 0
+        assert "Decision recorded" in result.output
+
+    def test_decide_show(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(
+            main,
+            ["decide", "decision one", "-r", "reason one", "-p", str(tmp_path)],
+        )
+        result = runner.invoke(main, ["decide", "--show", "-p", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "decision one" in result.output
+
+    def test_decide_clear(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(
+            main,
+            ["decide", "to clear", "-r", "test", "-p", str(tmp_path)],
+        )
+        result = runner.invoke(main, ["decide", "--clear", "-p", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "Cleared" in result.output
+
+    def test_decide_no_args_fails(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["decide", "-p", str(tmp_path)])
         assert result.exit_code in {0, 1, 2}
