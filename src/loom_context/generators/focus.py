@@ -9,11 +9,49 @@ from typing import Any, Optional
 
 # Common stop words to filter from queries
 STOP_WORDS = {
-    "a", "an", "the", "in", "on", "at", "to", "for", "of", "with",
-    "and", "or", "not", "is", "are", "was", "were", "be", "been",
-    "do", "does", "did", "will", "would", "could", "should",
-    "el", "la", "los", "las", "de", "del", "en", "con", "por", "para",
-    "un", "una", "que", "es", "y", "o", "no",
+    "a",
+    "an",
+    "the",
+    "in",
+    "on",
+    "at",
+    "to",
+    "for",
+    "of",
+    "with",
+    "and",
+    "or",
+    "not",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "el",
+    "la",
+    "los",
+    "las",
+    "de",
+    "del",
+    "en",
+    "con",
+    "por",
+    "para",
+    "un",
+    "una",
+    "que",
+    "es",
+    "y",
+    "o",
+    "no",
 }
 
 
@@ -49,7 +87,7 @@ class FocusGenerator:
         project = index.get("project", {})
 
         # Header (always included)
-        sections.append(f"# Focused Context: \"{query}\"")
+        sections.append(f'# Focused Context: "{query}"')
         sections.append(
             f"**Project:** {project.get('name', '')} "
             f"({project.get('type', '')}, "

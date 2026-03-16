@@ -2,6 +2,11 @@
 
 Thanks for your interest in contributing! This guide covers everything you need to set up your development environment, follow our conventions, and submit quality contributions.
 
+Before contributing, also review:
+
+- `CODE_OF_CONDUCT.md` for collaboration expectations
+- `SECURITY.md` for private vulnerability reporting
+
 ---
 
 ## Table of Contents
@@ -271,6 +276,8 @@ Current: `0.1.0` (pre-1.0, API may change between minor versions).
 ---
 
 ## Pull Request Process
+
+Open pull requests with the repository template and keep the validation checklist accurate. If your change is user-facing, update `README.md`, `docs/`, or `CHANGELOG.md` as appropriate.
 
 1. **Fork** the repo and create a branch from `main`
 2. **Write code** following the style guide above

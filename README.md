@@ -1,177 +1,223 @@
 # Loom-Context
 
-**The Architecture Context Engine for AI-First Engineering.**
+**Architecture context for AI-assisted engineering.**
 
-> *"Code is what we write. Context is how we survive it."*
+Loom-Context scans your repository, infers architecture and conventions, and generates a compact `.context/` directory that AI agents can use as project memory.
 
-Loom-Context is the **nervous system** for your project. Just as the human brain doesn't reprocess all of reality every instant — it uses working memory, learned patterns, and cognitive shortcuts — Loom builds an **architectural context layer** that AI agents read as their long-term memory about your project.
+It is designed for one specific job:
 
-Without Loom, every AI session starts from zero. With Loom, the AI **remembers** your architecture, your rules, and your intent.
+- understand repo structure
+- detect architecture and naming rules
+- summarize docs and plans
+- generate AI-ready context
+- audit basic architectural boundaries
 
-```
+It does **not** send source code anywhere by default, and it does **not** require a hosted AI service to work.
+
+## Install
+
+```bash
 pip install loom-context
+```
+
+Verify:
+
+```bash
+loom --version
+```
+
+## Quick Start
+
+```bash
 cd your-project/
 loom init .
+loom prompt . --stdout
 ```
 
-~1 second. 7 files. Complete architectural context for any LLM.
+What happens:
 
----
+1. Loom scans your project structure, dependencies, code patterns, and docs.
+2. Loom generates `.context/` with architecture, naming, stack, rules, and plans summary.
+3. You can feed that context to an AI agent or audit the repo against detected rules.
 
-## How It Works
-
-```
-Your Project          Loom Engine              AI Agent
-─────────────    ──────────────────    ──────────────────
-src/             → StructureScanner   → architecture.md
-package.json     → DependencyScanner  → stack.json
-*.ts, *.py       → CodeScanner        → naming.md
-docs/            → DocsScanner        → plans-summary.md
-                                      → index.json (entry point)
-                                      → rules.json (auditable)
-                                      → directory-map.md
-```
-
-1. **Scans** your project: structure, dependencies, code patterns, documentation
-2. **Detects** architecture (Clean Architecture, Hexagonal, MVC, feature-based), naming conventions (PascalCase, I-prefix, use-prefix, suffixes), and full technology stack
-3. **Generates** `.context/` — 7 structured files that any AI agent can consume in seconds
-4. **Audits** code against detected rules: naming violations, layer boundary violations
-
-## The Brain Analogy
-
-Loom operates like the layers of the human brain:
-
-| Brain Layer | Loom Component | Function |
-|-------------|---------------|----------|
-| Sensory System | Scanners | Perceives the project as-is |
-| Working Memory | `.context/` (7 files) | What the AI holds "active" |
-| Prefrontal Cortex | PromptGenerator | Compiles context into decisions |
-| Immune System | Auditors | Detects anomalies proactively |
-| Blood-Brain Barrier | Security Filter | Blocks secrets and noise |
-
-Read the full analogy: [docs/guides/philosophy.md](docs/guides/philosophy.md)
-
-## Commands
+## Core Commands
 
 ```bash
 loom init .                    # Full scan + generate .context/
-loom scan .                    # Re-scan and update
-loom prompt . --stdout         # Generate master AI prompt
-loom audit .                   # Validate against rules
+loom scan .                    # Re-scan and update .context/
+loom prompt . --stdout         # Print master AI prompt
+loom prompt . -o prompt.md     # Write prompt to file
+loom audit .                   # Validate naming and layer rules
 loom plan .                    # Summarize project docs/plans
-loom watch . --interval 60     # Continuous mode
+loom watch . --interval 60     # Refresh context continuously
 ```
 
-## What It Generates
+## What Loom Generates
 
-```
+```text
 .context/
-├── index.json          ← AI reads this FIRST (entry point)
-├── architecture.md     ← Patterns, layers, boundaries
-├── naming.md           ← Naming conventions with real examples
-├── directory-map.md    ← Annotated directory tree
-├── stack.json          ← Dependencies categorized by purpose
-├── rules.json          ← Machine-readable rules for auditing
-└── plans-summary.md    ← Summary of existing project plans
+├── index.json
+├── architecture.md
+├── naming.md
+├── directory-map.md
+├── stack.json
+├── rules.json
+└── plans-summary.md
 ```
 
-**Progressive consumption:**
-- `index.json` quick_rules → 30 seconds of context
-- `+ architecture.md + naming.md` → 2 minutes
-- `+ directory-map.md + stack.json` → complete picture
+Recommended consumption order:
 
-## Detected Patterns
+- `index.json`: fast orientation and quick rules
+- `architecture.md` + `naming.md`: coding constraints
+- `directory-map.md` + `stack.json`: implementation context
+- `plans-summary.md`: docs and roadmap context
 
-| What | How |
-|------|-----|
-| **Project type** | Marker files: `app.config.js` → Expo, `next.config.js` → Next.js, `pyproject.toml` → Python, etc. |
-| **Architecture** | Directory analysis: `domain/ + infrastructure/ + presentation/` → Clean Architecture |
-| **Naming** | Samples ~100 files: PascalCase, camelCase, I-prefix interfaces, use-prefix hooks |
-| **Stack** | Parses package.json/pyproject.toml, categorizes 130+ known packages |
-| **Docs** | Indexes all .md files, extracts titles, sections, plan status |
-| **Boundaries** | Infers layer rules: "domain MUST NOT import from infrastructure" |
+## Example Workflow
+
+```bash
+pip install loom-context
+cd your-project/
+loom init .
+loom audit .
+loom prompt . -o .context/PROMPT.md
+```
+
+Then use the generated prompt with your preferred AI tool.
+
+## What It Detects
+
+| Area | Detection |
+|------|-----------|
+| Project type | Marker files such as `pyproject.toml`, `next.config.js`, `app.config.js` |
+| Architecture | Clean Architecture, Hexagonal, MVC, MVVM, feature-based, layered |
+| Naming | PascalCase, camelCase, kebab-case, snake_case, prefixes, suffixes |
+| Stack | Packages from `package.json`, `pyproject.toml`, `requirements.txt` |
+| Docs | Markdown files, headings, plan status, doc categories |
+| Rules | Layer boundaries and naming conventions inferred from the repo |
 
 ## Supported Project Types
 
-React Native / Expo, React / Next.js, Angular, Vue / Nuxt, Svelte, Node.js, Python, Rust, Go, Java, and more.
+Loom currently recognizes many common project shapes, including:
 
-## Security
+- React Native / Expo
+- React / Next.js
+- Angular
+- Vue / Nuxt
+- Svelte
+- Node.js
+- Python
+- Rust
+- Go
+- Java
 
-Three layers of protection:
+## Security Model
 
-1. **`.gitignore` respect** — if Git ignores it, Loom ignores it
-2. **`.contextignore`** — additional exclusions (same format as .gitignore)
-3. **Hardcoded secrets** — `.env`, `*.pem`, `*.key`, `credentials*` are ALWAYS excluded
+Loom uses three layers of filtering:
 
-**Output is metadata only.** Zero source code in `.context/`. Never.
+1. respects `.gitignore`
+2. respects `.contextignore`
+3. always excludes common secret patterns such as `.env`, `*.pem`, `*.key`, and credential files
+
+The generated output is metadata-focused. Loom is designed to avoid copying source code into `.context/`.
+
+## Why Use It
+
+Without Loom:
+
+- each AI session starts from zero
+- architecture has to be rediscovered manually
+- naming and boundary rules are easy to miss
+- project docs stay disconnected from code assistance
+
+With Loom:
+
+- the repo becomes queryable context
+- AI gets a stable architecture snapshot
+- rule violations can be caught earlier
+- docs and plans become part of the working context
+
+## Current Scope
+
+Loom is already useful for early adoption, but it is not pretending to be finished.
+
+Current strengths:
+
+- repository scanning
+- architecture and naming inference
+- prompt generation
+- basic audits
+- docs and plan summarization
+
+Current limitations:
+
+- no task-specific bundles yet
+- no local retrieval/reranking yet
+- `watch` is interval-based, not event-driven
+- validation still needs more real-world repositories
 
 ## Documentation
 
-### Conceptual
-| Document | Description |
-|----------|-------------|
-| [Philosophy & Brain Analogy](docs/guides/philosophy.md) | Why Loom exists, the nervous system metaphor |
-| [Architecture](docs/architecture/overview.md) | Internal design: pipeline, components, patterns |
-| [Design Patterns](docs/architecture/patterns.md) | Clean Arch, Hexagonal, MVC — detection algorithms |
-| [References](docs/REFERENCES.md) | Scientific foundations, academic sources, citations |
+### Guides
 
-### Technical
-| Document | Description |
-|----------|-------------|
-| [Quick Start](docs/guides/quickstart.md) | Install, first scan, use with AI |
-| [Directory Structure](docs/architecture/directory-structure.md) | Full annotated project anatomy |
-| [CLI Reference](docs/guides/cli-reference.md) | All 6 commands with examples |
-| [Context Output](docs/guides/context-output.md) | The 7 .context/ files explained |
-| [Security](docs/guides/security.md) | Three-layer protection model |
-| [Best Practices](docs/guides/best-practices.md) | Workflows for individuals, teams, and AI |
+- [Quick Start](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/quickstart.md)
+- [CLI Reference](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/cli-reference.md)
+- [Context Output](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/context-output.md)
+- [Security](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/security.md)
+- [Best Practices](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/best-practices.md)
 
-### Diagrams
-| Document | Description |
-|----------|-------------|
-| [Data Flow](docs/diagrams/data-flow.md) | Information flow from code to AI prompt |
-| [Component Map](docs/diagrams/component-map.md) | Component relationships and extensibility |
+### Architecture
 
-Full index: [docs/INDEX.md](docs/INDEX.md)
+- [Philosophy and Brain Analogy](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/philosophy.md)
+- [Architecture Overview](https://github.com/jadruiz/Loom-Context/blob/main/docs/architecture/overview.md)
+- [Design Patterns](https://github.com/jadruiz/Loom-Context/blob/main/docs/architecture/patterns.md)
+- [Directory Structure](https://github.com/jadruiz/Loom-Context/blob/main/docs/architecture/directory-structure.md)
 
-## Theoretical Foundations
+### Planning
 
-Loom's design is grounded in:
+- [Documentation Index](https://github.com/jadruiz/Loom-Context/blob/main/docs/INDEX.md)
+- [Roadmap v0.2 - v0.4](https://github.com/jadruiz/Loom-Context/blob/main/docs/plans/roadmap-v0.2-v0.4.md)
+- [Local AI Integration Strategy](https://github.com/jadruiz/Loom-Context/blob/main/docs/plans/ai-integration-strategy.md)
+- [Release Pilot Plan](https://github.com/jadruiz/Loom-Context/blob/main/docs/plans/release-pilot-plan.md)
+- [Release 0.1.1 Plan](https://github.com/jadruiz/Loom-Context/blob/main/docs/plans/release-0.1.1-plan.md)
 
-- **Cognitive Science:** Baddeley's Working Memory model (1974), Miller's "Magical Number Seven" (1956), Sweller's Cognitive Load Theory (1988) — justifying progressive context compression
-- **Software Architecture:** Martin's Clean Architecture (2017), Cockburn's Hexagonal Architecture (2005), Evans' Domain-Driven Design (2003) — the patterns Loom detects and enforces
-- **AI-Assisted Engineering:** Fan et al. (2023) on LLMs for SE, Vaithilingam et al. (2022) on context as the #1 factor for code generation quality
+### References and Diagrams
 
-Full references with citations: [docs/REFERENCES.md](docs/REFERENCES.md)
+- [Scientific References](https://github.com/jadruiz/Loom-Context/blob/main/docs/REFERENCES.md)
+- [Data Flow](https://github.com/jadruiz/Loom-Context/blob/main/docs/diagrams/data-flow.md)
+- [Component Map](https://github.com/jadruiz/Loom-Context/blob/main/docs/diagrams/component-map.md)
 
 ## Development
 
 ```bash
-# Setup
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Test
-pytest
-
-# Lint
+pytest -v --tb=short
 ruff check src/ tests/
-
-# Type check
+ruff format --check src/ tests/
 mypy src/loom_context/
-
-# Build for PyPI
 python3 -m build
-twine check dist/*
+python3 -m twine check dist/*
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full development guide, git conventions, and publishing instructions.
+Contributor guide:
+
+- [CONTRIBUTING.md](https://github.com/jadruiz/Loom-Context/blob/main/CONTRIBUTING.md)
+- [SECURITY.md](https://github.com/jadruiz/Loom-Context/blob/main/SECURITY.md)
+- [CODE_OF_CONDUCT.md](https://github.com/jadruiz/Loom-Context/blob/main/CODE_OF_CONDUCT.md)
+
+Community workflow:
+
+- bug reports and feature requests use the GitHub issue templates
+- pull requests use the repository PR template
+- security reports should be sent privately as described in `SECURITY.md`
 
 ## Requirements
 
-- Python >= 3.9
-- 4 runtime dependencies: `click`, `rich`, `pathspec`, `jinja2`
-- Zero configuration needed — just `loom init .`
+- Python 3.9+
+- runtime dependencies: `click`, `rich`, `pathspec`, `jinja2`
 
 ## License
 
-MIT — J. Adrian Ruiz C.
+MIT

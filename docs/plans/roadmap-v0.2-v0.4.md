@@ -13,10 +13,11 @@ La siguiente etapa del producto no debe enfocarse en "mas comandos por si acaso"
 
 La secuencia correcta es:
 
-1. mejorar valor con heuristicas y manifests reproducibles
-2. agregar retrieval local opcional
-3. integrar export y workspace complementario
-4. medir antes de introducir mas IA o complejidad
+1. endurecer contratos y arquitectura interna
+2. mejorar valor con heuristicas y manifests reproducibles
+3. agregar retrieval local opcional
+4. integrar export y workspace complementario
+5. medir antes de introducir mas IA o complejidad
 
 ## Principios de Producto
 
@@ -68,6 +69,32 @@ Al final de v0.4, Loom deberia poder:
 - usar retrieval local opcional para mejorar seleccion
 - seguir funcionando de manera determinista sin depender de un LLM
 
+## Prerrequisito - Hardening arquitectonico
+
+Antes de ampliar capacidades, Loom necesita una base mas explicita para escalar sin volver fragil el core.
+
+Documento de referencia:
+
+- [architecture-hardening-plan.md](./architecture-hardening-plan.md)
+
+### Objetivos
+
+- contratos tipados para resultados y manifests
+- modularizacion del CLI
+- separacion entre output canonico y estado efimero
+- puertos y pipelines para agregar nuevas capabilities
+
+### Entregables minimos
+
+- [ ] modelos tipados para `ScanResult` y artefactos futuros
+- [ ] extraccion de casos de uso fuera del CLI
+- [ ] registry o factory para scanners/generators
+- [ ] decision formal sobre `.context/`, `.loom/` y `context/`
+
+### Criterio de salida
+
+Las siguientes features deben poder entrar sin crecer por condicionantes ad hoc en `engine.py` o `cli.py`.
+
 ## v0.2 - Bundles, manifests y handoff
 
 ### Meta
@@ -112,10 +139,12 @@ Introducir el concepto de "unidad de contexto por tarea" sin incorporar todavia 
 ### Alcance tecnico
 
 - nuevo paquete `src/loom_context/selector/`
-- `heuristics.py`
+- `strategies/heuristic.py`
 - `bundle.py`
 - `manifest.py`
+- `models.py` o contratos equivalentes
 - tests especificos para seleccion y manifests
+- tests de contrato para serializacion y trazabilidad
 
 ### Criterios de salida
 
@@ -135,6 +164,7 @@ Introducir el concepto de "unidad de contexto por tarea" sin incorporar todavia 
 - nunca excluir `quick_rules` relevantes
 - incluir trazabilidad de por que cada archivo entro al bundle
 - limitar el MVP a texto + manifest, sin interfaz adicional
+- construir la feature sobre contratos tipados, no sobre nuevos `dict` anonimos
 
 ## v0.3 - Retrieval local opcional
 
@@ -150,7 +180,8 @@ Mejorar la precision de seleccion con modelos abiertos ejecutados localmente, ma
 
 ### Entregables tecnicos
 
-- [ ] `selector/embeddings.py`
+- [ ] `selector/strategies/hybrid.py`
+- [ ] `infrastructure/ai/embeddings.py`
 - [ ] cache local de embeddings
 - [ ] ranking hibrido heuristico + semantico
 - [ ] invalidacion incremental del cache
@@ -185,6 +216,7 @@ Mejorar la precision de seleccion con modelos abiertos ejecutados localmente, ma
 - extras opcionales en `pyproject.toml`
 - cache persistente
 - registrar score y estrategia usada en `manifest.json`
+- adapter aislado para proveedores de embeddings
 
 ## v0.4 - Export a agentes, workspace y watch incremental
 
@@ -204,6 +236,8 @@ Reducir friccion de adopcion diaria sin desplazar el centro del producto.
 - [ ] workspace opcional `context/`
 - [ ] actualizacion incremental por eventos de archivo
 - [ ] invalidacion de bundles stale
+- [ ] mantener `.context/` como salida canonica reproducible
+- [ ] mantener `.loom/` como estado no canonico
 
 ### Estructura inicial del workspace
 
@@ -229,6 +263,7 @@ Reducir friccion de adopcion diaria sin desplazar el centro del producto.
 ### Mitigacion
 
 - `.context/` sigue siendo generado por Loom
+- `.loom/` absorbe cache, sesiones y estado incremental
 - `context/` es material humano opcional
 - manifests enlazan ambos mundos, no los mezclan
 
@@ -288,4 +323,3 @@ El roadmap sera correcto si Loom termina haciendo esto mejor que hoy:
 - menor friccion para retomar trabajo
 - mejor handoff entre agentes
 - sin perder trazabilidad ni depender de servicios externos
-
