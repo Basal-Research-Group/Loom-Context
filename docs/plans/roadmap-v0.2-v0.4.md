@@ -18,7 +18,7 @@ Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./s
 | v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch, focus, log, status | — |
 | v0.2.0 | Completado | .loom/, audit en init, enrich, decide, GitHelper | [archive](./archive/v0.2.0/delivery.md) |
 | v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
-| v0.2.2 | En desarrollo | Bundles + handoff + doctor | [v0.2.2/delivery.md](./v0.2.2/delivery.md) |
+| v0.2.2 | Completado | Bundles + handoff + doctor | [archive](./archive/v0.2.2/delivery.md) |
 | v0.3.0 | Planificado | Retrieval local opcional (embeddings) | [v0.3.0/delivery.md](./v0.3.0/delivery.md) |
 | v0.4.0 | Planificado | Export a agentes + watch incremental | [v0.4.0/delivery.md](./v0.4.0/delivery.md) |
 
@@ -256,7 +256,7 @@ Alineado con [architecture-hardening-plan.md](./architecture-hardening-plan.md).
 | 7 | v0.2.1 | CLI modular (12 comandos), store/ package | Completado |
 | 8 | v0.2.1 | Pipeline detection, frontmatter parsing, Loomy | Completado |
 | 9 | v0.2.2 | Bundle command con seleccion heuristica | Completado |
-| 10 | v0.2.2 | Handoff + doctor | En desarrollo |
+| 10 | v0.2.2 | Handoff + doctor | Completado |
 | 11 | v0.3.0 | Embeddings opcionales (si se necesitan) | Planificado |
 | 12 | v0.4.0 | Export + watch incremental | Planificado |
 

@@ -1,7 +1,8 @@
 ---
 type: delivery
 version: "0.2.2"
-status: in-progress
+status: archived
+progress: 9/9
 prerequisite: "0.2.1"
 scope: generator, cli
 languages: [python]
@@ -117,13 +118,13 @@ src/loom_context/
 
 - [x] `selector/strategies/heuristic.py`
 - [x] `selector/bundle.py`
+- [x] `selector/handoff.py`
 - [x] `selector/models.py` (SelectionCandidate, SelectionReason, BundleManifest)
-- [x] CLI: `loom bundle`
-- [x] 5 tests de bundle (stdout, save, no context, smaller than prompt, manifest)
-- [ ] CLI: `loom handoff`
-- [ ] CLI: `loom doctor`
-- [ ] `.context/handoffs/<slug>.md`
-- [ ] tests de handoff
+- [x] CLI: `loom bundle` (5 tests)
+- [x] CLI: `loom handoff` (4 tests)
+- [x] CLI: `loom doctor` (3 tests)
+- [x] `.context/bundles/<slug>/bundle.md` + `manifest.json`
+- [x] `.context/handoffs/<slug>.md`
 
 ## Criterios de salida
 
