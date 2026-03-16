@@ -5,30 +5,54 @@ status: planned
 prerequisite: "0.2.0"
 scope: engine, scanner, cli
 languages: [python]
+patterns: [value-object, facade, composition]
 ---
 
 # v0.2.1 — Contratos Tipados y CLI Modular
 
-> Estado: PLANIFICADO
-> Prerequisito: v0.2.0 publicado
-> Referencia: [architecture-hardening-plan.md](../architecture-hardening-plan.md) Fases A y B
+## TL;DR
+
+Reemplaza `dict[str, Any]` por dataclasses tipados en todo el pipeline. Separa cli.py (550+ lineas) en un archivo por comando. Esto prepara la base estable para bundles (v0.2.2) y elimina errores de tipado que hoy solo se descubren en runtime.
+
+---
+
+## Indice
+
+- [Problema que resuelve](#problema-que-resuelve)
+- [Analogia](#analogia)
+- [Que cambia](#que-cambia)
+- [Patrones de diseno](#patrones-de-diseno)
+- [Estructura de archivos](#estructura-de-archivos)
+- [Entregables](#entregables)
+- [Criterios de salida](#criterios-de-salida)
+
+---
 
 ## Problema que resuelve
 
-Todo el pipeline pasa `dict[str, Any]` entre capas. Esto significa:
+Hoy todo el pipeline pasa `dict[str, Any]` entre capas. Eso significa:
 
 - errores de tipado solo se descubren en runtime
-- cada nuevo modulo inventa sus propias llaves
+- cada modulo nuevo inventa sus propias llaves string
 - mypy no puede validar nada entre scanner y generator
-- cli.py tiene 550+ lineas y crece con cada comando
+- cli.py crece sin limite y mezcla rendering con logica
 
 Sin contratos tipados, los bundles (v0.2.2) heredarian la misma fragilidad.
+
+## Analogia
+
+**Hoy:** los scanners entregan cajas sin etiqueta. El generator abre cada caja, mete la mano y espera encontrar lo que necesita. Si alguien cambio el contenido, solo se entera cuando algo falla.
+
+**Despues:** cada scanner entrega un formulario con campos definidos. El generator sabe exactamente que esperar, y si falta algo, el error se detecta antes de ejecutar.
+
+- `dict[str, Any]` = caja sin etiqueta
+- `dataclass(frozen=True)` = formulario con campos obligatorios
+
+---
 
 ## Que cambia
 
 ### Contratos tipados
-
-Dataclasses que reemplazan dicts anonimos:
 
 ```python
 @dataclass(frozen=True)
@@ -42,28 +66,6 @@ class StructureFacts:
     project_name: str = ""
 
 @dataclass(frozen=True)
-class DependencyInfo:
-    package_manager: str
-    dependencies: list[Dependency]
-    stack_summary: dict[str, list[str]]
-
-@dataclass(frozen=True)
-class CodeAnalysis:
-    file_naming: dict[str, Any]
-    code_naming: dict[str, Any]
-    suffix_patterns: list[dict[str, Any]]
-    prefix_patterns: list[dict[str, Any]]
-    import_aliases: dict[str, str]
-    total_code_files: int
-
-@dataclass(frozen=True)
-class DocsInventory:
-    docs: list[DocEntry]
-    doc_count: int
-    agents_md: Optional[str]
-    by_type: dict[str, int]
-
-@dataclass(frozen=True)
 class ScanResult:
     structure: StructureFacts
     deps: DependencyInfo
@@ -74,18 +76,51 @@ class ScanResult:
 
 ### Transicion gradual
 
-- scanners devuelven dataclasses
-- `ScanResult.to_dict()` para compatibilidad con generators
-- generators pueden migrar gradualmente a recibir objetos tipados
-- tests existentes no deben romperse
+- Scanners devuelven dataclasses en vez de dicts
+- `ScanResult.to_dict()` mantiene compatibilidad con generators
+- Generators migran gradualmente a recibir objetos tipados
+- Tests existentes no se rompen
 
 ### CLI modular
 
-```text
+```
+cli/
+  __init__.py            # main group (~30 lineas)
+  commands/
+    init.py              # cada comando < 80 lineas
+    scan.py
+    prompt.py
+    audit.py
+    ...
+```
+
+---
+
+## Patrones de diseno
+
+| Patron | Donde | Por que |
+|--------|-------|---------|
+| **Value Object** | `StructureFacts`, `DependencyInfo`, etc. (`frozen=True`) | Inmutables, sin identidad, comparables por valor |
+| **Facade** | `ScanResult.to_dict()` | Un punto de acceso para serializar todo el resultado |
+| **Composition** | CLI group + commands | Cada comando es un modulo independiente, compuesto en el group |
+| **Adapter** | mappers `dict → dataclass` en cada scanner | Transicion gradual sin romper generators |
+
+---
+
+## Estructura de archivos
+
+### Nuevos
+
+```
 src/loom_context/
+  domain/
+    models/
+      __init__.py
+      scan.py             # ScanResult, StructureFacts, DependencyInfo, etc.
   cli/
-    __init__.py          # main group + version (~30 lines)
+    __init__.py           # main group + version
     commands/
+      __init__.py
       init.py
       scan.py
       prompt.py
@@ -99,11 +134,25 @@ src/loom_context/
       decide.py
 ```
 
-Cada comando:
-- parsea input
-- invoca engine o servicio
-- renderiza salida con Rich
-- no contiene logica de negocio
+### Modificados
+
+```
+src/loom_context/
+  scanners/structure.py   # devuelve StructureFacts
+  scanners/deps.py        # devuelve DependencyInfo
+  scanners/code.py        # devuelve CodeAnalysis
+  scanners/docs.py        # devuelve DocsInventory
+  engine.py               # usa ScanResult
+```
+
+### Eliminados
+
+```
+src/loom_context/
+  cli.py                  # reemplazado por cli/__init__.py + commands/
+```
+
+---
 
 ## Entregables
 
@@ -111,14 +160,19 @@ Cada comando:
 - [ ] scanners actualizados para devolver objetos tipados
 - [ ] `ScanResult.to_dict()` para compatibilidad
 - [ ] CLI modularizado: un archivo por comando
-- [ ] `mypy --strict` pasa en domain/models/
-- [ ] cli.py principal < 50 lineas
-
-## Tests
-
-- [ ] tests existentes siguen pasando sin cambios
+- [ ] `mypy --strict` pasa en `domain/models/`
+- [ ] cli/ principal < 50 lineas
+- [ ] cada comando < 80 lineas
+- [ ] tests existentes siguen pasando
 - [ ] tests de contrato para serializacion (ScanResult → dict → JSON)
-- [ ] mypy pasa sin errores en domain/
+
+## Criterios de salida
+
+- Scanners devuelven dataclasses, no dicts
+- `mypy --strict` pasa en domain/
+- cli.py eliminado, reemplazado por cli/
+- `.context/` output identico al de v0.2.0 (no breaking changes)
+- 0 regresiones en tests
 
 ## Dependencias nuevas
 
@@ -126,11 +180,8 @@ Ninguna.
 
 ## Riesgos
 
-- romper compatibilidad de salida en `.context/`
-- migracion parcial que deja dicts y dataclasses mezclados
-
-## Mitigacion
-
-- `to_dict()` mantiene formato de salida identico
-- migrar scanner por scanner, test por test
-- verificar que `.context/` output no cambia bit a bit
+| Riesgo | Mitigacion |
+|--------|-----------|
+| Romper formato de `.context/` | `to_dict()` mantiene output identico; comparar bit a bit |
+| Mezcla de dicts y dataclasses | Migrar scanner por scanner, test por test |
+| CLI commands con imports circulares | Lazy imports en cada comando (patron ya usado) |

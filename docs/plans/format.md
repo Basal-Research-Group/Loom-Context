@@ -5,119 +5,240 @@ audience: contributor
 
 # Formato Estandar de Documentos para Loom
 
-> Este formato permite que Loom extraiga metadata estructurada de planes, decisiones y documentacion del proyecto.
+## TL;DR
 
-## Por que un formato
+Todos los documentos del proyecto siguen un formato consistente con frontmatter YAML, seccion TL;DR, indice, analogias y patrones de diseno explicitos. Esto permite que Loom extraiga metadata estructurada y que cualquier persona (o agente) entienda el proyecto rapido.
 
-Loom escanea docs y extrae: titulo, secciones, status items. Pero sin estructura consistente, la calidad del contexto depende de como cada autor escriba su markdown.
+---
 
-Con un formato estandar:
-- el docs scanner extrae metadata rica
-- focus y bundle seleccionan mejor
-- el contexto para agentes es mas preciso
-- la trazabilidad entre versiones es automatica
+## Indice
 
-## Formato de Delivery (plan por version)
+- [Reglas generales](#reglas-generales)
+- [Secciones obligatorias por tipo](#secciones-obligatorias-por-tipo)
+- [Frontmatter YAML](#frontmatter-yaml)
+- [Reglas de escritura](#reglas-de-escritura)
+- [Templates por tipo](#templates-por-tipo)
+
+---
+
+## Reglas generales
+
+### Todo documento debe tener
+
+1. **Frontmatter YAML** — metadata parseable por Loom
+2. **TL;DR** — 2-3 lineas que resuman todo. Si alguien solo lee esto, debe entender de que va
+3. **Indice** — enlaces a secciones principales (si tiene mas de 3 secciones)
+4. **Analogia** — donde aplique, una comparacion con algo cotidiano que aclare el concepto
+5. **Patrones de diseno** — si el documento describe arquitectura o implementacion, nombrar patrones explicitos
+6. **Nombres claros** — sin ambiguedades, usar los mismos terminos que el codigo
+
+### Reglas de escritura
+
+- **Usa analogias**: "El engine es como un director de orquesta: no toca instrumentos, coordina a los que tocan"
+- **Nombra patrones**: no digas "una cosa que selecciona", di "Strategy pattern para seleccion"
+- **Se directo**: primera oracion = conclusion. Despues justifica
+- **Sin jerga innecesaria**: si un termino tiene equivalente comun, usa el comun primero
+- **Checklists sobre parrafos**: para entregables y criterios, siempre usar `- [ ]` o `- [x]`
+- **Tablas sobre listas largas**: si comparas 3+ cosas, usa tabla
+- **Codigo sobre descripcion**: si puedes mostrar un comando o estructura, hazlo
+
+---
+
+## Frontmatter YAML
+
+```yaml
+---
+type: delivery | architecture | roadmap | scope | guide | decision | contributing | security | changelog | code-of-conduct
+version: "0.2.0"           # solo para delivery
+status: planned | in-progress | released | deferred
+prerequisite: "0.1.0"      # solo para delivery
+scope: engine, cli, scanner, generator, auditor, infra
+languages: [python]
+patterns: [clean-architecture, strategy, registry]
+audience: developer | user | contributor
+---
+```
+
+Campos opcionales segun tipo. Solo `type` es obligatorio.
+
+---
+
+## Secciones obligatorias por tipo
+
+### Delivery (plan por version)
+
+| Seccion | Obligatoria | Descripcion |
+|---------|-------------|-------------|
+| TL;DR | Si | 2-3 lineas: que, por que, impacto |
+| Indice | Si (si > 3 secciones) | Links a secciones |
+| Problema que resuelve | Si | Que dolor o gap existe hoy |
+| Analogia | Si | "Es como..." para explicar el cambio |
+| Que cambia | Si | Descripcion tecnica con subsecciones |
+| Patrones de diseno | Si (si aplica) | Que patrones se usan y por que |
+| Estructura de archivos | Si | Que archivos se crean/modifican |
+| Entregables | Si | Checklist con `- [ ]` |
+| Criterios de salida | Si | Como saber que esta lista |
+| Dependencias nuevas | Si | Ninguna, o listado explicito |
+| Riesgos | Opcional | Que puede salir mal |
+
+### Architecture
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| TL;DR | Si |
+| Indice | Si |
+| Analogia | Si |
+| Estado actual | Si |
+| Arquitectura objetivo | Si |
+| Principios de diseno | Si |
+| Patrones de diseno | Si (nombrados: Strategy, Registry, etc.) |
+| Anti-patrones | Si |
+| Secuencia de implementacion | Si |
+| Criterio de exito | Si |
+
+### Scope
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| TL;DR | Si |
+| Que es (con analogia) | Si |
+| Para que sirve bien | Si |
+| Para que NO sirve | Si |
+| Limites del analisis | Si |
+| Direccion futura | Opcional |
+
+### Contributing
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| TL;DR | Si |
+| Setup | Si |
+| Estructura del proyecto | Si |
+| Convenciones de codigo | Si |
+| Testing | Si |
+| Git conventions | Si |
+| PR process | Si |
+
+### Guide / How-to
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| TL;DR | Si |
+| Prerequisitos | Si |
+| Pasos | Si |
+| Verificacion | Si |
+| Troubleshooting | Opcional |
+
+### Decision Record
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| TL;DR | Si |
+| Contexto | Si |
+| Decision | Si |
+| Consecuencias | Si |
+| Alternativas | Opcional |
+
+### Changelog
+
+| Seccion | Obligatoria |
+|---------|-------------|
+| Keep a Changelog format | Si |
+| Unreleased al inicio | Si |
+| Added/Changed/Removed/Fixed | Si |
+
+### Security / Code of Conduct
+
+Formato estandar de la industria. Solo agregar frontmatter y TL;DR.
+
+---
+
+## Templates por tipo
+
+### Template: Delivery
 
 ```markdown
 ---
 type: delivery
-version: "0.2.0"
-status: in-progress | planned | released
-prerequisite: "0.1.0"
-scope: engine | cli | scanner | generator | auditor | infra
+version: "X.Y.Z"
+status: planned
+prerequisite: "X.Y.Z"
+scope: engine, cli
 languages: [python]
+patterns: [strategy, registry]
 ---
 
 # vX.Y.Z — Titulo corto
 
-> Estado: EN DEVELOP | PLANIFICADO | PUBLICADO
+## TL;DR
+
+[2-3 lineas: que entrega, que problema resuelve, impacto principal]
+
+## Indice
+
+- [Problema que resuelve](#problema-que-resuelve)
+- [Analogia](#analogia)
+- [Que cambia](#que-cambia)
+- [Patrones de diseno](#patrones-de-diseno)
+- [Entregables](#entregables)
+- [Criterios de salida](#criterios-de-salida)
 
 ## Problema que resuelve
 
-[1-3 parrafos: que dolor resuelve esta entrega]
+[Que dolor existe hoy]
+
+## Analogia
+
+[Comparacion cotidiana que aclare el concepto]
 
 ## Que cambia
 
-[Descripcion de cambios con subsecciones si es necesario]
+[Descripcion tecnica]
+
+## Patrones de diseno
+
+[Que patrones se usan: Strategy, Registry, Adapter, etc. y por que]
+
+## Estructura de archivos
+
+[Que se crea/modifica]
 
 ## Entregables
 
-- [ ] entregable pendiente
-- [x] entregable completado
+- [ ] entregable 1
+- [ ] entregable 2
 
 ## Criterios de salida
 
-[Como saber que esta version esta lista]
+[Como saber que esta listo]
 
 ## Dependencias nuevas
 
-[Ninguna, o listado explicito]
+Ninguna.
 
 ## Riesgos
 
-[Opcional: que puede salir mal y como mitigarlo]
+[Opcional]
 ```
 
-## Formato de Decision Record
-
-```markdown
----
-type: decision
-scope: architecture | naming | deps | security | product
-status: accepted | superseded | deprecated
-date: 2026-03-16
----
-
-# DR-NNN: Titulo de la decision
-
-## Contexto
-
-[Que situacion motiva la decision]
-
-## Decision
-
-[Que se decidio]
-
-## Consecuencias
-
-[Que implica esta decision para el futuro]
-
-## Alternativas consideradas
-
-[Opcional: que otras opciones habia]
-```
-
-## Formato de Scope / Definicion de Producto
-
-```markdown
----
-type: scope
----
-
-# Scope de [Producto]
-
-## Que es
-
-## Para que sirve bien
-
-## Para que NO sirve
-
-## Principio
-
-## Direccion futura
-```
-
-## Formato de Arquitectura
+### Template: Architecture
 
 ```markdown
 ---
 type: architecture
-languages: [python, typescript]
-patterns: [clean-architecture, hexagonal]
+languages: [python]
+patterns: [clean-architecture, strategy]
 ---
 
-# Arquitectura de [Proyecto]
+# [Titulo]
+
+## TL;DR
+
+[2-3 lineas]
+
+## Indice
+
+## Analogia
 
 ## Estado actual
 
@@ -125,49 +246,36 @@ patterns: [clean-architecture, hexagonal]
 
 ## Principios de diseno
 
-## Capas / Modulos
+## Patrones de diseno
+
+[Strategy, Registry, Factory, Adapter, etc. — nombrados y explicados]
 
 ## Anti-patrones a evitar
+
+## Secuencia de implementacion
+
+## Criterio de exito
 ```
 
-## Formato de Roadmap
-
-```markdown
----
-type: roadmap
-versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0", "0.4.0"]
 ---
 
-# Roadmap [Rango]
+## Convenciones de nombres en documentos
 
-## Estado actual
+| Concepto | Nombre correcto | No usar |
+|----------|----------------|---------|
+| Carpeta canonico | `.context/` | "context folder", "output" |
+| Carpeta operativa | `.loom/` | "state folder", "cache" |
+| Analisis del repo | scan | "parse", "read" |
+| Generacion de contexto | generate | "build", "create" |
+| Verificacion de reglas | audit | "check", "validate" |
+| Re-analisis + persistencia | enrich | "refresh", "update" |
+| Seleccion por tarea | bundle | "filter", "subset" |
+| Resumen para retomar | handoff | "summary", "report" |
+| Registro de decision | decision record | "ADR", "note" |
+| Hallazgo del audit | finding | "violation", "issue" |
+| Cambio al contexto | mutation | "update", "change" |
 
-[Tabla con versiones y estados]
-
-## Principios de producto
-
-## [Version] — [Titulo]
-
-[Para cada version, resumen breve con link a delivery.md]
-```
-
-## Formato de Guia / How-to
-
-```markdown
 ---
-type: guide
-audience: developer | user | contributor
-languages: [python]
----
-
-# [Titulo de la guia]
-
-## Prerequisitos
-
-## Pasos
-
-## Verificacion
-```
 
 ## Como lo usa Loom
 
@@ -176,73 +284,20 @@ languages: [python]
 El docs scanner extrae:
 - titulo (primer H1)
 - secciones (H2, H3)
-- status items (checkboxes, tablas con done/pending)
+- status items (checkboxes `[x]`/`[ ]`, tablas con done/pending)
 - tipo (por path y contenido)
 
 ### Futuro (v0.2.1+)
 
-Con frontmatter parsing, el scanner extraera:
-- `type` → clasificacion mas precisa
+Con frontmatter parsing:
+- `type` → clasificacion precisa
 - `version` → dependency graph entre deliveries
-- `status` → dashboard de progreso real
+- `status` → dashboard de progreso
 - `scope` → mejor seleccion en focus/bundle
 - `languages` → contexto por lenguaje
 - `patterns` → matching con arquitectura detectada
 - `prerequisite` → orden de implementacion
 
-### Que no cambia
+### Regla
 
-- el frontmatter es opcional
-- docs sin frontmatter siguen funcionando con heuristicas
-- Loom nunca modifica los docs del usuario
-- el formato no es obligatorio, es recomendado
-
-## Lenguajes de programacion
-
-Loom detecta lenguajes por archivos marcador:
-
-| Lenguaje | Marcadores |
-|----------|-----------|
-| Python | pyproject.toml, setup.py, requirements.txt |
-| TypeScript | tsconfig.json, package.json + ts deps |
-| JavaScript | package.json |
-| Rust | Cargo.toml |
-| Go | go.mod |
-| Java | pom.xml, build.gradle |
-| Kotlin | build.gradle.kts |
-| Swift | Package.swift |
-| Ruby | Gemfile |
-| PHP | composer.json |
-| C# | *.csproj, *.sln |
-
-Los templates de `.context/` se adaptan al lenguaje detectado. En el futuro, los delivery docs podran especificar `languages` en frontmatter para dar contexto adicional al scanner.
-
-## Estructura de directorios recomendada
-
-```text
-docs/
-  plans/
-    scope.md                    # que es y que no es el producto
-    format.md                   # este documento
-    roadmap-vX-vY.md            # overview con links
-    architecture-*.md           # planes transversales
-    ai-integration-*.md         # estrategias especificas
-    vX.Y.Z/
-      delivery.md               # plan de entrega por version
-  guides/
-    quickstart.md
-    cli-reference.md
-    best-practices.md
-    security.md
-  architecture/
-    overview.md                 # si es necesario separar de plans
-```
-
-## Regla general
-
-Los docs son para humanos y agentes. El formato debe ser:
-
-- legible sin herramientas
-- parseable por Loom
-- util para focus y bundle
-- trazable a una version o decision
+El frontmatter es opcional. Docs sin frontmatter siguen funcionando con heuristicas. Pero docs con frontmatter dan mejor contexto.
