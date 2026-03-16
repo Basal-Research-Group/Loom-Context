@@ -274,3 +274,165 @@ def watch(path: str, interval: int) -> None:
             time.sleep(interval)
     except KeyboardInterrupt:
         console.print("\n  Stopped.")
+
+
+@main.command()
+@click.argument("query")
+@click.argument("path", default=".", type=click.Path(exists=True))
+@click.option("--stdout", "to_stdout", is_flag=True, help="Print to stdout")
+@click.option("--output", "-o", "output_file", help="Write to file")
+@click.option("--max-chars", default=8000, help="Target max characters")
+def focus(
+    query: str, path: str, to_stdout: bool, output_file: Optional[str], max_chars: int
+) -> None:
+    """Generate a focused context prompt for a specific task."""
+    from loom_context.generators.focus import FocusGenerator
+
+    root = Path(path).resolve()
+    context_dir = root / ".context"
+
+    if not context_dir.exists():
+        console.print("[red]Error:[/red] No .context/ found. Run 'loom init' first.")
+        sys.exit(1)
+
+    gen = FocusGenerator(context_dir)
+    result = gen.generate(query, max_chars=max_chars)
+
+    if result is None:
+        console.print("[red]Error:[/red] Could not generate focused context. Check your query.")
+        sys.exit(1)
+
+    if output_file:
+        Path(output_file).write_text(result, encoding="utf-8")
+        console.print(
+            f"  Focused context written to [green]{output_file}[/green] ({len(result)} chars)"
+        )
+    elif to_stdout:
+        click.echo(result)
+    else:
+        console.print(Panel(
+            f"Focused context for [bold]\"{query}\"[/bold]: "
+            f"[bold]{len(result)}[/bold] chars",
+            title="Loom Focus",
+        ))
+        console.print("\nUse [cyan]loom focus \"query\" --stdout[/cyan] to pipe output.")
+
+
+@main.command(name="log")
+@click.argument("message", required=False)
+@click.option("--path", "-p", default=".", type=click.Path(exists=True), help="Project path")
+@click.option("--show", "do_show", is_flag=True, help="Show recent entries")
+@click.option("--last", "last_n", type=int, default=5, help="Number of entries to show")
+@click.option("--clear", "do_clear", is_flag=True, help="Clear session log")
+def log_cmd(
+    message: Optional[str], path: str, do_show: bool, last_n: int, do_clear: bool
+) -> None:
+    """Session memory: log progress between development sessions."""
+    from loom_context.session import SessionLogger
+
+    root = Path(path).resolve()
+    context_dir = root / ".context"
+    logger = SessionLogger(context_dir, root)
+
+    if do_clear:
+        count = logger.clear()
+        console.print(f"  Cleared {count} session entries.")
+        return
+
+    if do_show:
+        entries = logger.read(count=last_n)
+        if not entries:
+            console.print("  No session entries.")
+            return
+        console.print(f"\n  Session Log (last {len(entries)})\n")
+        for entry in entries:
+            ts = entry.timestamp[:19].replace("T", " ")
+            branch_info = f" {entry.branch}" if entry.branch else ""
+            sha_info = f" ({entry.sha})" if entry.sha else ""
+            console.print(f"  [dim]{ts}[/dim]{branch_info}{sha_info}")
+            console.print(f"    \"{entry.message}\"")
+            if entry.modified_files:
+                files = ", ".join(entry.modified_files[:5])
+                overflow = len(entry.modified_files) - 5
+                extra = f" +{overflow}" if overflow > 0 else ""
+                console.print(f"    [dim]Modified: {files}{extra}[/dim]")
+            console.print("")
+        return
+
+    if not message:
+        console.print("[red]Error:[/red] Provide a message or use --show / --clear.")
+        console.print("  Usage: loom log \"your message here\"")
+        sys.exit(1)
+
+    entry = logger.append(message)
+    branch_info = f" ({entry.branch})" if entry.branch else ""
+    console.print(f"  [green]+[/green] Logged{branch_info}")
+    if entry.modified_files:
+        console.print(f"    Modified: {len(entry.modified_files)} files")
+
+
+@main.command()
+@click.argument("path", default=".", type=click.Path(exists=True))
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def status(path: str, as_json: bool) -> None:
+    """Project health dashboard."""
+    import json as json_mod
+
+    from loom_context.status import StatusCollector
+
+    root = Path(path).resolve()
+    collector = StatusCollector(root)
+    st = collector.collect()
+
+    if as_json:
+        click.echo(json_mod.dumps(st.to_dict(), indent=2, ensure_ascii=False, default=str))
+        return
+
+    if not st.context_exists:
+        console.print("  [red]Not initialized.[/red] Run 'loom init .' first.")
+        return
+
+    # Header
+    arch = ", ".join(st.architecture) if st.architecture else "unknown"
+    console.print(Panel(
+        f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
+        title="Loom Status",
+    ))
+
+    # Scan freshness
+    if st.last_scan:
+        scan_display = st.last_scan[:19].replace("T", " ")
+        if st.is_stale:
+            console.print(
+                f"  [yellow]Stale[/yellow]  Last scan: {scan_display}  "
+                f"({st.stale_file_count} files changed). Run 'loom scan'."
+            )
+        else:
+            console.print(f"  [green]Fresh[/green]  Last scan: {scan_display}")
+    else:
+        console.print("  [yellow]No scan timestamp found.[/yellow]")
+
+    # Audit
+    if st.audit_errors > 0 or st.audit_warnings > 0:
+        console.print(
+            f"  Audit   [red]{st.audit_errors} errors[/red], "
+            f"[yellow]{st.audit_warnings} warnings[/yellow]"
+        )
+    else:
+        console.print("  Audit   [green]clean[/green]")
+
+    # Quick rules
+    if st.quick_rules:
+        console.print(f"\n  Rules ({len(st.quick_rules)}):")
+        for rule in st.quick_rules[:5]:
+            console.print(f"    [yellow]>[/yellow] {rule}")
+        if len(st.quick_rules) > 5:
+            console.print(f"    ... +{len(st.quick_rules) - 5} more")
+
+    # Session log
+    if st.recent_logs:
+        console.print(f"\n  Session Log ({len(st.recent_logs)} recent):")
+        for entry in st.recent_logs[:3]:
+            ts = entry.timestamp[:16].replace("T", " ")
+            console.print(f"    [dim]{ts}[/dim] \"{entry.message}\"")
+    console.print("")

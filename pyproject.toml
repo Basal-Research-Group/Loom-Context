@@ -121,6 +121,10 @@ ignore = [
 "src/loom_context/cli.py" = [
     "T201",    # print/click.echo is the CLI's job
 ]
+"src/loom_context/session.py" = [
+    "S603",    # subprocess call to git is intentional
+    "S607",    # git is expected on PATH
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["loom_context"]
