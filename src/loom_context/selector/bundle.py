@@ -26,6 +26,7 @@ class BundleBuilder:
         self,
         task: str,
         max_chars: int = 12000,
+        top_k: int = 0,
         strategy: str = "heuristic",
     ) -> Optional[tuple[str, BundleManifest]]:
         """Build a bundle for the given task. Returns (content, manifest) or None."""
@@ -34,6 +35,10 @@ class BundleBuilder:
 
         selector = HeuristicStrategy(self.context_dir)
         candidates = selector.select(task, max_chars=max_chars)
+
+        # Apply top-k limit if specified
+        if top_k > 0 and len(candidates) > top_k:
+            candidates = candidates[:top_k]
 
         if not candidates:
             return None
@@ -103,9 +108,10 @@ class BundleBuilder:
         self,
         task: str,
         max_chars: int = 12000,
+        top_k: int = 0,
     ) -> Optional[tuple[Path, Path]]:
         """Build and save bundle to .context/bundles/<slug>/."""
-        result = self.build(task, max_chars=max_chars)
+        result = self.build(task, max_chars=max_chars, top_k=top_k)
         if result is None:
             return None
 
