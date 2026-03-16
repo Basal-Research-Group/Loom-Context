@@ -1,8 +1,8 @@
 ---
 type: delivery
 version: "0.4.0"
-status: planned
-prerequisite: "0.3.0"
+status: in-progress
+prerequisite: "0.2.2"
 scope: cli, infra
 languages: [python]
 patterns: [adapter, observer, facade]
