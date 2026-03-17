@@ -209,17 +209,16 @@ El usuario no debe instalar stack pesado si solo quiere init, scan, audit o prom
 
 Todo lo implementado en esta sesion. Ver [delivery unificado](./archive/v0.2.0/delivery.md).
 
-### v0.3.0 (postergado)
+### v0.3.0 (siguiente, pendiente de uso real)
 
-Embeddings locales opcionales. Solo se implementa con evidencia de que heuristicas no alcanzan. Ver [deferred](./archive/v0.3.0/delivery.md).
-
-### v0.5.0+ (futuro)
-
-Basado en feedback de uso real en Akana. Posibles areas:
+Scope por definir basado en feedback de uso real en Akana. Areas candidatas:
 - analisis profundo de arquitecturas mixtas
 - metricas y KPIs por capa
 - observabilidad y logging
 - templates editables para output
+- embeddings opcionales (si heuristicas no alcanzan)
+
+El plan de embeddings original fue postergado. Ver [deferred-embeddings](./archive/deferred-embeddings.md).
 
 ## Definicion de Exito
 
