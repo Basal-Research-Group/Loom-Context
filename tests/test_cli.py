@@ -1430,6 +1430,157 @@ class TestStructureProjectTypes:
         assert result.structure.project_type == "angular"
 
 
+class TestSessionMigrationExtended:
+    def test_migrate_appends_when_target_exists(self, tmp_path: Path) -> None:
+        """Migration appends old entries when .loom/sessions.jsonl exists."""
+        from loom_context.store.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "sessions.jsonl").write_text('{"timestamp":"2024-01-01","message":"old"}\n')
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "sessions.jsonl").write_text('{"timestamp":"2024-06-01","message":"existing"}\n')
+
+        logger = SessionLogger(loom, tmp_path)
+        migrated = logger.migrate_from_context(ctx)
+        assert migrated
+        assert not (ctx / "sessions.jsonl").exists()
+        entries = logger.read(count=10)
+        messages = {e.message for e in entries}
+        assert "old" in messages
+        assert "existing" in messages
+
+    def test_migrate_no_old_file(self, tmp_path: Path) -> None:
+        """Migration returns False when no old file exists."""
+        from loom_context.store.session import SessionLogger
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
+        assert not logger.migrate_from_context(ctx)
+
+    def test_session_corrupted_lines(self, tmp_path: Path) -> None:
+        """Corrupted JSONL lines are skipped."""
+        from loom_context.store.session import SessionLogger
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "sessions.jsonl").write_text(
+            '{"timestamp":"2024-01-01","message":"good"}\n'
+            "not json\n"
+            '{"timestamp":"2024-01-02","message":"also good"}\n'
+        )
+        logger = SessionLogger(loom, tmp_path)
+        entries = logger.read(count=10)
+        assert len(entries) == 2
+
+
+class TestHandoffWithFindings:
+    def test_handoff_shows_violations(self, tmp_project: Path) -> None:
+        """Handoff includes violation breakdown when findings exist."""
+        # Add boundary violation
+        bad = tmp_project / "src" / "domain" / "entities" / "Violation.ts"
+        bad.write_text('import { X } from "@infrastructure/repos/X";\n')
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        from loom_context.selector.handoff import HandoffBuilder
+
+        builder = HandoffBuilder(tmp_project / ".context", tmp_project / ".loom", tmp_project)
+        content = builder.build("fix violations")
+        assert content is not None
+        assert "Current State" in content
+        assert "layer-boundary" in content
+
+
+class TestStatusStaleness:
+    def test_status_no_scan_timestamp(self, tmp_path: Path) -> None:
+        """Status handles missing generated_at in index.json."""
+        from loom_context.status import StatusCollector
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "unknown"}}')
+
+        collector = StatusCollector(tmp_path)
+        st = collector.collect()
+        assert st.context_exists
+        assert st.is_stale  # No timestamp means stale
+
+    def test_status_corrupted_index(self, tmp_path: Path) -> None:
+        """Status handles corrupted index.json."""
+        from loom_context.status import StatusCollector
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text("not json")
+
+        collector = StatusCollector(tmp_path)
+        st = collector.collect()
+        assert st.context_exists
+        assert st.project_type == "unknown"
+
+
+class TestDoctorEdgeCases:
+    def test_doctor_corrupted_index(self, tmp_path: Path) -> None:
+        """Doctor handles corrupted index.json."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text("not json")
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "corrupted" in result.output
+
+    def test_doctor_missing_context_files(self, tmp_path: Path) -> None:
+        """Doctor reports missing context files."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "missing" in result.output
+
+    def test_doctor_no_gitignore(self, tmp_path: Path) -> None:
+        """Doctor warns about missing .gitignore."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "gitignore" in result.output.lower()
+
+
+class TestHeuristicEdgeCases:
+    def test_empty_context_dir(self, tmp_path: Path) -> None:
+        """Heuristic handles empty .context/ gracefully."""
+        from loom_context.selector.strategies.heuristic import HeuristicStrategy
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        strategy = HeuristicStrategy(ctx)
+        candidates = strategy.select("anything")
+        assert candidates == []
+
+    def test_matches_with_spanish_query(self, tmp_project: Path) -> None:
+        """Heuristic handles Spanish stop words."""
+        from loom_context.selector.strategies.heuristic import HeuristicStrategy
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        strategy = HeuristicStrategy(tmp_project / ".context")
+        candidates = strategy.select("la arquitectura del dominio")
+        # Should filter stop words and still find matches
+        assert len(candidates) > 0
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
