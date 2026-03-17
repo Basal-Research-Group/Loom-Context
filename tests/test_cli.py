@@ -2101,6 +2101,134 @@ class TestAuditorNamingExtended:
         assert len(props_v) == 0
 
 
+class TestAuditorCorruptedRules:
+    def test_naming_corrupted_rules(self, tmp_path: Path) -> None:
+        from loom_context.auditors.naming import NamingAuditor
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "rules.json").write_text("not json!!!")
+        ff = FileFilter(tmp_path)
+        auditor = NamingAuditor(tmp_path, ff)
+        assert not auditor.load_rules()
+
+    def test_structure_corrupted_rules(self, tmp_path: Path) -> None:
+        from loom_context.auditors.structure import StructureAuditor
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "rules.json").write_text("bad json")
+        ff = FileFilter(tmp_path)
+        auditor = StructureAuditor(tmp_path, ff)
+        assert not auditor.load_rules()
+
+    def test_structure_no_boundaries(self, tmp_path: Path) -> None:
+        from loom_context.auditors.structure import StructureAuditor
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "rules.json").write_text('{"naming": {}}')
+        ff = FileFilter(tmp_path)
+        auditor = StructureAuditor(tmp_path, ff)
+        auditor.load_rules()
+        assert auditor.audit() == []
+
+    def test_structure_require_import(self, tmp_project: Path) -> None:
+        bad = tmp_project / "src" / "domain" / "entities" / "Req.js"
+        bad.write_text('const x = require("@infrastructure/repos/X");\n')
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        from loom_context.auditors.structure import StructureAuditor
+
+        ff = FileFilter(tmp_project)
+        auditor = StructureAuditor(tmp_project, ff)
+        auditor.load_rules()
+        violations = auditor.audit()
+        assert any("Req.js" in v.file for v in violations)
+
+
+class TestPromptMissingFiles:
+    def test_prompt_missing_architecture(self, tmp_path: Path) -> None:
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text(
+            '{"project":{"name":"x","type":"python","architecture":[],'
+            '"language":"Python","runtime":"Python"},"quick_rules":[],"stats":{}}'
+        )
+        from loom_context.generators.prompt import PromptGenerator
+
+        gen = PromptGenerator(ctx)
+        prompt = gen.generate()
+        assert "Project Context" in prompt
+
+
+class TestCorruptedJsonl:
+    def test_decisions_corrupted(self, tmp_path: Path) -> None:
+        from loom_context.store.decisions import DecisionLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "decisions.jsonl").write_text(
+            '{"timestamp":"t","summary":"good","rationale":"r","scope":"architecture"}\nnot json\n'
+        )
+        assert len(DecisionLog(loom, tmp_path).read(count=10)) == 1
+
+    def test_mutations_corrupted(self, tmp_path: Path) -> None:
+        from loom_context.store.mutations import MutationLog
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "mutations.jsonl").write_text(
+            '{"timestamp":"t","action":"init","files_changed":[],"summary":"x"}\nbad\n'
+        )
+        assert len(MutationLog(loom, tmp_path).read(count=10)) == 1
+
+
+class TestBundleEdgeCases:
+    def test_unknown_strategy(self, tmp_project: Path) -> None:
+        from loom_context.selector.bundle import BundleBuilder
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        builder = BundleBuilder(tmp_project / ".context", tmp_project)
+        assert builder.build("x", strategy="unknown") is None
+
+
+class TestIndexRuntime:
+    def test_runtime_with_stack(self) -> None:
+        from loom_context.generators.index import IndexGenerator
+
+        gen = IndexGenerator()
+        r = gen.generate(
+            {
+                "structure": {"project_type": "nodejs", "architecture": [], "project_name": "t"},
+                "deps": {
+                    "dependencies": [],
+                    "stack_summary": {"ui-framework": ["react@19"], "platform": ["expo@53"]},
+                },
+                "code": {"total_code_files": 0, "file_naming": {}},
+                "docs": {"doc_count": 0, "agents_md": None},
+            },
+            "0.2.0",
+        )
+        assert "react@19" in r["project"]["runtime"]
+
+    def test_runtime_without_stack(self) -> None:
+        from loom_context.generators.index import IndexGenerator
+
+        gen = IndexGenerator()
+        r = gen.generate(
+            {
+                "structure": {"project_type": "go", "architecture": [], "project_name": "t"},
+                "deps": {"dependencies": [], "stack_summary": {}},
+                "code": {"total_code_files": 0, "file_naming": {}},
+                "docs": {"doc_count": 0, "agents_md": None},
+            },
+            "0.2.0",
+        )
+        assert r["project"]["runtime"] == "Go"
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
