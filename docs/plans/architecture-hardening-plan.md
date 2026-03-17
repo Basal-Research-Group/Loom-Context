@@ -371,39 +371,28 @@ Agregar un nuevo scanner o generator no debe requerir tocar engine.py.
 - acoplar retrieval local al flujo base
 - esconder reglas de inclusion en helpers sin trazabilidad
 
-## Secuencia de implementacion (actualizada)
+## Secuencia de implementacion (estado final)
 
-### Completo
+### Completado
 
-| Paso | Fase | Version | Estado |
-|------|------|---------|--------|
-| 1 | D parcial | v0.2.0 | Hecho: .loom/ separado de .context/ |
-| 2 | — | v0.2.0 | Hecho: GitHelper compartido (Facade) |
-| 3 | — | v0.2.0 | Hecho: audit en init + enrich + decide |
-
-### Siguiente
-
-| Paso | Fase | Version | Que hacer |
-|------|------|---------|-----------|
-| 4 | A | v0.2.1 | Contratos tipados (ScanResult, StructureFacts, etc.) |
-| 5 | B | v0.2.1 | Modularizacion CLI (1 archivo por comando) |
-| 6 | — | v0.2.2 | Bundles + manifests + handoff (sobre contratos estables) |
+| Paso | Fase | Version | Que se hizo |
+|------|------|---------|-------------|
+| 1 | D parcial | v0.2.0 | .loom/ separado de .context/ |
+| 2 | — | v0.2.0 | GitHelper compartido (Facade) |
+| 3 | — | v0.2.0 | Audit en init + enrich + decide |
+| 4 | A | v0.2.1 | Contratos tipados (ScanResult, 7 frozen dataclasses) |
+| 5 | B | v0.2.1 | CLI modular (15 comandos en archivos separados) |
+| 6 | — | v0.2.1 | store/ package, pipeline detection, frontmatter, Loomy |
+| 7 | — | v0.2.2 | Bundle + handoff + doctor + compact format |
+| 8 | — | v0.4.0 | Export a 4 agentes + --install |
 
 ### Postergado (cuando se necesite)
 
-| Paso | Fase | Condicion para implementar |
-|------|------|---------------------------|
-| 7 | C: Pipelines/puertos | Cuando haya 6+ scanners o plugins externos |
-| 8 | D resto: Cache | Cuando haya embeddings (post-v0.3.0) |
-| 9 | E: IA | Cuando heuristicas demuestren ser insuficientes |
-
-### Por que Fase C se posterga
-
-El engine tiene 155 lineas y 4 scanners fijos. Agregar bundles no requiere registry ni pipeline builder — el selector es un consumidor de ScanResult, no un nuevo scanner. Introducir puertos abstractos y registry ahora seria abstraccion prematura. Se implementara cuando:
-
-- haya mas de 5 scanners
-- haya plugins externos
-- el engine supere 300 lineas
+| Fase | Condicion para implementar |
+|------|---------------------------|
+| C: Pipelines/puertos | Cuando haya 6+ scanners o plugins externos |
+| D resto: Cache | Cuando haya embeddings |
+| E: IA (v0.3.0) | Cuando heuristicas demuestren ser insuficientes |
 
 ## Criterio final de exito
 
