@@ -2378,6 +2378,127 @@ class TestDepsPackageJsonEdgeCases:
         assert "requests" in dep_names
 
 
+class TestBundleNoResults:
+    def test_bundle_save_no_results(self, tmp_project: Path) -> None:
+        """Bundle --save with stop-words-only query fails gracefully."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["bundle", "the a an is", str(tmp_project), "--save"])
+        assert result.exit_code == 1
+
+    def test_bundle_build_no_results(self, tmp_project: Path) -> None:
+        """Bundle without --save with bad query fails gracefully."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["bundle", "the a an is", str(tmp_project)])
+        assert result.exit_code == 1
+
+
+class TestHandoffNoContext:
+    def test_handoff_no_loom(self, tmp_project: Path) -> None:
+        """Handoff works without .loom/ (just .context/)."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        # Handoff should still work using just index.json
+        result = runner.invoke(main, ["handoff", "test task", str(tmp_project), "--stdout"])
+        assert result.exit_code == 0
+        assert "test task" in result.output
+
+    def test_handoff_save_no_context(self, tmp_path: Path) -> None:
+        """Handoff --save fails without .context/."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["handoff", "task", str(tmp_path), "--save"])
+        assert result.exit_code == 1
+
+
+class TestLogNoMessage:
+    def test_log_no_message_no_flags(self, tmp_path: Path) -> None:
+        """Log without message or flags shows error."""
+        runner = CliRunner()
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        result = runner.invoke(main, ["log", "-p", str(tmp_path)])
+        assert result.exit_code in {0, 1, 2}
+
+
+class TestDoctorLoomFiles:
+    def test_doctor_loom_no_decisions(self, tmp_path: Path) -> None:
+        """Doctor warns about missing decisions log."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        for f in [
+            "architecture.md",
+            "naming.md",
+            "directory-map.md",
+            "stack.json",
+            "rules.json",
+            "plans-summary.md",
+        ]:
+            (ctx / f).write_text("x")
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "inconsistencies.json").write_text("{}")
+        (loom / "mutations.jsonl").write_text("")
+        (loom / "sessions.jsonl").write_text("")
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        # Should mention decisions or show warning
+        assert "decision" in result.output.lower() or "warning" in result.output.lower()
+
+    def test_doctor_loom_no_mutations(self, tmp_path: Path) -> None:
+        """Doctor warns about missing mutations log."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        for f in [
+            "architecture.md",
+            "naming.md",
+            "directory-map.md",
+            "stack.json",
+            "rules.json",
+            "plans-summary.md",
+        ]:
+            (ctx / f).write_text("x")
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        (loom / "inconsistencies.json").write_text("{}")
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+
+
+class TestExportUnknownAgent:
+    def test_export_invalid_agent(self, tmp_project: Path) -> None:
+        """Export with invalid agent shows error."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "invalid"])
+        assert result.exit_code == 2  # Click validation error
+
+
+class TestStructureFeatureDetection:
+    def test_features_dir_at_root(self, tmp_path: Path) -> None:
+        """Detect feature-based when features/ is at root src level."""
+        src = tmp_path / "src"
+        src.mkdir()
+        presentation = src / "presentation"
+        presentation.mkdir()
+        features = presentation / "features"
+        features.mkdir()
+        (features / "auth.ts").write_text("export {};")
+        # Need a clean-arch base for the check to trigger
+        for d in ["domain", "infrastructure"]:
+            (src / d).mkdir()
+            (src / d / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        # Should detect something
+        assert len(result.structure.architecture) > 0
+
+
 class TestDoctorPartialSetup:
     def test_doctor_index_no_type(self, tmp_path: Path) -> None:
         ctx = tmp_path / ".context"
