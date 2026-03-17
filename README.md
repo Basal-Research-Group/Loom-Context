@@ -1,5 +1,10 @@
 # 🕸️ Loom-Context
 
+[![CI](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml/badge.svg)](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/loom-context)](https://pypi.org/project/loom-context/)
+[![Python](https://img.shields.io/pypi/pyversions/loom-context)](https://pypi.org/project/loom-context/)
+[![License](https://img.shields.io/github/license/jadruiz/Loom-Context)](LICENSE)
+
 **Architecture context engine for AI-first engineering.**
 
 ```
