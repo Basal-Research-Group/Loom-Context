@@ -2101,6 +2101,127 @@ class TestAuditorNamingExtended:
         assert len(props_v) == 0
 
 
+class TestGitHelperModifiedFiles:
+    def test_modified_files_fallback_to_cached(self, tmp_path: Path) -> None:
+        """modified_files falls back to --cached when HEAD diff is empty."""
+        from loom_context.git import GitHelper
+
+        git = GitHelper(tmp_path)
+        # In a non-git dir, both diffs return None, so result is []
+        assert git.modified_files() == []
+
+    def test_cmd_returns_none_on_failure(self, tmp_path: Path) -> None:
+        """cmd returns None when git command fails (non-zero exit)."""
+        from loom_context.git import GitHelper
+
+        git = GitHelper(tmp_path)
+        # status in non-git dir fails
+        assert git.cmd(["status"]) is None
+
+
+class TestFocusInfoDisplay:
+    def test_focus_info_panel(self, tmp_project: Path) -> None:
+        """Focus without --stdout shows info panel."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["focus", "domain", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Loom Focus" in result.output
+
+    def test_focus_returns_none(self, tmp_project: Path) -> None:
+        """Focus with stop-words-only query exits with error."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["focus", "the a an", str(tmp_project)])
+        assert result.exit_code == 1
+
+
+class TestLogModifiedFiles:
+    def test_log_show_with_modified_files(self, tmp_project: Path) -> None:
+        """Log show displays modified files info."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        # Log a message (will capture git modified files)
+        runner.invoke(main, ["log", "test entry", "-p", str(tmp_project)])
+        result = runner.invoke(main, ["log", "--show", "--last", "1", "-p", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "test entry" in result.output
+
+
+class TestDecideScope:
+    def test_decide_with_deps_scope(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            ["decide", "add lodash", "-r", "utility", "-s", "deps", "-p", str(tmp_path)],
+        )
+        assert result.exit_code == 0
+        assert "Decision recorded" in result.output
+
+    def test_decide_show_with_rationale(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(
+            main,
+            ["decide", "test", "-r", "my reason", "-p", str(tmp_path)],
+        )
+        result = runner.invoke(main, ["decide", "--show", "-p", str(tmp_path)])
+        assert "my reason" in result.output
+
+
+class TestEnrichWithErrors:
+    def test_enrich_with_violations(self, tmp_project: Path) -> None:
+        """Enrich shows alert when violations exist."""
+        bad = tmp_project / "src" / "domain" / "entities" / "EnrichBad.ts"
+        bad.write_text('import { X } from "@infrastructure/repos/X";\n')
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["enrich", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "errors" in result.output
+
+
+class TestExporterGenericFile:
+    def test_generic_default_filename(self, tmp_project: Path) -> None:
+        from loom_context.exporters.generic import GenericExporter
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        exporter = GenericExporter(tmp_project / ".context", tmp_project)
+        assert exporter.default_filename() == ".loom-export.md"
+        assert exporter.install_path().name == ".loom-export.md"
+
+
+class TestCompactEdgeCases:
+    def test_compact_empty_context(self, tmp_path: Path) -> None:
+        from loom_context.selector.compact import CompactFormatter
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        formatter = CompactFormatter(ctx)
+        assert formatter.format_all() == ""
+
+    def test_compact_with_full_context(self, tmp_project: Path) -> None:
+        from loom_context.selector.compact import CompactFormatter
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        formatter = CompactFormatter(tmp_project / ".context")
+        result = formatter.format_all()
+        assert "CTX:" in result
+        assert "STATS:" in result
+        assert "DIRS:" in result
+
+
+class TestStatusDecisionsCount:
+    def test_status_with_decisions(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        runner.invoke(main, ["decide", "test", "-r", "reason", "-p", str(tmp_project)])
+        result = runner.invoke(main, ["status", str(tmp_project)])
+        assert "Decisions" in result.output
+        assert "1 recorded" in result.output
+
+
 class TestAuditorCorruptedRules:
     def test_naming_corrupted_rules(self, tmp_path: Path) -> None:
         from loom_context.auditors.naming import NamingAuditor
