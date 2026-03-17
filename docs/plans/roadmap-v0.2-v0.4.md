@@ -15,11 +15,23 @@ Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./s
 
 | Version | Estado | Entregables | Detalle |
 |---------|--------|-------------|---------|
-| v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch, focus, log, status | — |
+| v0.1.0 | Publicado en PyPI | init, scan, prompt, audit, plan, watch, focus, log, status | — |
 | v0.2.0 | Completado | .loom/, audit en init, enrich, decide, GitHelper | [archive](./archive/v0.2.0/delivery.md) |
 | v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
-| v0.2.2 | Completado | Bundles + handoff + doctor | [archive](./archive/v0.2.2/delivery.md) |
-| v0.3.0 | Completado (parcial) | Export a 4 agentes (watch postergado) | [archive](./archive/v0.3.0/delivery.md) |
+| v0.2.2 | Completado | Bundle, handoff, doctor, compact format | [archive](./archive/v0.2.2/delivery.md) |
+| v0.3.0 | Postergado | Embeddings (sin evidencia de necesidad) | [archive](./archive/v0.3.0/delivery.md) |
+| v0.4.0 | Completado | Export a 4 agentes + --install | [archive](./archive/v0.4.0/delivery.md) |
+
+### Extras no planificados (implementados durante desarrollo)
+
+- `--compact` format en prompt y bundle (71-89% menos tokens)
+- `--top-k` y `--token-budget` en bundle
+- `--install` en export (escribe donde el agente lo espera)
+- `loom plan` con barras de progreso y badges de frontmatter
+- Pipeline architecture detection
+- Frontmatter YAML parsing en docs scanner
+- Loomy mascot con 8 expresiones
+- Compact formatter para output denso sin markdown
 
 ---
 
