@@ -1581,6 +1581,177 @@ class TestHeuristicEdgeCases:
         assert len(candidates) > 0
 
 
+class TestLogCommandExtended:
+    def test_log_show_empty(self, tmp_path: Path) -> None:
+        """Log --show with no entries."""
+        runner = CliRunner()
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        result = runner.invoke(main, ["log", "--show", "-p", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "No session entries" in result.output
+
+    def test_log_show_with_entries(self, tmp_project: Path) -> None:
+        """Log --show with entries shows details."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        runner.invoke(main, ["log", "first", "-p", str(tmp_project)])
+        runner.invoke(main, ["log", "second", "-p", str(tmp_project)])
+        result = runner.invoke(main, ["log", "--show", "-p", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "second" in result.output
+        assert "first" in result.output
+
+
+class TestPlanCommandExtended:
+    def test_plan_no_docs(self, tmp_path: Path) -> None:
+        """Plan with no docs shows message."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["plan", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "No documentation" in result.output
+
+    def test_plan_with_frontmatter(self, tmp_path: Path) -> None:
+        """Plan shows frontmatter badges."""
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "plan.md").write_text(
+            '---\ntype: delivery\nversion: "1.0"\nstatus: planned\n'
+            "progress: 3/5\n---\n\n# My Plan\n\n- [x] Done\n- [ ] Todo\n"
+        )
+        runner = CliRunner()
+        result = runner.invoke(main, ["plan", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "v1.0" in result.output
+        assert "planned" in result.output
+
+
+class TestIndexGeneratorLanguages:
+    def test_detects_typescript(self, tmp_path: Path) -> None:
+        """Detect TypeScript for React Native."""
+        from loom_context.generators.index import IndexGenerator
+
+        gen = IndexGenerator()
+        result = gen.generate(
+            {
+                "structure": {
+                    "project_type": "react-native-expo",
+                    "architecture": [],
+                    "project_name": "test",
+                },
+                "deps": {"dependencies": [], "stack_summary": {}},
+                "code": {"total_code_files": 0, "file_naming": {}},
+                "docs": {"doc_count": 0, "agents_md": None},
+            },
+            "0.2.0",
+        )
+        assert result["project"]["language"] == "TypeScript"
+
+    def test_detects_rust(self, tmp_path: Path) -> None:
+        from loom_context.generators.index import IndexGenerator
+
+        gen = IndexGenerator()
+        result = gen.generate(
+            {
+                "structure": {
+                    "project_type": "rust",
+                    "architecture": [],
+                    "project_name": "test",
+                },
+                "deps": {"dependencies": [], "stack_summary": {}},
+                "code": {"total_code_files": 0, "file_naming": {}},
+                "docs": {"doc_count": 0, "agents_md": None},
+            },
+            "0.2.0",
+        )
+        assert result["project"]["language"] == "Rust"
+
+    def test_detects_go(self, tmp_path: Path) -> None:
+        from loom_context.generators.index import IndexGenerator
+
+        gen = IndexGenerator()
+        result = gen.generate(
+            {
+                "structure": {
+                    "project_type": "go",
+                    "architecture": [],
+                    "project_name": "test",
+                },
+                "deps": {"dependencies": [], "stack_summary": {}},
+                "code": {"total_code_files": 0, "file_naming": {}},
+                "docs": {"doc_count": 0, "agents_md": None},
+            },
+            "0.2.0",
+        )
+        assert result["project"]["language"] == "Go"
+
+
+class TestCodeScannerExtended:
+    def test_detects_python_naming(self, tmp_path: Path) -> None:
+        """Python files use snake_case."""
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "my_module.py").write_text("def my_func():\n    pass\n")
+        (src / "another_module.py").write_text("class MyClass:\n    pass\n")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.code.total_code_files > 0
+
+
+class TestDocsScannerExtended:
+    def test_classifies_setup_doc(self, tmp_path: Path) -> None:
+        """Docs with setup-related names classified correctly."""
+        (tmp_path / "SETUP.md").write_text("# Setup\n\n## Prerequisites\n")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        setup_docs = [d for d in result.docs.docs if d.type == "setup"]
+        assert len(setup_docs) > 0
+
+    def test_classifies_changelog(self, tmp_path: Path) -> None:
+        (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 1.0\n")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        cl_docs = [d for d in result.docs.docs if d.type == "changelog"]
+        assert len(cl_docs) > 0
+
+    def test_empty_frontmatter(self, tmp_path: Path) -> None:
+        """Doc with empty frontmatter uses heuristic."""
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "notes.md").write_text("---\n---\n\n# Just Content\n")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "notes" in d.path)
+        assert doc.type == "general"
+
+
+class TestExporterBase:
+    def test_generic_export(self, tmp_project: Path) -> None:
+        """Generic exporter returns master prompt."""
+        from loom_context.exporters.generic import GenericExporter
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        exporter = GenericExporter(tmp_project / ".context", tmp_project)
+        content = exporter.export()
+        assert "Project Context" in content
+
+    def test_install_path(self, tmp_project: Path) -> None:
+        """Each exporter has correct install path."""
+        from loom_context.exporters.claude import ClaudeExporter
+        from loom_context.exporters.codex import CodexExporter
+        from loom_context.exporters.cursor import CursorExporter
+
+        ctx = tmp_project / ".context"
+        claude = ClaudeExporter(ctx, tmp_project)
+        assert claude.install_path().name == "CLAUDE.md"
+        codex = CodexExporter(ctx, tmp_project)
+        assert codex.install_path().name == "AGENTS.md"
+        cursor = CursorExporter(ctx, tmp_project)
+        assert cursor.install_path().name == ".cursorrules"
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
