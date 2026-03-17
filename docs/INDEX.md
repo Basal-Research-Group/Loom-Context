@@ -48,6 +48,7 @@ loom init .
 | [Seguridad](guides/security.md) | Como Loom protege tu codigo |
 | [Buenas practicas](guides/best-practices.md) | Patrones recomendados para equipos |
 | [Loomy](guides/loomy.md) | La mascota spider-neuron y sus expresiones |
+| [Calidad](guides/quality.md) | 7 capas de calidad, herramientas, cobertura |
 
 ### Planes de entrega (por version)
 
