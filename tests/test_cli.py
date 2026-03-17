@@ -1835,6 +1835,175 @@ class TestFocusCommandExtended:
         assert Path(outfile).exists()
 
 
+class TestCodeScannerNaming:
+    def test_kebab_case_detection(self, tmp_path: Path) -> None:
+        """Detect kebab-case file naming."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for name in ["my-component.ts", "user-service.ts", "auth-guard.ts"]:
+            (src / name).write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.code.file_naming.get("dominant_style") == "kebab-case"
+
+    def test_snake_case_detection(self, tmp_path: Path) -> None:
+        """Detect snake_case file naming."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for name in ["my_module.py", "user_service.py", "auth_guard.py"]:
+            (src / name).write_text("pass")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.code.file_naming.get("dominant_style") == "snake_case"
+
+
+class TestPromptGeneratorEdgeCases:
+    def test_prompt_without_agents_md(self, tmp_path: Path) -> None:
+        """Prompt works without AGENTS.md."""
+        engine = LoomEngine(tmp_path)
+        engine.init()
+        prompt = engine.generate_prompt()
+        assert "Project Context" in prompt
+        assert len(prompt) > 50
+
+    def test_prompt_with_all_files(self, tmp_project: Path) -> None:
+        """Prompt includes all .context/ sections."""
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        prompt = engine.generate_prompt()
+        assert "Architecture" in prompt
+        assert "Naming" in prompt
+        assert "Directory" in prompt
+
+
+class TestStructureTreeBuilding:
+    def test_mvvm_detection(self, tmp_path: Path) -> None:
+        """Detect MVVM architecture."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for d in ["models", "views", "viewmodels"]:
+            (src / d).mkdir()
+            (src / d / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "mvvm" in result.structure.architecture
+
+    def test_hexagonal_detection(self, tmp_path: Path) -> None:
+        """Detect hexagonal architecture with ports and adapters."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for d in ["ports", "adapters"]:
+            (src / d).mkdir()
+            (src / d / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "hexagonal" in result.structure.architecture
+
+    def test_unknown_project_type(self, tmp_path: Path) -> None:
+        """Project with no markers is unknown."""
+        (tmp_path / "random.txt").write_text("hello")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "unknown"
+
+
+class TestDocsScannerClassification:
+    def test_classifies_contributing(self, tmp_path: Path) -> None:
+        (tmp_path / "CONTRIBUTING.md").write_text("# Contributing\n")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "CONTRIBUTING" in d.path)
+        assert doc.type == "contributing"
+
+    def test_classifies_by_content_patterns(self, tmp_path: Path) -> None:
+        """Docs classified by content when path doesn't match."""
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "overview.md").write_text("# Overview\n\n## Architecture\n\nClean layers.\n")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "overview" in d.path)
+        assert doc.type == "architecture"
+
+    def test_extracts_sections(self, tmp_path: Path) -> None:
+        """Docs scanner extracts H2 and H3 sections."""
+        (tmp_path / "README.md").write_text(
+            "# Title\n\n## Section One\n\nText.\n\n### Sub Section\n\nMore.\n"
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        doc = next(d for d in result.docs.docs if "README" in d.path)
+        assert "Section One" in doc.sections
+        assert "Sub Section" in doc.sections
+
+
+class TestGitHelper:
+    def test_git_helper_in_non_git_dir(self, tmp_path: Path) -> None:
+        """GitHelper returns None in non-git directory."""
+        from loom_context.git import GitHelper
+
+        git = GitHelper(tmp_path)
+        assert git.branch() is None
+        assert git.sha() is None
+        assert git.modified_files() == []
+
+
+class TestDoctorComprehensive:
+    def test_doctor_no_loom_dir(self, tmp_path: Path) -> None:
+        """Doctor warns when .loom/ is missing."""
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        for f in [
+            "architecture.md",
+            "naming.md",
+            "directory-map.md",
+            "stack.json",
+            "rules.json",
+            "plans-summary.md",
+        ]:
+            (ctx / f).write_text("content")
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+        assert ".loom/ missing" in result.output or "warning" in result.output.lower()
+
+    def test_doctor_all_green(self, tmp_project: Path) -> None:
+        """Doctor passes all checks on properly initialized project."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        # Add .gitignore with .loom/
+        gi = tmp_project / ".gitignore"
+        gi_content = gi.read_text(encoding="utf-8") if gi.exists() else ""
+        if ".loom/" not in gi_content:
+            gi.write_text(gi_content + "\n.loom/\n")
+
+        result = runner.invoke(main, ["doctor", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "passed" in result.output
+
+
+class TestStatusJSON:
+    def test_status_json_has_all_fields(self, tmp_project: Path) -> None:
+        """Status --json includes all expected fields."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["status", str(tmp_project), "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "context_exists" in data
+        assert "project_name" in data
+        assert "architecture" in data
+        assert "quick_rules" in data
+        assert "decisions_count" in data
+        assert "last_findings" in data
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
