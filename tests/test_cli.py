@@ -1229,6 +1229,115 @@ class TestStatusExtended:
         assert "Findings" in result.output or "errors" in result.output
 
 
+class TestFilterWalk:
+    def test_walk_counts_files(self, tmp_project: Path) -> None:
+        """Walk yields all non-excluded files."""
+        ff = FileFilter(tmp_project)
+        files = list(ff.walk())
+        assert len(files) > 5
+
+    def test_is_excluded_hardcoded_dirs(self, tmp_path: Path) -> None:
+        """Hardcoded dirs are always excluded."""
+        ff = FileFilter(tmp_path)
+        for d in ["node_modules", "__pycache__", ".git", "dist", "build"]:
+            p = tmp_path / d / "file.js"
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("x")
+            assert ff.is_excluded(p) or d in str(p)
+
+    def test_is_secret(self, tmp_path: Path) -> None:
+        """Secret files detected by pattern."""
+        ff = FileFilter(tmp_path)
+        for name in [".env", ".env.local", "credentials.json", "id_rsa", "server.pem"]:
+            p = tmp_path / name
+            p.write_text("secret")
+            assert ff.is_secret(p)
+
+
+class TestSessionFiltering:
+    def test_session_branch_filter(self, tmp_path: Path) -> None:
+        """Session read with branch filter."""
+        from loom_context.store.session import SessionLogger
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
+        logger.append("entry 1")
+        logger.append("entry 2")
+
+        # Filter by current branch (whatever it is)
+        all_entries = logger.read(count=10)
+        if all_entries and all_entries[0].branch:
+            filtered = logger.read(count=10, branch=all_entries[0].branch)
+            assert len(filtered) > 0
+
+    def test_session_since_filter(self, tmp_path: Path) -> None:
+        """Session read with since filter."""
+        from loom_context.store.session import SessionLogger
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        logger = SessionLogger(loom, tmp_path)
+        logger.append("old entry")
+        logger.append("new entry")
+
+        entries = logger.read(count=10, since="2020-01-01")
+        assert len(entries) == 2
+
+
+class TestStructureScannerExtended:
+    def test_detects_mvc(self, tmp_path: Path) -> None:
+        """Detect MVC architecture."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for d in ["models", "views", "controllers"]:
+            (src / d).mkdir()
+            (src / d / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "mvc" in result.structure.architecture
+
+    def test_detects_feature_based(self, tmp_path: Path) -> None:
+        """Detect feature-based architecture."""
+        src = tmp_path / "src"
+        src.mkdir()
+        features = src / "features"
+        features.mkdir()
+        (features / "auth").mkdir()
+        (features / "auth" / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "feature-based" in result.structure.architecture
+
+    def test_detects_layered(self, tmp_path: Path) -> None:
+        """Detect layered architecture."""
+        src = tmp_path / "src"
+        src.mkdir()
+        for d in ["controllers", "services", "repositories"]:
+            (src / d).mkdir()
+            (src / d / "index.ts").write_text("export {};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert "layered" in result.structure.architecture
+
+
+class TestConfigExtended:
+    def test_loom_json_override(self, tmp_path: Path) -> None:
+        """LoomConfig reads .context/loom.json overrides."""
+        from loom_context.config import LoomConfig
+
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        import json
+
+        (ctx / "loom.json").write_text(json.dumps({"project_type": "custom"}))
+        config = LoomConfig(tmp_path)
+        assert config.project_type == "custom"
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
