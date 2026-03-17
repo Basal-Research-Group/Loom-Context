@@ -24,8 +24,8 @@
   "stats": {
     "total_files": 62,
     "total_code_files": 61,
-    "total_docs": 34,
-    "total_dependencies": 8
+    "total_docs": 35,
+    "total_dependencies": 12
   },
-  "generated_at": "2026-03-17T05:53:29.682041+00:00"
+  "generated_at": "2026-03-17T06:23:17.739438+00:00"
 }
