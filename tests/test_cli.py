@@ -1338,6 +1338,98 @@ class TestConfigExtended:
         assert config.project_type == "custom"
 
 
+class TestWatchCommand:
+    def test_watch_help(self) -> None:
+        """Watch command has help."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["watch", "--help"])
+        assert result.exit_code == 0
+        assert "interval" in result.output
+
+
+class TestFilterWalkDirs:
+    def test_walk_dirs_skips_excluded(self, tmp_project: Path) -> None:
+        """walk_dirs skips excluded directories."""
+        ff = FileFilter(tmp_project)
+        dirs = list(ff.walk_dirs())
+        dir_names = {d.name for d in dirs}
+        assert "node_modules" not in dir_names
+        assert ".git" not in dir_names
+        assert "src" in dir_names
+
+    def test_walk_dirs_skips_context(self, tmp_project: Path) -> None:
+        """walk_dirs skips .context/ directory."""
+        # Create .context/ first
+        (tmp_project / ".context").mkdir(exist_ok=True)
+        ff = FileFilter(tmp_project)
+        dirs = list(ff.walk_dirs())
+        dir_names = {d.name for d in dirs}
+        assert ".context" not in dir_names
+
+
+class TestDepsScannerPackageManagers:
+    def test_detects_pnpm(self, tmp_path: Path) -> None:
+        """Detect pnpm from lock file."""
+        (tmp_path / "package.json").write_text('{"dependencies": {"react": "^19"}}')
+        (tmp_path / "pnpm-lock.yaml").write_text("lockfileVersion: 5")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.deps.package_manager == "pnpm"
+
+    def test_detects_yarn(self, tmp_path: Path) -> None:
+        """Detect yarn from lock file."""
+        (tmp_path / "package.json").write_text('{"dependencies": {"react": "^19"}}')
+        (tmp_path / "yarn.lock").write_text("# yarn")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.deps.package_manager == "yarn"
+
+    def test_detects_npm(self, tmp_path: Path) -> None:
+        """Detect npm from lock file."""
+        (tmp_path / "package.json").write_text('{"dependencies": {"react": "^19"}}')
+        (tmp_path / "package-lock.json").write_text("{}")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.deps.package_manager == "npm"
+
+    def test_detects_uv(self, tmp_path: Path) -> None:
+        """Detect uv from lock file."""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "x"\nversion = "1"\ndependencies = ["click"]\n'
+        )
+        (tmp_path / "uv.lock").write_text("# uv")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.deps.package_manager == "uv"
+
+
+class TestStructureProjectTypes:
+    def test_detects_nextjs(self, tmp_path: Path) -> None:
+        (tmp_path / "next.config.js").write_text("module.exports = {};")
+        (tmp_path / "package.json").write_text('{"dependencies": {"next": "^14"}}')
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "nextjs"
+
+    def test_detects_rust(self, tmp_path: Path) -> None:
+        (tmp_path / "Cargo.toml").write_text('[package]\nname = "mylib"')
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "rust"
+
+    def test_detects_go(self, tmp_path: Path) -> None:
+        (tmp_path / "go.mod").write_text("module example.com/mymod")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "go"
+
+    def test_detects_angular(self, tmp_path: Path) -> None:
+        (tmp_path / "angular.json").write_text("{}")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "angular"
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
