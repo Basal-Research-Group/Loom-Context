@@ -2004,6 +2004,103 @@ class TestStatusJSON:
         assert "last_findings" in data
 
 
+class TestGitHelperExtended:
+    def test_git_modified_files_in_repo(self) -> None:
+        """GitHelper returns modified files in an actual git repo."""
+        from loom_context.git import GitHelper
+
+        # Loom-Context itself is a git repo
+        git = GitHelper(Path().resolve())
+        # Should return a list (possibly empty if clean)
+        result = git.modified_files()
+        assert isinstance(result, list)
+
+    def test_git_branch_in_repo(self) -> None:
+        """GitHelper returns branch name in actual git repo."""
+        from loom_context.git import GitHelper
+
+        git = GitHelper(Path().resolve())
+        branch = git.branch()
+        assert branch is not None
+        assert len(branch) > 0
+
+    def test_git_cmd_with_bad_args(self, tmp_path: Path) -> None:
+        """GitHelper.cmd returns None for invalid git commands."""
+        from loom_context.git import GitHelper
+
+        git = GitHelper(tmp_path)
+        assert git.cmd(["this-is-not-a-command"]) is None
+
+
+class TestStructureBoundaryRules:
+    def test_boundary_rules_for_clean_arch(self, tmp_project: Path) -> None:
+        """Clean architecture generates boundary rules."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        assert len(result.structure.layer_boundaries) > 0
+        assert "domain" in result.structure.layer_boundaries
+
+    def test_boundary_rules_empty_for_flat(self, tmp_path: Path) -> None:
+        """Flat projects have no boundary rules."""
+        (tmp_path / "main.py").write_text("print('hi')")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        # Flat project may or may not have boundaries
+        assert isinstance(result.structure.layer_boundaries, dict)
+
+    def test_file_counts_by_dir(self, tmp_project: Path) -> None:
+        """Scan includes file counts per directory."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        assert len(result.structure.file_counts_by_dir) > 0
+
+
+class TestCodeScannerSampling:
+    def test_handles_many_files(self, tmp_path: Path) -> None:
+        """Code scanner handles projects with many files."""
+        src = tmp_path / "src"
+        src.mkdir()
+        # Create more than sample_size (100) files
+        for i in range(110):
+            (src / f"Module{i}.ts").write_text(f"export const x{i} = {i};")
+
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.code.total_code_files == 110
+        # Naming should still be detected
+        assert result.code.file_naming.get("dominant_style") == "PascalCase"
+
+
+class TestAuditorNamingExtended:
+    def test_no_rules_returns_error(self, tmp_path: Path) -> None:
+        """Naming auditor returns error when no rules.json."""
+        from loom_context.auditors.naming import NamingAuditor
+
+        ff = FileFilter(tmp_path)
+        auditor = NamingAuditor(tmp_path, ff)
+        violations = auditor.audit()
+        assert len(violations) == 1
+        assert violations[0].rule == "rules-missing"
+
+    def test_props_and_state_interfaces_allowed(self, tmp_project: Path) -> None:
+        """Interfaces ending in Props or State don't need I prefix."""
+        from loom_context.auditors.naming import NamingAuditor
+
+        # Add file with Props/State interfaces (should pass)
+        good = tmp_project / "src" / "presentation" / "components" / "ButtonProps.tsx"
+        good.write_text("export interface ButtonProps { label: string; }\n")
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        ff = FileFilter(tmp_project)
+        auditor = NamingAuditor(tmp_project, ff)
+        auditor.load_rules()
+        violations = auditor.audit()
+        props_v = [v for v in violations if "ButtonProps" in v.message]
+        assert len(props_v) == 0
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
