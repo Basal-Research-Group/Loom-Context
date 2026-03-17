@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from loom_context.exporters.base import BaseExporter
 
@@ -58,3 +59,6 @@ class CodexExporter(BaseExporter):
 
     def default_filename(self) -> str:
         return "AGENTS.md"
+
+    def install_path(self) -> Path:
+        return self.root / "AGENTS.md"
