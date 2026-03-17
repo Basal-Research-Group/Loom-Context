@@ -1752,6 +1752,89 @@ class TestExporterBase:
         assert cursor.install_path().name == ".cursorrules"
 
 
+class TestDepsInferCategory:
+    def test_infer_types(self) -> None:
+        from loom_context.scanners.deps import _infer_category
+
+        assert _infer_category("@types/react") == "type-definitions"
+        assert _infer_category("eslint-plugin-react") == "linting"
+        assert _infer_category("prettier") == "formatting"
+        assert _infer_category("jest") == "testing"
+        assert _infer_category("babel-plugin-x") == "plugin"
+        assert _infer_category("webpack") == "build-tool"
+        assert _infer_category("@react-navigation/native") == "navigation"
+        assert _infer_category("expo-camera") == "expo-module"
+        assert _infer_category("react-native-svg") == "react-native-module"
+        assert _infer_category("lodash") == "other"
+
+
+class TestStructureEdgeCases:
+    def test_nodejs_without_react(self, tmp_path: Path) -> None:
+        """Node project without react detected as nodejs."""
+        (tmp_path / "package.json").write_text('{"dependencies": {"express": "^4"}}')
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "nodejs"
+
+    def test_expo_from_app_json(self, tmp_path: Path) -> None:
+        """Detect expo from app.json."""
+        (tmp_path / "app.json").write_text('{"expo": {"name": "test"}}')
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "react-native-expo"
+
+    def test_react_from_package_json(self, tmp_path: Path) -> None:
+        """Detect react from package.json deps."""
+        (tmp_path / "package.json").write_text(
+            '{"dependencies": {"react": "^19", "react-dom": "^19"}}'
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "react"
+
+    def test_react_native_from_package_json(self, tmp_path: Path) -> None:
+        """Detect react-native from package.json deps."""
+        (tmp_path / "package.json").write_text(
+            '{"dependencies": {"react": "^19", "react-native": "^0.79"}}'
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.project_type == "react-native"
+
+
+class TestAuditorsStructureExtended:
+    def test_no_rules_returns_empty(self, tmp_path: Path) -> None:
+        """Structure auditor returns empty when no rules exist."""
+        from loom_context.auditors.structure import StructureAuditor
+
+        ff = FileFilter(tmp_path)
+        auditor = StructureAuditor(tmp_path, ff)
+        violations = auditor.audit()
+        assert violations == []
+
+    def test_loads_import_aliases(self, tmp_project: Path) -> None:
+        """Structure auditor loads import aliases from rules."""
+        from loom_context.auditors.structure import StructureAuditor
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        ff = FileFilter(tmp_project)
+        auditor = StructureAuditor(tmp_project, ff)
+        auditor.load_rules()
+        assert "@domain/*" in auditor.import_aliases
+
+
+class TestFocusCommandExtended:
+    def test_focus_with_output_file(self, tmp_project: Path) -> None:
+        """Focus --output writes to file."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "focus-out.md")
+        result = runner.invoke(main, ["focus", "architecture", str(tmp_project), "-o", outfile])
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()
