@@ -311,7 +311,7 @@ Agregar un nuevo scanner o generator no debe requerir tocar engine.py.
 
 ---
 
-## Fase E - Seleccion y AI opcional (v0.3.0+)
+## Fase E - Seleccion y AI opcional (futuro, post-v0.3.0)
 
 ### Prerequisitos
 
@@ -394,7 +394,7 @@ Agregar un nuevo scanner o generator no debe requerir tocar engine.py.
 | Paso | Fase | Condicion para implementar |
 |------|------|---------------------------|
 | 7 | C: Pipelines/puertos | Cuando haya 6+ scanners o plugins externos |
-| 8 | D resto: Cache | Cuando haya embeddings (v0.3.0) |
+| 8 | D resto: Cache | Cuando haya embeddings (post-v0.3.0) |
 | 9 | E: IA | Cuando heuristicas demuestren ser insuficientes |
 
 ### Por que Fase C se posterga

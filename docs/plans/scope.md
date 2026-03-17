@@ -101,7 +101,7 @@ El arquitecto (tu) o el contratista (el agente de IA) usan ese informe para toma
 - Prioridad entre archivos para un bundle
 - Deteccion de arquitecturas mixtas o ambiguas
 
-### Requiere IA auxiliar (futuro, v0.3.0+)
+### Requiere IA auxiliar (futuro, post-v0.3.0)
 
 - Ranking semantico de contexto por tarea
 - Resumen de decisiones implicitas
