@@ -12,6 +12,9 @@ repos:
       - id: check-merge-conflict
       - id: detect-private-key
       - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-ast
+        files: \.py$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.0
@@ -19,6 +22,14 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports, --disable-error-code=no-any-return, --disable-error-code=has-type]
+        additional_dependencies: [click, rich, pathspec, jinja2]
+        files: ^src/
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.0.0
