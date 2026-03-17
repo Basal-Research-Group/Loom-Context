@@ -1,6 +1,6 @@
 ---
 type: delivery
-version: "0.4.0"
+version: "0.3.0"
 status: archived
 progress: 5/7
 prerequisite: "0.2.2"
@@ -9,7 +9,7 @@ languages: [python]
 patterns: [adapter, observer, facade]
 ---
 
-# v0.4.0 — Export a Agentes y Watch Incremental
+# v0.3.0 — Export a Agentes y Watch Incremental
 
 ## TL;DR
 

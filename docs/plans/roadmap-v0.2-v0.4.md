@@ -1,6 +1,6 @@
 ---
 type: roadmap
-versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0", "0.4.0"]
+versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0"]
 ---
 
 # Roadmap v0.2 - v0.4
@@ -19,8 +19,7 @@ Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./s
 | v0.2.0 | Completado | .loom/, audit en init, enrich, decide, GitHelper | [archive](./archive/v0.2.0/delivery.md) |
 | v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
 | v0.2.2 | Completado | Bundles + handoff + doctor | [archive](./archive/v0.2.2/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (solo con evidencia de necesidad) | [v0.3.0/delivery.md](./v0.3.0/delivery.md) |
-| v0.4.0 | Completado (parcial) | Export a 4 agentes (watch postergado) | [archive](./archive/v0.4.0/delivery.md) |
+| v0.3.0 | Completado (parcial) | Export a 4 agentes (watch postergado) | [archive](./archive/v0.3.0/delivery.md) |
 
 ---
 
@@ -144,47 +143,7 @@ Introducir "unidad de contexto por tarea" sin modelos locales.
 
 ---
 
-## v0.3.0 - Retrieval local opcional
-
-### Meta
-
-Mejorar precision de seleccion con embeddings locales. Fallback a heuristicas si no hay modelo.
-
-### Prerequisitos
-
-- contratos tipados (v0.2.1)
-- bundles heuristicos funcionando (v0.2.2)
-- evidencia de que heuristicas no alcanzan
-
-### Entregables
-
-- [ ] `loom bundle "<task>" --ai off|local`
-- [ ] `loom bundle "<task>" --top-k N`
-- [ ] `loom bundle "<task>" --token-budget N`
-- [ ] `selector/strategies/hybrid.py`
-- [ ] `infrastructure/ai/embeddings.py`
-- [ ] cache local de embeddings en `.loom/cache/`
-- [ ] invalidacion incremental
-
-### Modelos candidatos
-
-- `sentence-transformers/all-MiniLM-L6-v2` (MVP ligero)
-- `BAAI/bge-m3` (mejor retrieval, multilingue)
-
-### Packaging
-
-- extra opcional: `pip install loom-context[ai]`
-- paquete base sigue con 4 deps
-
-### Criterios de salida
-
-- mejora medible de precision@k vs heuristico
-- `--ai off` sigue funcionando
-- tiempo aceptable para proyectos medianos
-
----
-
-## v0.4.0 - Export a agentes y watch incremental
+## v0.3.0 - Export a agentes y watch incremental
 
 ### Meta
 
@@ -206,7 +165,7 @@ Reducir friccion de adopcion diaria.
 
 ---
 
-## Evals y Telemetria Local (pre v0.3.0)
+## Evals y Telemetria Local (post-v0.3.0, pre-AI)
 
 ### Dataset minimo
 
@@ -234,7 +193,7 @@ No introducir fine-tuning antes de tener baseline medido.
 
 - click, rich, pathspec, jinja2
 
-### Extra `ai` (v0.3.0+)
+### Extra `ai` (futuro, post-v0.3.0)
 
 - sentence-transformers + dependencias
 
@@ -257,8 +216,8 @@ Alineado con [architecture-hardening-plan.md](./architecture-hardening-plan.md).
 | 8 | v0.2.1 | Pipeline detection, frontmatter parsing, Loomy | Completado |
 | 9 | v0.2.2 | Bundle command con seleccion heuristica | Completado |
 | 10 | v0.2.2 | Handoff + doctor | Completado |
-| 11 | v0.3.0 | Embeddings opcionales (si se necesitan) | Planificado |
-| 12 | v0.4.0 | Export + watch incremental | Planificado |
+| 11 | v0.3.0 | Export + watch incremental | Completado parcial |
+| 12 | futuro | Embeddings opcionales (si se necesitan) | No iniciado |
 
 Fase C (pipelines/puertos) postergada hasta que haya 6+ scanners o plugins.
 
