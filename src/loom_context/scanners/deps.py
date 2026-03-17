@@ -239,28 +239,46 @@ class DependencyScanner(BaseScanner):
                 result["package_manager"] = "pip"
 
         # Simple TOML parsing for dependencies (avoid tomli dependency)
+        # First: extract inline lists like: dependencies = ["click>=8.0", "rich"]
+        self._parse_toml_inline_list(content, "dependencies", result, dev=False)
+
+        # Then: parse line-by-line for sections like [tool.poetry.dependencies]
         in_deps = False
         for line in content.splitlines():
             stripped = line.strip()
             if stripped == "[project]":
                 continue
             if stripped.startswith("["):
-                in_deps = "dependencies" in stripped
+                in_deps = "dependencies" in stripped and "=" not in stripped
                 continue
             if in_deps and stripped and not stripped.startswith("#"):
-                # Parse "package>=version" or "package"
-                stripped = stripped.strip('"').strip("'").strip(",").strip('"').strip("'")
-                if not stripped:
-                    continue
-                parts = stripped.split(">=")
-                if len(parts) == 1:
-                    parts = stripped.split("==")
-                if len(parts) == 1:
-                    parts = stripped.split("~=")
-                name = parts[0].strip().strip('"').strip("'")
-                version = parts[1].strip().strip('"').strip("'") if len(parts) > 1 else ""
-                if name and not name.startswith("[") and not name.startswith("#"):
-                    result["dependencies"].append(self._categorize(name, version, dev=False))
+                self._parse_dep_line(stripped, result, dev=False)
+
+    def _parse_toml_inline_list(
+        self, content: str, key: str, result: dict[str, Any], dev: bool
+    ) -> None:
+        """Extract deps from TOML inline list: key = ["pkg>=ver", ...]."""
+        import re
+
+        pattern = rf"{key}\s*=\s*\[(.*?)\]"
+        for match in re.finditer(pattern, content, re.DOTALL):
+            items_str = match.group(1)
+            for item in re.findall(r'"([^"]+)"', items_str):
+                self._parse_dep_line(item, result, dev=dev)
+
+    def _parse_dep_line(self, line: str, result: dict[str, Any], dev: bool) -> None:
+        """Parse a single dependency string like 'click>=8.0'."""
+        line = line.strip().strip('"').strip("'").strip(",").strip('"').strip("'")
+        if not line or line.startswith("#") or line.startswith("["):
+            return
+        for sep in [">=", "==", "~=", "<=", "!=", "<", ">"]:
+            if sep in line:
+                name, version = line.split(sep, 1)
+                result["dependencies"].append(
+                    self._categorize(name.strip(), version.strip(), dev=dev)
+                )
+                return
+        result["dependencies"].append(self._categorize(line.strip(), "", dev=dev))
 
     def _scan_requirements_txt(self, path: Path, result: dict[str, Any]) -> None:
         try:

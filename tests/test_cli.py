@@ -509,6 +509,138 @@ class TestEdgeCases:
         assert "readme.md" in names
 
 
+class TestDependencyScannerExtended:
+    def test_pep621_pyproject(self, tmp_path: Path) -> None:
+        """Parse pyproject.toml with PEP 621 [project] format."""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "mylib"\nversion = "1.0"\n'
+            'dependencies = ["fastapi>=0.100", "uvicorn>=0.23"]\n\n'
+            "[project.optional-dependencies]\n"
+            'dev = ["pytest>=7.0", "ruff>=0.4"]\n'
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        dep_names = {d.name for d in result.deps.dependencies}
+        assert "fastapi" in dep_names
+        assert "uvicorn" in dep_names
+
+    def test_requirements_txt(self, tmp_path: Path) -> None:
+        """Parse requirements.txt."""
+        (tmp_path / "requirements.txt").write_text(
+            "flask>=2.0\nrequests==2.28\nsqlalchemy\n# comment\n\n"
+        )
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        dep_names = {d.name for d in result.deps.dependencies}
+        assert "flask" in dep_names
+        assert "requests" in dep_names
+        assert "sqlalchemy" in dep_names
+
+    def test_package_json_dev_deps(self, tmp_project: Path) -> None:
+        """Dev dependencies are marked as dev=True."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        ts_dep = next((d for d in result.deps.dependencies if d.name == "typescript"), None)
+        assert ts_dep is not None
+        assert ts_dep.dev is True
+
+    def test_known_package_categorization(self, tmp_project: Path) -> None:
+        """Known packages get proper categories."""
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        react_dep = next((d for d in result.deps.dependencies if d.name == "react"), None)
+        assert react_dep is not None
+        assert react_dep.category == "ui-framework"
+
+
+class TestFilterExtended:
+    def test_contextignore_glob_patterns(self, tmp_path: Path) -> None:
+        """Complex .contextignore glob patterns."""
+        (tmp_path / ".contextignore").write_text("**/*.generated.ts\n**/fixtures/**\ntemp_*\n")
+        (tmp_path / "src").mkdir()
+        (tmp_path / "src" / "api.generated.ts").write_text("gen")
+        (tmp_path / "src" / "api.ts").write_text("real")
+        fixtures = tmp_path / "src" / "fixtures"
+        fixtures.mkdir()
+        (fixtures / "data.json").write_text("{}")
+        (tmp_path / "temp_file.txt").write_text("tmp")
+        (tmp_path / "keep.txt").write_text("ok")
+
+        ff = FileFilter(tmp_path)
+        files = list(ff.walk())
+        names = {f.name for f in files}
+        assert "api.ts" in names
+        assert "api.generated.ts" not in names
+        assert "data.json" not in names
+        assert "temp_file.txt" not in names
+        assert "keep.txt" in names
+
+    def test_excludes_keystore_and_p12(self, tmp_path: Path) -> None:
+        """Keystore and certificate files are always excluded."""
+        (tmp_path / "release.keystore").write_text("key")
+        (tmp_path / "cert.p12").write_text("cert")
+        (tmp_path / "app.ts").write_text("ok")
+
+        ff = FileFilter(tmp_path)
+        files = list(ff.walk())
+        names = {f.name for f in files}
+        assert "release.keystore" not in names
+        assert "cert.p12" not in names
+        assert "app.ts" in names
+
+    def test_excludes_expo_and_next_dirs(self, tmp_path: Path) -> None:
+        """Framework-specific dirs are excluded."""
+        for d in [".expo", ".next", ".nuxt", ".turbo"]:
+            p = tmp_path / d
+            p.mkdir()
+            (p / "cache.json").write_text("{}")
+        (tmp_path / "src.ts").write_text("ok")
+
+        ff = FileFilter(tmp_path)
+        files = list(ff.walk())
+        parts = set()
+        for f in files:
+            parts.update(f.parts)
+        assert ".expo" not in parts
+        assert ".next" not in parts
+        assert ".nuxt" not in parts
+
+
+class TestFocusExtended:
+    def test_focus_matches_stack(self, tmp_project: Path) -> None:
+        """Focus finds stack-related context."""
+        from loom_context.generators.focus import FocusGenerator
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        gen = FocusGenerator(tmp_project / ".context")
+        result = gen.generate("react zustand")
+        assert result is not None
+        assert len(result) > 0
+
+    def test_focus_matches_naming(self, tmp_project: Path) -> None:
+        """Focus finds naming-related context."""
+        from loom_context.generators.focus import FocusGenerator
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        gen = FocusGenerator(tmp_project / ".context")
+        result = gen.generate("naming conventions interface prefix")
+        assert result is not None
+
+    def test_focus_to_file(self, tmp_project: Path) -> None:
+        """Focus writes to file via CLI."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "focus.md")
+        result = runner.invoke(main, ["focus", "domain", str(tmp_project), "-o", outfile])
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+        assert len(Path(outfile).read_text()) > 0
+
+
 class TestSessionLogger:
     def test_append_and_read(self, tmp_path: Path) -> None:
         from loom_context.store.session import SessionLogger
