@@ -54,12 +54,9 @@ loom init .
 
 | Version | Estado | Que entrega | Plan |
 |---------|--------|-------------|------|
-| v0.1.0 | Publicado | init, scan, prompt, audit, plan, watch | — |
-| v0.2.0 | Completado | .loom/, audit en init, enrich, decide | [archive](plans/archive/v0.2.0/delivery.md) |
-| v0.2.1 | Completado | Contratos, CLI modular, pipeline, Loomy | [archive](plans/archive/v0.2.1/delivery.md) |
-| v0.2.2 | Completado | Bundle, handoff, doctor, compact | [archive](plans/archive/v0.2.2/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (sin evidencia de necesidad) | [archive](plans/archive/v0.3.0/delivery.md) |
-| v0.4.0 | Completado | Export a 4 agentes + --install | [archive](plans/archive/v0.4.0/delivery.md) |
+| v0.1.0 | Publicado | 6 comandos, 25 tests | — |
+| v0.2.0 | Listo para release | 15 comandos, 257 tests, 95% cobertura | [delivery](plans/archive/v0.2.0/delivery.md) |
+| v0.3.0 | Postergado | Embeddings (sin evidencia) | [deferred](plans/archive/v0.3.0/delivery.md) |
 
 ### Estrategias transversales
 

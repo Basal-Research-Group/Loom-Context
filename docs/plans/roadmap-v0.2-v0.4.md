@@ -11,26 +11,14 @@ versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0"]
 
 Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./scope.md) para limites y direccion.
 
-## Estado Actual (2026-03-16)
+## Estado Actual (2026-03-17)
 
 | Version | Estado | Entregables | Detalle |
 |---------|--------|-------------|---------|
-| v0.1.0 | Publicado en PyPI | init, scan, prompt, audit, plan, watch, focus, log, status | — |
-| v0.2.0 | Completado | .loom/, audit en init, enrich, decide, GitHelper | [archive](./archive/v0.2.0/delivery.md) |
-| v0.2.1 | Completado | Contratos tipados, CLI modular, store/, pipeline, frontmatter, Loomy | [archive](./archive/v0.2.1/delivery.md) |
-| v0.2.2 | Completado | Bundle, handoff, doctor, compact format | [archive](./archive/v0.2.2/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (sin evidencia de necesidad) | [archive](./archive/v0.3.0/delivery.md) |
-| v0.4.0 | Completado | Export a 4 agentes + --install | [archive](./archive/v0.4.0/delivery.md) |
-
-### Extras no planificados (implementados durante desarrollo)
-
-- `--compact` format en prompt y bundle (71-89% menos tokens)
-- `--top-k` y `--token-budget` en bundle
-- `--install` en export (escribe donde el agente lo espera)
-- `loom plan` con barras de progreso y badges de frontmatter
-- Pipeline architecture detection
-- Frontmatter YAML parsing en docs scanner
-- Loomy mascot con 8 expresiones
+| v0.1.0 | Publicado en PyPI | 6 comandos, 25 tests | — |
+| v0.2.0 | En develop (listo para release) | 15 comandos, 257 tests, 95% cobertura | [delivery](./archive/v0.2.0/delivery.md) |
+| v0.3.0 | Postergado | Embeddings (sin evidencia de necesidad) | [deferred](./archive/v0.3.0/delivery.md) |
+| v0.5.0+ | Futuro | Analisis profundo, observabilidad, metricas | Pendiente de uso real |
 - Compact formatter para output denso sin markdown
 
 ---
@@ -215,23 +203,23 @@ El usuario no debe instalar stack pesado si solo quiere init, scan, audit o prom
 
 ---
 
-## Orden de Implementacion (actualizado)
+## Versiones
 
-Alineado con [architecture-hardening-plan.md](./architecture-hardening-plan.md).
+### v0.2.0 (en develop, listo para release)
 
-| Paso | Version | Que hacer | Estado |
-|------|---------|-----------|--------|
-| 1-3 | v0.2.0 | .loom/, GitHelper, audit en init, enrich, decide | Completado |
-| 4-5 | v0.2.0 | Probado en Akana (674 archivos, 107 violaciones, 0.9s) | Completado |
-| 6 | v0.2.1 | Contratos tipados (models.py, ScanResult) | Completado |
-| 7 | v0.2.1 | CLI modular (12 comandos), store/ package | Completado |
-| 8 | v0.2.1 | Pipeline detection, frontmatter parsing, Loomy | Completado |
-| 9 | v0.2.2 | Bundle command con seleccion heuristica | Completado |
-| 10 | v0.2.2 | Handoff + doctor | Completado |
-| 11 | v0.3.0 | Export + watch incremental | Completado parcial |
-| 12 | futuro | Embeddings opcionales (si se necesitan) | No iniciado |
+Todo lo implementado en esta sesion. Ver [delivery unificado](./archive/v0.2.0/delivery.md).
 
-Fase C (pipelines/puertos) postergada hasta que haya 6+ scanners o plugins.
+### v0.3.0 (postergado)
+
+Embeddings locales opcionales. Solo se implementa con evidencia de que heuristicas no alcanzan. Ver [deferred](./archive/v0.3.0/delivery.md).
+
+### v0.5.0+ (futuro)
+
+Basado en feedback de uso real en Akana. Posibles areas:
+- analisis profundo de arquitecturas mixtas
+- metricas y KPIs por capa
+- observabilidad y logging
+- templates editables para output
 
 ## Definicion de Exito
 
