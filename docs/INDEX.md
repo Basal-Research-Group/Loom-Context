@@ -56,7 +56,7 @@ loom init .
 |---------|--------|-------------|------|
 | v0.1.0 | Publicado | 6 comandos, 25 tests | — |
 | v0.2.0 | Listo para release | 15 comandos, 257 tests, 95% cobertura | [delivery](plans/archive/v0.2.0/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (sin evidencia) | [deferred](plans/archive/v0.3.0/delivery.md) |
+| v0.3.0 | Pendiente | Basado en feedback de uso real | — |
 
 ### Estrategias transversales
 
