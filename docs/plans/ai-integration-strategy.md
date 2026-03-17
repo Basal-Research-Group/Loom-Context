@@ -1,8 +1,8 @@
 ---
 type: architecture
 scope: infra, generator
-status: deferred
-target_version: "0.3.0"
+status: future
+target_version: "future"
 ---
 
 # Estrategia de Integracion de IA Local
@@ -11,7 +11,7 @@ target_version: "0.3.0"
 
 ## Estado (2026-03-16)
 
-La IA esta postergada a v0.3.0. Las decisiones aqui siguen vigentes pero no se implementan hasta tener:
+La IA de retrieval/ranking sigue como linea futura opcional, posterior a `v0.3.0`. Las decisiones aqui siguen vigentes pero no se implementan hasta tener:
 
 - contratos tipados (v0.2.1)
 - bundles heuristicos funcionando (v0.2.2)

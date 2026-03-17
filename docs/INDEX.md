@@ -43,6 +43,8 @@ loom init .
 | [Quickstart](guides/quickstart.md) | Como instalar y usar por primera vez |
 | [CLI Reference](guides/cli-reference.md) | Todos los comandos con ejemplos |
 | [Output .context/](guides/context-output.md) | Que genera Loom y como lo consume la IA |
+| [Investigacion y mejora](guides/research.md) | Que datos puede explotar Loom para mejora continua e investigacion |
+| [Versiones y ramas](guides/versioning.md) | Como se relacionan SemVer, develop, main y release branches |
 | [Seguridad](guides/security.md) | Como Loom protege tu codigo |
 | [Buenas practicas](guides/best-practices.md) | Patrones recomendados para equipos |
 | [Loomy](guides/loomy.md) | La mascota spider-neuron y sus expresiones |
@@ -55,8 +57,7 @@ loom init .
 | v0.2.0 | Completado | .loom/, audit en init, enrich, decide | [archive](plans/archive/v0.2.0/delivery.md) |
 | v0.2.1 | Completado | Contratos, CLI modular, pipeline, Loomy | [archive](plans/archive/v0.2.1/delivery.md) |
 | v0.2.2 | Completado | Bundles + handoff + doctor | [archive](plans/archive/v0.2.2/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (solo con evidencia) | [delivery](plans/v0.3.0/delivery.md) |
-| v0.4.0 | Completado | Export a 4 agentes (watch postergado) | [archive](plans/archive/v0.4.0/delivery.md) |
+| v0.3.0 | Completado | Export a 4 agentes (watch postergado) | [archive](plans/archive/v0.3.0/delivery.md) |
 
 ### Estrategias transversales
 
@@ -64,7 +65,7 @@ loom init .
 |-----------|-----------|
 | [Roadmap v0.2-v0.4](plans/roadmap-v0.2-v0.4.md) | Vision completa con secuencia |
 | [Architecture Hardening](plans/architecture-hardening-plan.md) | Refactor: contratos, pipelines, CLI |
-| [AI Integration](plans/ai-integration-strategy.md) | Embeddings, ranking, postergado a v0.3.0 |
+| [AI Integration](plans/ai-integration-strategy.md) | Embeddings y ranking como linea futura opcional, post-v0.3.0 |
 
 ### Contribucion y comunidad
 
