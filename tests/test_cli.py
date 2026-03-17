@@ -2222,6 +2222,68 @@ class TestStatusDecisionsCount:
         assert "1 recorded" in result.output
 
 
+class TestDoctorPartialSetup:
+    def test_doctor_index_no_type(self, tmp_path: Path) -> None:
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {}}')
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+
+    def test_doctor_no_index(self, tmp_path: Path) -> None:
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert "missing" in result.output.lower() or "fail" in result.output.lower()
+
+    def test_doctor_loom_partial(self, tmp_path: Path) -> None:
+        ctx = tmp_path / ".context"
+        ctx.mkdir()
+        (ctx / "index.json").write_text('{"project": {"type": "python"}}')
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        runner = CliRunner()
+        result = runner.invoke(main, ["doctor", str(tmp_path)])
+        assert result.exit_code == 0
+
+
+class TestBundleSaveEdgeCases:
+    def test_bundle_save_creates_dirs(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["bundle", "architecture", str(tmp_project), "--save"])
+        assert result.exit_code == 0
+        assert (tmp_project / ".context" / "bundles").exists()
+
+
+class TestStructureAuditorResolution:
+    def test_no_layer_for_unknown_import(self, tmp_project: Path) -> None:
+        from loom_context.auditors.structure import StructureAuditor
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        ff = FileFilter(tmp_project)
+        auditor = StructureAuditor(tmp_project, ff)
+        auditor.load_rules()
+        boundaries = auditor.rules.get("architecture", {}).get("layer_boundaries", {})
+        assert auditor._resolve_import_layer("react", boundaries) is None
+
+    def test_detect_layer_not_in_boundary(self, tmp_project: Path) -> None:
+        from loom_context.auditors.structure import StructureAuditor
+
+        engine = LoomEngine(tmp_project)
+        engine.init()
+        ff = FileFilter(tmp_project)
+        auditor = StructureAuditor(tmp_project, ff)
+        auditor.load_rules()
+        boundaries = auditor.rules.get("architecture", {}).get("layer_boundaries", {})
+        from pathlib import PurePosixPath
+
+        assert auditor._detect_layer(PurePosixPath("random/file.ts"), boundaries) is None
+
+
 class TestAuditorCorruptedRules:
     def test_naming_corrupted_rules(self, tmp_path: Path) -> None:
         from loom_context.auditors.naming import NamingAuditor
