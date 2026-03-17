@@ -638,7 +638,7 @@ class TestFocusExtended:
         result = runner.invoke(main, ["focus", "domain", str(tmp_project), "-o", outfile])
         assert result.exit_code == 0
         assert Path(outfile).exists()
-        assert len(Path(outfile).read_text()) > 0
+        assert len(Path(outfile).read_text(encoding="utf-8")) > 0
 
 
 class TestSessionLogger:
