@@ -193,7 +193,7 @@ class TestEngine:
         engine = LoomEngine(tmp_project)
         engine.init()
 
-        index = json.loads((tmp_project / ".context" / "index.json").read_text())
+        index = json.loads((tmp_project / ".context" / "index.json").read_text(encoding="utf-8"))
         assert "loom_version" in index
         assert "project" in index
         assert "quick_rules" in index
@@ -442,7 +442,7 @@ class TestEdgeCases:
         engine = LoomEngine(tmp_path)
         engine.init()
         assert (tmp_path / ".context" / "index.json").exists()
-        index = json.loads((tmp_path / ".context" / "index.json").read_text())
+        index = json.loads((tmp_path / ".context" / "index.json").read_text(encoding="utf-8"))
         assert index["project"]["type"] == "unknown"
 
     def test_project_without_deps(self, tmp_path: Path) -> None:
@@ -1003,7 +1003,7 @@ class TestInitWithAudit:
 
         findings_path = tmp_project / ".loom" / "inconsistencies.json"
         assert findings_path.exists()
-        data = json.loads(findings_path.read_text())
+        data = json.loads(findings_path.read_text(encoding="utf-8"))
         assert "errors" in data
         assert "warnings" in data
         assert "violations" in data
@@ -1090,6 +1090,143 @@ class TestDecideCommand:
         runner = CliRunner()
         result = runner.invoke(main, ["decide", "-p", str(tmp_path)])
         assert result.exit_code in {0, 1, 2}
+
+
+class TestAuditCommandExtended:
+    def test_audit_with_violations(self, tmp_project: Path) -> None:
+        """Audit shows table when violations found."""
+        # Add a file with boundary violation
+        bad = tmp_project / "src" / "domain" / "entities" / "Bad.ts"
+        bad.write_text('import { X } from "@infrastructure/repos/X";\n')
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["audit", str(tmp_project)])
+        assert result.exit_code == 1
+        assert "ERROR" in result.output
+        assert "Summary" in result.output
+
+
+class TestExportInstall:
+    def test_export_to_file(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "custom.md")
+        result = runner.invoke(
+            main, ["export", str(tmp_project), "--agent", "generic", "-o", outfile]
+        )
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+
+    def test_export_install(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["export", str(tmp_project), "--agent", "claude", "--install"])
+        assert result.exit_code == 0
+        assert "Installed" in result.output
+        assert (tmp_project / "CLAUDE.md").exists()
+
+
+class TestHandoffExtended:
+    def test_handoff_to_file(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "handoff.md")
+        result = runner.invoke(main, ["handoff", "task", str(tmp_project), "-o", outfile])
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+
+    def test_handoff_info_display(self, tmp_project: Path) -> None:
+        """Without --stdout or --save, shows info panel."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["handoff", "task", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Loom Handoff" in result.output
+
+
+class TestBundleExtended:
+    def test_bundle_to_file(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "bundle.md")
+        result = runner.invoke(main, ["bundle", "domain", str(tmp_project), "-o", outfile])
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+
+    def test_bundle_info_display(self, tmp_project: Path) -> None:
+        """Without --stdout or --save, shows info panel."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["bundle", "domain", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Loom Bundle" in result.output
+
+    def test_bundle_token_budget(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(
+            main,
+            ["bundle", "domain", str(tmp_project), "--stdout", "--token-budget", "100"],
+        )
+        assert result.exit_code == 0
+
+
+class TestPromptExtended:
+    def test_prompt_info_display(self, tmp_project: Path) -> None:
+        """Without --stdout, shows info panel."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["prompt", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Loom Prompt" in result.output
+
+    def test_prompt_compact_to_file(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        outfile = str(tmp_project / "compact.txt")
+        result = runner.invoke(main, ["prompt", str(tmp_project), "--compact", "-o", outfile])
+        assert result.exit_code == 0
+        assert Path(outfile).exists()
+        content = Path(outfile).read_text(encoding="utf-8")
+        assert "CTX:" in content
+
+
+class TestFocusNoContext:
+    def test_focus_no_match(self, tmp_project: Path) -> None:
+        """Focus with irrelevant query returns None via CLI."""
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["focus", "xyznonexistent", str(tmp_project), "--stdout"])
+        # Should either output something or exit gracefully
+        assert result.exit_code in {0, 1}
+
+
+class TestDoctorExtended:
+    def test_doctor_stale_context(self, tmp_project: Path) -> None:
+        """Doctor detects stale context."""
+        import time
+
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        # Touch a source file to make context stale
+        time.sleep(0.1)
+        (tmp_project / "src" / "domain" / "entities" / "New.ts").write_text("export {};\n")
+        result = runner.invoke(main, ["doctor", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "stale" in result.output.lower() or "passed" in result.output.lower()
+
+
+class TestStatusExtended:
+    def test_status_with_findings(self, tmp_project: Path) -> None:
+        """Status shows findings when they exist."""
+        # Add violation to trigger findings
+        bad = tmp_project / "src" / "domain" / "entities" / "Bad2.ts"
+        bad.write_text('import { X } from "@infrastructure/repos/X";\n')
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["status", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Findings" in result.output or "errors" in result.output
 
 
 class TestHandoffCommand:
@@ -1254,7 +1391,7 @@ class TestBundleCommand:
         assert (bundle_dir / "bundle.md").exists()
         assert (bundle_dir / "manifest.json").exists()
 
-        manifest = json.loads((bundle_dir / "manifest.json").read_text())
+        manifest = json.loads((bundle_dir / "manifest.json").read_text(encoding="utf-8"))
         assert manifest["task"] == "domain layer"
         assert manifest["selection_strategy"] == "heuristic"
         assert manifest["included_count"] > 0
