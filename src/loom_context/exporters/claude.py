@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from loom_context.exporters.base import BaseExporter
 
 
@@ -24,3 +26,6 @@ class ClaudeExporter(BaseExporter):
 
     def default_filename(self) -> str:
         return "CLAUDE.md"
+
+    def install_path(self) -> Path:
+        return self.root / "CLAUDE.md"

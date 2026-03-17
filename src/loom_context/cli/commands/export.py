@@ -22,9 +22,21 @@ from loom_context.cli import console
 )
 @click.option("--stdout", "to_stdout", is_flag=True, help="Print to stdout")
 @click.option("--output", "-o", "output_file", help="Write to specific file")
-def export_cmd(path: str, agent: str, to_stdout: bool, output_file: Optional[str]) -> None:
+@click.option(
+    "--install",
+    "do_install",
+    is_flag=True,
+    help="Install to project root where the agent expects it",
+)
+def export_cmd(
+    path: str,
+    agent: str,
+    to_stdout: bool,
+    output_file: Optional[str],
+    do_install: bool,
+) -> None:
     """Export context formatted for a specific AI agent."""
-    from loom_context.brand import LOOMY_FAIL, LOOMY_HAPPY
+    from loom_context.brand import LOOMY_FAIL, LOOMY_HAPPY, LOOMY_WINK
     from loom_context.exporters import get_exporter
 
     root = Path(path).resolve()
@@ -45,8 +57,16 @@ def export_cmd(path: str, agent: str, to_stdout: bool, output_file: Optional[str
         click.echo(exporter.export())
         return
 
-    out_path = Path(output_file) if output_file else None
+    if do_install:
+        # Install to where the agent expects it (project root)
+        install = exporter.install_path()
+        saved = exporter.export_to_file(install)
+        chars = len(saved.read_text(encoding="utf-8"))
+        console.print(f"  {LOOMY_WINK} Installed for [bold]{agent}[/bold] ({chars} chars)")
+        console.print(f"    [green]+[/green] {saved.name}")
+        return
 
+    out_path = Path(output_file) if output_file else None
     saved = exporter.export_to_file(out_path)
     chars = len(saved.read_text(encoding="utf-8"))
     console.print(f"  {LOOMY_HAPPY} Exported for [bold]{agent}[/bold] ({chars} chars)")
