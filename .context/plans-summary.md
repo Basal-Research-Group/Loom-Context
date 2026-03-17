@@ -31,7 +31,7 @@
   - Donde Agrega Valor la IA
   - Seleccion
   - Sintesis
-- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 11.2KB)
+- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 10.8KB)
   - Estado (actualizado 2026-03-16)
   - Ya completado
   - Pendiente
@@ -55,7 +55,7 @@
 - **changelog**: 1 file(s)
 - **code-of-conduct**: 1 file(s)
 - **contributing**: 1 file(s)
-- **delivery**: 4 file(s)
+- **delivery**: 5 file(s)
 - **general**: 4 file(s)
 - **guide**: 11 file(s)
 - **roadmap**: 1 file(s)
