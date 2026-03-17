@@ -35,6 +35,10 @@ class BaseExporter(ABC):
         """Default output filename for this agent."""
         return f"{self.agent_name}{self.file_extension}"
 
+    def install_path(self) -> Path:
+        """Where the agent expects the file in the project root."""
+        return self.root / self.default_filename()
+
     def _read_file(self, filename: str) -> str:
         """Read a .context/ file."""
         path = self.context_dir / filename
