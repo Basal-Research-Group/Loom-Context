@@ -2,7 +2,7 @@
 
 ## Architecture Documentation
 
-- **Loom-Context — AI Agent Guidelines** (`CLAUDE.md`, 2.9KB)
+- **Loom-Context — AI Agent Guidelines** (`CLAUDE.md`, 3.7KB)
   - Project Overview
   - Architecture
   - Layer Rules
@@ -55,8 +55,8 @@
 - **changelog**: 1 file(s)
 - **code-of-conduct**: 1 file(s)
 - **contributing**: 1 file(s)
-- **delivery**: 3 file(s)
-- **general**: 4 file(s)
+- **delivery**: 4 file(s)
+- **general**: 7 file(s)
 - **guide**: 12 file(s)
 - **roadmap**: 1 file(s)
 - **scope**: 1 file(s)

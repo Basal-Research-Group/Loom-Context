@@ -10,14 +10,14 @@ loom_context/  # (9 files)
     commands/  # (18 files)
 
   exporters/  # (6 files)
-  generators/  # Output generators (pipeline pattern) (5 files)
+  generators/  # Output generators (pipeline pattern) (6 files)
   scanners/  # Input scanners (pipeline pattern) (6 files)
   security/  # (2 files)
   selector/  # (5 files)
     strategies/  # Strategy pattern implementations (2 files)
 
   store/  # State store / persistence layer (6 files)
-  templates/  # (3 files)
+  templates/  # (4 files)
 
 
 ```

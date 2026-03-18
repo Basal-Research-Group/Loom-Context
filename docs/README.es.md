@@ -38,7 +38,7 @@ cd tu-proyecto/
 loom init .
 ```
 
-> 📉 Probado en un proyecto React Native de 674 archivos: scan en 0.9s, 107 violaciones de boundary, bundles 93% mas pequenos que el prompt completo.
+> 📉 Bundles 93% mas pequenos que el prompt completo. Scan en <2 segundos.
 
 ---
 
