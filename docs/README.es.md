@@ -3,7 +3,7 @@
 [![CI](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml/badge.svg)](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/loom-context)](https://pypi.org/project/loom-context/)
 [![Python](https://img.shields.io/pypi/pyversions/loom-context)](https://pypi.org/project/loom-context/)
-[![License](https://img.shields.io/github/license/jadruiz/Loom-Context)](../LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](../LICENSE)
 
 **Contexto determinista y axiomatico para ingenieria AI-first.**
 
@@ -19,9 +19,11 @@
   menos tokens, mas senal
 ```
 
-Loom no usa IA. Loom evita desperdiciar IA.
+El core de Loom es determinista — no requiere IA. Evita desperdiciar IA.
 
 Escanea tu repo, infiere arquitectura y convenciones, y compila contexto compacto que cualquier agente (Claude, Codex, Cursor) puede consumir — para que dejen de releer 700 archivos y trabajen con los 7 que importan.
+
+> La IA puede opcionalmente mejorar la seleccion (futuro), pero la base siempre es determinista y reproducible.
 
 ```
 Sin Loom:   35KB de prompt  →  agente lee todo         →  deriva, desperdicio, alucinaciones
