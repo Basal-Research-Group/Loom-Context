@@ -6,11 +6,11 @@
     "code": {
       "classes": {
         "format": "PascalCase",
-        "count": 55
+        "count": 60
       },
       "functions": {
         "format": "camelCase",
-        "count": 134
+        "count": 142
       }
     }
   },

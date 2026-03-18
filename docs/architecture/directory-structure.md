@@ -55,7 +55,7 @@ Loom-Context/
 │
 ├── pyproject.toml                   # Config: hatchling, deps, CLI entry
 ├── README.md                        # Descripción del proyecto
-└── LICENSE                          # MIT — J. Adrian Ruiz C.
+└── LICENSE                          # Apache-2.0 — J. Adrian Ruiz C.
 ```
 
 ## Métricas del Código

@@ -4,10 +4,10 @@
 **Source root:** `src/`
 
 ```
-loom_context/  # (8 files)
+loom_context/  # (9 files)
   auditors/  # Rule validators (pipeline pattern) (3 files)
   cli/  # (1 files)
-    commands/  # (16 files)
+    commands/  # (18 files)
 
   exporters/  # (6 files)
   generators/  # Output generators (pipeline pattern) (5 files)
@@ -16,7 +16,7 @@ loom_context/  # (8 files)
   selector/  # (5 files)
     strategies/  # Strategy pattern implementations (2 files)
 
-  store/  # State store / persistence layer (5 files)
+  store/  # State store / persistence layer (6 files)
   templates/  # (3 files)
 
 
