@@ -129,6 +129,8 @@ class CodeScanner(BaseScanner):
         prefix_patterns = self._detect_prefix_patterns(files, sample)
         import_aliases = self._detect_import_aliases()
 
+        naming_by_role = self._analyze_naming_by_role(files, suffix_patterns)
+
         return {
             "file_naming": file_naming,
             "code_naming": code_naming,
@@ -136,6 +138,7 @@ class CodeScanner(BaseScanner):
             "prefix_patterns": prefix_patterns,
             "import_aliases": import_aliases,
             "total_code_files": len(files),
+            "naming_by_role": naming_by_role,
         }
 
     def _collect_code_files(self) -> list[Path]:
@@ -158,6 +161,63 @@ class CodeScanner(BaseScanner):
         if other_count > 0:
             sample += random.sample(other_files, other_count)
         return sample
+
+    def _analyze_naming_by_role(
+        self, files: list[Path], suffix_patterns: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Analyze naming style per architectural role."""
+        # Build role map from detected suffixes
+        role_files: dict[str, list[str]] = {}
+        suffix_set = {sp["suffix"].lower() for sp in suffix_patterns}
+
+        for f in files:
+            stem = f.stem
+            role = "other"
+
+            # Detect role from suffix
+            for suffix in suffix_set:
+                if stem.lower().endswith(suffix.lower()):
+                    role = suffix
+                    break
+
+            # Detect role from prefix
+            if stem.startswith("use") and len(stem) > 3 and stem[3].isupper():
+                role = "hook"
+            elif stem.startswith("I") and len(stem) > 1 and stem[1].isupper():
+                role = "interface"
+
+            # Detect role from directory
+            for part in f.parts:
+                if part in {"components", "screens", "views", "pages"}:
+                    if role == "other":
+                        role = "component"
+                    break
+                if part in {"hooks"}:
+                    role = "hook"
+                    break
+
+            role_files.setdefault(role, []).append(stem)
+
+        # Calculate naming per role
+        result: dict[str, Any] = {}
+        for role, stems in sorted(role_files.items()):
+            if len(stems) < 2:
+                continue
+            counts: dict[str, int] = {}
+            for stem in stems:
+                case = _classify_case(stem)
+                counts[case] = counts.get(case, 0) + 1
+            total = sum(counts.values())
+            dominant = max(counts, key=counts.get) if counts else "unknown"  # type: ignore[arg-type]
+            confidence = counts.get(dominant, 0) / total if total > 0 else 0
+            if confidence > 0.5:
+                result[role] = {
+                    "style": dominant,
+                    "confidence": round(confidence, 2),
+                    "count": total,
+                }
+
+        return result
 
     def _analyze_file_naming(self, files: list[Path]) -> dict[str, Any]:
         """Analyze file naming patterns."""

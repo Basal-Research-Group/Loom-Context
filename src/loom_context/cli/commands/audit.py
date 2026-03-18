@@ -13,7 +13,8 @@ from loom_context.cli import console
 
 @click.command()
 @click.argument("path", default=".", type=click.Path(exists=True))
-def audit(path: str) -> None:
+@click.option("--summary", "show_summary", is_flag=True, help="Show grouped summary only")
+def audit(path: str, show_summary: bool) -> None:
     """Validate code against rules defined in .context/."""
     from loom_context.auditors.naming import NamingAuditor
     from loom_context.auditors.structure import StructureAuditor
@@ -47,6 +48,64 @@ def audit(path: str) -> None:
         console.print(f"  {LOOMY_HAPPY} [green]No violations found.[/green]")
         return
 
+    errors = sum(1 for v in all_violations if v.severity == "error")
+    warnings = sum(1 for v in all_violations if v.severity == "warning")
+
+    if show_summary:
+        _show_summary(all_violations, errors, warnings)
+    else:
+        _show_full(all_violations, errors, warnings)
+
+    if errors > 0:
+        sys.exit(1)
+
+
+def _show_summary(violations: list, errors: int, warnings: int) -> None:
+    """Show grouped summary by directory and rule."""
+    from loom_context.brand import LOOMY_ALERT
+
+    # Group by directory
+    by_dir: dict[str, int] = {}
+    by_rule: dict[str, int] = {}
+    for v in violations:
+        parts = v.file.split("/")
+        dir_key = "/".join(parts[:2]) if len(parts) > 1 else parts[0]
+        by_dir[dir_key] = by_dir.get(dir_key, 0) + 1
+        by_rule[v.rule] = by_rule.get(v.rule, 0) + 1
+
+    # By directory
+    table = Table(title="Violations by Directory")
+    table.add_column("Directory", style="cyan")
+    table.add_column("Count", justify="right")
+    table.add_column("Priority", width=20)
+
+    for dir_name, count in sorted(by_dir.items(), key=lambda x: -x[1]):
+        pct = count / len(violations) * 100
+        bar = "=" * int(pct / 5) + "-" * (20 - int(pct / 5))
+        table.add_row(dir_name, str(count), f"[{bar}]")
+
+    console.print(table)
+
+    # By rule
+    console.print("")
+    rule_table = Table(title="Violations by Rule")
+    rule_table.add_column("Rule", style="yellow")
+    rule_table.add_column("Count", justify="right")
+
+    for rule, count in sorted(by_rule.items(), key=lambda x: -x[1]):
+        rule_table.add_row(rule, str(count))
+
+    console.print(rule_table)
+
+    console.print(
+        f"\n  {LOOMY_ALERT} [red]{errors} errors[/red], "
+        f"[yellow]{warnings} warnings[/yellow], "
+        f"{len(violations)} total"
+    )
+
+
+def _show_full(violations: list, errors: int, warnings: int) -> None:
+    """Show full violation table."""
     table = Table(title="Audit Results")
     table.add_column("Severity", width=8)
     table.add_column("File", style="cyan")
@@ -55,20 +114,12 @@ def audit(path: str) -> None:
     table.add_column("Message")
     table.add_column("Suggestion", style="dim")
 
-    errors = 0
-    warnings = 0
-
-    for v in sorted(all_violations, key=lambda x: (x.severity != "error", x.file)):
+    for v in sorted(violations, key=lambda x: (x.severity != "error", x.file)):
         severity_style = {
             "error": "[red]ERROR[/red]",
             "warning": "[yellow]WARN[/yellow]",
             "info": "[blue]INFO[/blue]",
         }.get(v.severity, v.severity)
-
-        if v.severity == "error":
-            errors += 1
-        elif v.severity == "warning":
-            warnings += 1
 
         table.add_row(
             severity_style,
@@ -83,8 +134,5 @@ def audit(path: str) -> None:
     console.print(
         f"\n  Summary: [red]{errors} errors[/red], "
         f"[yellow]{warnings} warnings[/yellow], "
-        f"{len(all_violations)} total"
+        f"{len(violations)} total"
     )
-
-    if errors > 0:
-        sys.exit(1)

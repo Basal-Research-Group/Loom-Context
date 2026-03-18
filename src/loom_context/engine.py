@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -30,6 +31,8 @@ from loom_context.store.findings import FindingsStore
 from loom_context.store.mutations import MutationLog
 from loom_context.store.session import SessionLogger
 
+logger = logging.getLogger("loom")
+
 
 class LoomEngine:
     """Central orchestrator for Loom-Context."""
@@ -45,10 +48,15 @@ class LoomEngine:
         code_scanner = CodeScanner(self.config.root, self.file_filter)
         docs_scanner = DocsScanner(self.config.root, self.file_filter)
 
+        logger.debug("scanning structure...")
         structure_raw = structure_scanner.scan()
+        logger.debug("scanning dependencies...")
         deps_raw = deps_scanner.scan()
+        logger.debug("scanning code patterns...")
         code_raw = code_scanner.scan()
+        logger.debug("scanning documentation...")
         docs_raw = docs_scanner.scan()
+        logger.debug("scan complete")
 
         # Add project name
         structure_raw["project_name"] = self.config.root.name
