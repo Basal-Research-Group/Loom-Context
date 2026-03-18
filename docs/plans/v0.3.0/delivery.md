@@ -29,7 +29,7 @@ Loom pasa de "detectar arquitectura" a "medir salud". Naming por rol, violacione
 
 ## Problema que resuelve
 
-Loom v0.2.0 detecta arquitectura y naming pero no mide salud. Akana tiene 109 violaciones sin prioridad, naming al 50% de confianza porque mezcla roles, y no hay metricas cuantitativas. El monorepo se detecta como "flat".
+Loom v0.2.0 detecta arquitectura y naming pero no mide salud. Un proyecto real tiene 109 violaciones sin prioridad, naming al 50% de confianza porque mezcla roles, y no hay metricas cuantitativas. El monorepo se detecta como "flat".
 
 ## Analogia
 
@@ -59,7 +59,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 - [ ] Actualizar naming.md.j2 para mostrar tabla por rol
 - [ ] Tests con proyecto que tiene naming mixto por rol
 
-**Criterio de salida:** En Akana, componentes = PascalCase (95%+), hooks = camelCase (95%+).
+**Criterio de salida:** En un proyecto real, componentes = PascalCase (95%+), hooks = camelCase (95%+).
 
 ---
 
@@ -70,7 +70,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 - **Archivos:** `cli/commands/audit.py`, `store/findings.py`
 - **No tocar:** scanners/, generators/, engine.py, selector/
 
-**Problema:** 109 violaciones en Akana, todas "layer-boundary ERROR". No agrupa por modulo ni indica por donde empezar.
+**Problema:** 109 violaciones en un proyecto real, todas "layer-boundary ERROR". No agrupa por modulo ni indica por donde empezar.
 
 **Entregables:**
 - [ ] Agrupar violaciones por directorio
@@ -111,7 +111,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 - **Archivos:** `scanners/structure.py`, `models.py`
 - **No tocar:** generators/, auditors/, cli/, store/, selector/
 
-**Problema:** `core_monorepo_enn` se detecta como "flat". Loom no lee `workspaces` de package.json ni entra a `packages/`.
+**Problema:** Un monorepo project se detecta como "flat". Loom no lee `workspaces` de package.json ni entra a `packages/`.
 
 **Entregables:**
 - [ ] Detectar monorepo: `workspaces` en package.json, `packages/`, `apps/`
@@ -119,7 +119,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 - [ ] Escanear cada workspace como sub-proyecto
 - [ ] Tests con monorepo de 2+ packages
 
-**Criterio de salida:** `core_monorepo_enn` se detecta como monorepo con N workspaces listados.
+**Criterio de salida:** Un monorepo project se detecta como monorepo con N workspaces listados.
 
 ---
 
@@ -187,7 +187,7 @@ Solo `cli/__init__.py` se toca en tareas 3, 5 y 6 (para registrar comandos nuevo
 - [x] Tarea 5: observabilidad completada
 - [x] Tarea 6: logging completada
 - [x] 269 tests pasan (95% cobertura mantenida)
-- [x] Probado en Akana + core_monorepo_enn + Loom-Context
+- [x] Probado en a real-world project + a monorepo project + Loom-Context
 - [x] Lint + format limpios
 
 ---

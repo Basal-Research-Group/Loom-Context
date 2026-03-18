@@ -104,7 +104,7 @@ loom bundle "refactorizar boundaries de core" . --stdout
 
 ```
 # Bundle: refactorizar boundaries de core
-**Project:** akana (react-native-expo, clean-architecture, hexagonal)
+**Project:** my-project (react-native-expo, clean-architecture, hexagonal)
 
 ## Relevant Rules
 - Layer boundary: core MUST NOT import from infrastructure
@@ -240,7 +240,7 @@ loom status .
 
 ```
 ╭────────────── Loom Status ──────────────╮
-│  ~(O O)~  akana  react-native-expo     │
+│  ~(O O)~  my-project  react-native-expo     │
 ╰─────────────────────────────────────────╯
   Fresh  Last scan: 2026-03-16 16:20
   Audit   107 errors, 0 warnings

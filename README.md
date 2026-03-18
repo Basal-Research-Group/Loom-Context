@@ -161,7 +161,7 @@ loom handoff "payment flow" . --save
 
 ## 📊 Real-World Results
 
-Tested on [Akana](https://github.com/jadruiz) — a 674-file React Native literacy app:
+Tested on a 674-file React Native project:
 
 | Metric | Result |
 |--------|--------|

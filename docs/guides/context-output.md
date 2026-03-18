@@ -52,7 +52,7 @@ La IA debe leer este archivo **primero**. Contiene metadata del proyecto y `quic
 {
   "loom_version": "0.2.0",
   "project": {
-    "name": "akana",
+    "name": "my-project",
     "type": "react-native-expo",
     "architecture": ["clean-architecture", "hexagonal", "feature-based"],
     "language": "TypeScript",

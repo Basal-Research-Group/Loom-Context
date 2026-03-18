@@ -326,7 +326,10 @@ class PlanGenerator:
             total_remaining = sum(c.count for c in remaining)
             phases.append(
                 PlanPhase(
-                    name=f"Resolve remaining {len(remaining)} clusters ({total_remaining} violations)",
+                    name=(
+                        f"Resolve {len(remaining)} remaining clusters"
+                        f" ({total_remaining} violations)"
+                    ),
                     tasks=[
                         f"Fix {c.source} → {c.target} ({c.count} violations)" for c in remaining[:5]
                     ],
