@@ -7,6 +7,8 @@
 
 **Deterministic, axiomatic context for AI-first engineering.**
 
+[English](#-quick-start) · [Español](docs/README.es.md)
+
 ```
         .  *  .  *  .
          \  |  /
@@ -206,7 +208,7 @@ git clone https://github.com/jadruiz/Loom-Context.git
 cd Loom-Context
 pip install -e ".[dev]"
 
-pytest                         # 104 tests, ~3s
+pytest                         # 281 tests, ~8s
 ruff check src/ tests/         # lint
 ruff format --check src/ tests/  # format
 ```
