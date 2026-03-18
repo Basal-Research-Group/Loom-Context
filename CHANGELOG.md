@@ -8,22 +8,19 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Branch Mapping
+## [0.3.0] - 2026-03-18
 
-This changelog tracks released package versions, not every internal delivery plan.
+### Added — Analysis & Observability (v0.3.0)
+- `loom metrics`: health metrics per layer (files, code, dirs, balance score)
+- `loom report`: usage analytics from `.loom/reports/usage.jsonl`
+- `loom audit --summary`: violations grouped by directory and rule
+- `--verbose / -v`: global debug logging flag
+- Naming by role analysis (hooks=camelCase, components=PascalCase vs 50% global)
+- Monorepo detection (workspaces, packages/, apps/, pnpm-workspace.yaml)
+- `.loom/reports/metrics.json` persistence
+- 12 new tests (269 total, 95% coverage)
 
-Current branch interpretation:
-
-- `develop`: active development line, keeps the current working package version
-- `main`: stable integration line
-- `release/0.2.0`: delta from `0.1.0` to `0.2.0`
-- `release/0.2.1`: delta from `0.2.0` to `0.2.1`
-- `release/0.2.2`: delta from `0.2.1` to `0.2.2`
-- `release/0.3.0`: delta from `0.2.2` to `0.3.0`
-
-See [`docs/guides/versioning.md`](docs/guides/versioning.md) for the branch/version policy.
-
-## [0.2.0] - 2026-03-16
+### Added — Context Engine (v0.2.0, included)
 
 ### Added — Commands (9 new, 15 total)
 - `loom enrich`: re-audit, regenerate context, persist findings
