@@ -1,7 +1,7 @@
-.PHONY: test lint format type-check audit build clean install qa smoke
+.PHONY: test lint format type-check security audit build clean install qa smoke
 
-# Quick quality check (run before every commit)
-qa: lint format type-check test
+# Full quality check (run before every commit)
+qa: lint format type-check security test
 	@echo "\n  ~(^ ^)~ all quality checks passed"
 
 # Individual checks
@@ -17,11 +17,15 @@ format:
 type-check:
 	python3 -m mypy src/loom_context/ --ignore-missing-imports --disable-error-code=no-any-return --disable-error-code=has-type
 
+# Security scan (bandit + pip-audit)
+security:
+	python3 -m bandit -c pyproject.toml --recursive src/
+
 # Coverage report
 coverage:
 	python3 -m pytest tests/ --cov=loom_context --cov-report=term-missing --tb=short
 
-# Security audit
+# Dependency audit
 audit:
 	pip-audit
 
@@ -29,7 +33,7 @@ audit:
 smoke:
 	loom init .
 	loom doctor .
-	loom status .
+	loom metrics .
 	loom bundle "architecture" . --stdout | head -20
 	@echo "\n  ~(^ ^)~ smoke test passed"
 
