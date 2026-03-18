@@ -334,3 +334,69 @@ progress: 12/12
 ```
 
 Actualizar manualmente al marcar entregables.
+
+---
+
+## Template: Plan Multiagente
+
+Cuando un delivery tiene tareas que pueden ejecutarse en paralelo por diferentes agentes, usar este formato. Es distinto al delivery simple porque cada tarea debe ser autocontenida.
+
+```markdown
+---
+type: delivery
+version: "X.Y.Z"
+status: planned
+prerequisite: "X.Y.Z"
+scope: scanner, cli, infra
+languages: [python]
+progress: 0/N
+---
+
+# vX.Y.Z — Titulo
+
+## TL;DR
+
+[2-3 lineas]
+
+## Indice
+
+## Problema que resuelve
+
+## Analogia
+
+## Tareas
+
+### Tarea N: Nombre
+
+- **Status:** `- [ ]` pendiente | `- [x]` completada
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** [lista de archivos que PUEDE tocar]
+- **No tocar:** [lista de archivos que NO debe tocar]
+
+**Problema:** [que resuelve esta tarea especificamente]
+
+**Entregables:**
+- [ ] entregable 1
+- [ ] entregable 2
+
+**Criterio de salida:** [como saber que esta tarea esta lista]
+
+## Mapa de Independencia
+
+[Tabla mostrando que ninguna tarea comparte archivos con otra]
+
+## Criterios de Salida (version completa)
+
+- [ ] Tarea 1 completada
+- [ ] Tarea 2 completada
+- [ ] Tests pasan (meta: mantener cobertura)
+- [ ] Probado en proyectos reales
+```
+
+### Reglas del template multiagente
+
+- Cada tarea lista archivos a tocar Y archivos a NO tocar
+- Ninguna tarea comparte archivos con otra (excepto triviales como cli/__init__.py)
+- Cada tarea tiene su propio criterio de salida independiente
+- Un agente puede tomar una tarea sin leer las demas
+- El mapa de independencia es obligatorio — si hay conflictos, redisenar las tareas
