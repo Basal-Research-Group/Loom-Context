@@ -216,6 +216,111 @@ El core es agnostico al dominio. Los scanners son especificos.
 
 ---
 
+## Soberania de Datos: IA Local sin Exposicion
+
+### El problema
+
+Un investigador quiere usar IA para revisar su tesis, buscar gaps, sugerir
+referencias. Pero enviar drafts completos, datos crudos y datasets a un
+servicio cloud expone la investigacion antes de publicarla.
+
+### La solucion Loom
+
+```
+Investigacion (local, privada)
+         |
+         v
+Loom escanea (local, determinista, sin red)
+         |
+         v
+.context/ (solo metadata, nunca contenido)
+  - "3 hipotesis, 2 datasets, metodo mixto, 47 referencias"
+  - NO: texto de la tesis, datos crudos, resultados sin publicar
+         |
+         v
+Embeddings ranquean (local, all-MiniLM-L6-v2, sin red)
+         |
+         v
+Agente recibe contexto compacto
+  - sabe QUE hay, no sabe QUE DICE
+  - puede sugerir, revisar, detectar gaps
+  - sin acceso al contenido real
+```
+
+### Que ve la IA vs que NO ve
+
+| Dato | Expuesto | Razon |
+|------|----------|-------|
+| Nombre de archivos | Si | Metadata para navegacion |
+| Secciones del documento | Si | Estructura del trabajo |
+| Nombres de datasets | Si | Inventario |
+| Referencias bibliograficas | Si | Ya son publicas |
+| Esquema de datos (columnas, tipos) | Si | Metadata, no valores |
+| **Texto de la tesis** | **No** | Contenido protegido |
+| **Datos crudos** | **No** | Propiedad intelectual |
+| **Resultados no publicados** | **No** | Pre-print protection |
+| **Codigo de analisis** | **No** | Solo metadata de scripts |
+| **Notas personales** | **No** | Filtrado por .contextignore |
+
+### Cadena de confianza
+
+```
+1. FileFilter          → excluye secrets, datos sensibles (.env, data/raw/)
+2. .contextignore      → el investigador define que NO escanear
+3. ResearchScanner     → extrae solo metadata, nunca contenido
+4. Embeddings (local)  → ranking semantico sin enviar datos a cloud
+5. .context/           → output compacto, verificable, auditable
+6. Agente              → recibe el mapa, nunca el territorio
+```
+
+La inteligencia de busqueda y ranking ocurre en la maquina del usuario.
+El LLM externo solo recibe contexto compacto pre-filtrado.
+
+---
+
+## Packaging por Dominio
+
+### Instalacion modular
+
+```bash
+pip install loom-context                    # core: auto-detect, 4 deps
+pip install loom-context[research]          # + research scanner
+pip install loom-context[data]              # + data scanner
+pip install loom-context[ai]               # + embeddings locales
+pip install loom-context[research,ai]      # research + embeddings
+```
+
+### Dependencias por extra
+
+| Extra | Dependencias adicionales | Peso aprox |
+|-------|-------------------------|-----------|
+| core (siempre) | click, rich, pathspec, jinja2 | ~5MB |
+| `[research]` | bibtexparser | ~1MB |
+| `[data]` | (ninguna adicional, usa stdlib) | 0 |
+| `[ai]` | sentence-transformers (trae torch) | ~2GB |
+
+### Principio
+
+El core siempre ligero. Cada dominio es un extra opcional.
+Un investigador que no programa no necesita CodeScanner.
+Un programador que no investiga no necesita ResearchScanner.
+
+### Auto-deteccion vs flag
+
+```bash
+loom init .                    # auto-detecta por archivos presentes
+loom init . --domain research  # forzar dominio
+loom init . --domain code      # forzar codigo (default actual)
+```
+
+Auto-deteccion:
+- `.bib` o `references/` → research
+- `package.json` o `pyproject.toml` → code
+- `dbt_project.yml` o `pipeline/` → data
+- Mixto → escanea con todos los scanners disponibles
+
+---
+
 ## Estado
 
 Exploracion. No hay fecha ni version asignada. Se implementara cuando:
@@ -223,3 +328,4 @@ Exploracion. No hay fecha ni version asignada. Se implementara cuando:
 - El dominio de research se valide con un proyecto real (tesis doctoral)
 - Se confirme que el patron scanner-por-dominio funciona sin modificar el core
 - Se defina el set minimo de artefactos que un ResearchScanner debe leer
+- Se valide que .contextignore protege datos sensibles de investigacion
