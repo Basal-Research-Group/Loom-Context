@@ -117,4 +117,5 @@ temp/
 .context/tmp/
 
 # Loom live state — local per user, never commit
-.loom/
+.loom/*
+!.loom/reports/

@@ -17,8 +17,8 @@ No consistent prefix patterns detected.
 
 ## Code-Level Naming
 
-- **Classes:** PascalCase (60 found)
-- **Functions:** camelCase (142 found)
+- **Classes:** PascalCase (64 found)
+- **Functions:** camelCase (148 found)
 
 ## Import Aliases
 

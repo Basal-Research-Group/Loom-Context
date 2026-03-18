@@ -1,5 +1,5 @@
 {
-  "loom_version": "0.2.0",
+  "loom_version": "0.3.0",
   "project": {
     "name": "Loom-Context",
     "type": "python",
@@ -22,10 +22,10 @@
     "Files use camelCase naming (80% of codebase)"
   ],
   "stats": {
-    "total_files": 66,
-    "total_code_files": 65,
-    "total_docs": 33,
+    "total_files": 68,
+    "total_code_files": 66,
+    "total_docs": 37,
     "total_dependencies": 12
   },
-  "generated_at": "2026-03-18T05:26:28.399576+00:00"
+  "generated_at": "2026-03-18T08:16:35.087221+00:00"
 }
