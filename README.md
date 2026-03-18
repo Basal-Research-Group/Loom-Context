@@ -7,7 +7,7 @@
 
 **Deterministic, axiomatic context for AI-first engineering.**
 
-[English](#-quick-start) · [Español](docs/README.es.md)
+[English](#-quick-start) · [Español](https://github.com/jadruiz/Loom-Context/blob/main/docs/README.es.md)
 
 ```
         .  *  .  *  .
@@ -192,14 +192,14 @@ Tested on a 674-file React Native project:
 
 | Guide | What it covers |
 |-------|---------------|
-| [🚀 Quick Start](docs/guides/quickstart.md) | Install, first scan, daily workflow |
-| [📖 CLI Reference](docs/guides/cli-reference.md) | All 15 commands with examples |
-| [📁 Context Output](docs/guides/context-output.md) | .context/ and .loom/ structure |
-| [🔒 Security](docs/guides/security.md) | 3-layer filtering model |
-| [📐 Best Practices](docs/guides/best-practices.md) | Individual, team, and AI patterns |
-| [🧠 Philosophy](docs/guides/philosophy.md) | The brain analogy + scientific references |
-| [🕸️ Loomy](docs/guides/loomy.md) | The spider-neuron mascot |
-| [📋 Roadmap](docs/plans/roadmap-v0.2-v0.4.md) | Version plan with delivery docs |
+| [🚀 Quick Start](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/quickstart.md) | Install, first scan, daily workflow |
+| [📖 CLI Reference](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/cli-reference.md) | All 15 commands with examples |
+| [📁 Context Output](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/context-output.md) | .context/ and .loom/ structure |
+| [🔒 Security](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/security.md) | 3-layer filtering model |
+| [📐 Best Practices](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/best-practices.md) | Individual, team, and AI patterns |
+| [🧠 Philosophy](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/philosophy.md) | The brain analogy + scientific references |
+| [🕸️ Loomy](https://github.com/jadruiz/Loom-Context/blob/main/docs/guides/loomy.md) | The spider-neuron mascot |
+| [📋 Roadmap](https://github.com/jadruiz/Loom-Context/blob/main/docs/plans/roadmap-v0.2-v0.4.md) | Version plan with delivery docs |
 
 ---
 
