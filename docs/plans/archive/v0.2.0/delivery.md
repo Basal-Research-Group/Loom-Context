@@ -85,4 +85,4 @@ No implementado. Razon: heuristicas producen 93% de reduccion sin IA.
 ## Probado en
 
 - Loom-Context (pipeline, 62 archivos, audit clean)
-- Akana (react-native-expo, 675 archivos, 109 violations, 0.8s)
+- A 674-file React Native project (react-native-expo, 675 archivos, 109 violations, 0.8s)
