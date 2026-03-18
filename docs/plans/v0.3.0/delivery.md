@@ -3,205 +3,195 @@ type: delivery
 version: "0.3.0"
 status: planned
 prerequisite: "0.2.0"
-scope: scanner, generator, cli, infra
+scope: scanner, cli, infra
 languages: [python]
 patterns: [strategy, decorator, observer]
+progress: 0/6
 ---
 
 # v0.3.0 — Analisis Profundo y Observabilidad
 
 ## TL;DR
 
-Loom pasa de "detectar arquitectura" a "medir salud". Naming por rol (no global), violaciones agrupadas con prioridad, metricas cuantitativas por capa, soporte monorepo, y `.loom/reports/` para analytics de uso.
+Loom pasa de "detectar arquitectura" a "medir salud". Naming por rol, violaciones agrupadas con prioridad, metricas por capa, soporte monorepo, y observabilidad de uso.
 
 ---
 
-## Tareas Independientes por Agente
+## Indice
 
-Cada tarea es autocontenida. Un agente puede tomar cualquiera sin depender de las demas. No se pisan entre si porque tocan archivos distintos.
+- [Problema que resuelve](#problema-que-resuelve)
+- [Analogia](#analogia)
+- [Tareas](#tareas)
+- [Mapa de independencia](#mapa-de-independencia)
+- [Criterios de salida](#criterios-de-salida)
+
+---
+
+## Problema que resuelve
+
+Loom v0.2.0 detecta arquitectura y naming pero no mide salud. Akana tiene 109 violaciones sin prioridad, naming al 50% de confianza porque mezcla roles, y no hay metricas cuantitativas. El monorepo se detecta como "flat".
+
+## Analogia
+
+v0.2.0 es como un medico que te dice "tienes fiebre". v0.3.0 es el medico que te dice "tienes fiebre de 39.2, probablemente por infeccion en la garganta, toma primero antibiotico y luego analgesico".
+
+---
+
+## Tareas
+
+Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se pueden ejecutar en paralelo sin conflictos.
+
+---
 
 ### Tarea 1: Naming por Rol
 
-> Agente: puede trabajar solo en `scanners/code.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `scanners/code.py`, `models.py`, `templates/naming.md.j2`
+- **No tocar:** engine.py, cli/, generators/, auditors/, store/, selector/
 
-**Problema:** Loom detecta naming global (50% PascalCase, 48% camelCase en Akana). Pero no es "mixto" — componentes usan PascalCase, hooks/utils usan camelCase. Son dominios distintos.
+**Problema:** Naming global dice 50% PascalCase + 48% camelCase = "mixto". Pero componentes son PascalCase y hooks son camelCase — son roles distintos, no inconsistencia.
 
-**Que hacer:**
+**Entregables:**
 - [ ] Agrupar archivos por rol (componente, hook, service, repository, etc.)
-- [ ] Calcular naming dominante POR ROL, no global
-- [ ] Agregar `naming_by_role` al output de CodeScanner
-- [ ] Actualizar `naming.md` template para mostrar por rol
-- [ ] Tests: proyecto con naming mixto por rol
+- [ ] Calcular naming dominante por rol, no global
+- [ ] Agregar `naming_by_role` a CodeAnalysis en models.py
+- [ ] Actualizar naming.md.j2 para mostrar tabla por rol
+- [ ] Tests con proyecto que tiene naming mixto por rol
 
-**Archivos a tocar:**
-- `src/loom_context/scanners/code.py` — logica de agrupacion
-- `src/loom_context/models.py` — agregar campo `naming_by_role` a CodeAnalysis
-- `src/loom_context/templates/naming.md.j2` — mostrar por rol
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** engine.py, cli/, generators/, auditors/, store/
-
-**Criterio de salida:**
-- En Akana: componentes = PascalCase, hooks = camelCase, services = PascalCase
-- Confianza por rol > 80% (vs 50% global actual)
+**Criterio de salida:** En Akana, componentes = PascalCase (95%+), hooks = camelCase (95%+).
 
 ---
 
 ### Tarea 2: Violaciones Agrupadas con Prioridad
 
-> Agente: puede trabajar solo en `auditors/` y `cli/commands/audit.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `cli/commands/audit.py`, `store/findings.py`
+- **No tocar:** scanners/, generators/, engine.py, selector/
 
-**Problema:** 109 violaciones en Akana, todas "layer-boundary ERROR". No dice por donde empezar ni agrupa por modulo.
+**Problema:** 109 violaciones en Akana, todas "layer-boundary ERROR". No agrupa por modulo ni indica por donde empezar.
 
-**Que hacer:**
-- [ ] Agrupar violaciones por modulo/directorio
-- [ ] Agregar severidad por frecuencia (modulo con mas violaciones = prioridad)
+**Entregables:**
+- [ ] Agrupar violaciones por directorio
+- [ ] Ordenar por frecuencia (modulo con mas violaciones = prioridad alta)
 - [ ] Mostrar resumen agrupado en `loom audit`
-- [ ] Agregar `--summary` flag a audit para vista compacta
-- [ ] Persistir violaciones agrupadas en `.loom/inconsistencies.json`
-- [ ] Tests: proyecto con violaciones en multiples modulos
+- [ ] Agregar `--summary` flag para vista compacta
+- [ ] Persistir agrupacion en `.loom/inconsistencies.json`
+- [ ] Tests con violaciones en multiples modulos
 
-**Archivos a tocar:**
-- `src/loom_context/cli/commands/audit.py` — renderizado agrupado
-- `src/loom_context/store/findings.py` — agregar agrupacion
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** scanners/, generators/, engine.py, selector/
-
-**Criterio de salida:**
-- `loom audit .` muestra: "core/ — 107 violations, domain/ — 2 violations"
-- `loom audit . --summary` muestra solo totales por modulo
+**Criterio de salida:** `loom audit` muestra "core/ — 107 violations | domain/ — 2 violations".
 
 ---
 
 ### Tarea 3: Metricas por Capa
 
-> Agente: puede trabajar solo en `status.py` y un nuevo `metrics.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `metrics.py` NUEVO, `cli/commands/metrics.py` NUEVO, `cli/__init__.py`
+- **No tocar:** scanners/, generators/, auditors/, store/, selector/
 
-**Problema:** Loom detecta que hay Clean Architecture pero no mide si esta balanceada. No hay metricas cuantitativas.
+**Problema:** Loom detecta Clean Architecture pero no mide si esta balanceada. No hay numeros.
 
-**Que hacer:**
-- [ ] Crear `src/loom_context/metrics.py` con calculo de metricas
-- [ ] Metricas: archivos por capa, lineas por capa, balance ratio
-- [ ] Agregar `loom metrics` comando
-- [ ] Output: tabla con metricas por capa + score de salud
+**Entregables:**
+- [ ] Crear `src/loom_context/metrics.py` con metricas por capa
+- [ ] Metricas: archivos por capa, balance ratio, capa mas grande/chica
+- [ ] Comando `loom metrics` con tabla Rich
 - [ ] Persistir en `.loom/reports/metrics.json`
-- [ ] Tests: proyecto con capas desbalanceadas
+- [ ] Tests con capas desbalanceadas
 
-**Archivos a tocar:**
-- `src/loom_context/metrics.py` — NUEVO
-- `src/loom_context/cli/commands/metrics.py` — NUEVO
-- `src/loom_context/cli/__init__.py` — registrar comando
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** scanners/, generators/, auditors/, store/, selector/
-
-**Criterio de salida:**
-- `loom metrics .` muestra tabla con archivos/lineas por capa
-- En Akana: muestra que core/ tiene mas archivos que domain/
+**Criterio de salida:** `loom metrics` muestra tabla con archivos/capa y score de balance.
 
 ---
 
 ### Tarea 4: Soporte Monorepo
 
-> Agente: puede trabajar solo en `scanners/structure.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `scanners/structure.py`, `models.py`
+- **No tocar:** generators/, auditors/, cli/, store/, selector/
 
-**Problema:** `core_monorepo_enn` se detecta como "flat" porque Loom no entra a packages/workspaces. No lee `workspaces` de package.json ni `packages/` dirs.
+**Problema:** `core_monorepo_enn` se detecta como "flat". Loom no lee `workspaces` de package.json ni entra a `packages/`.
 
-**Que hacer:**
-- [ ] Detectar monorepo por: `workspaces` en package.json, `packages/` dir, `apps/` dir
-- [ ] Escanear cada workspace como sub-proyecto
+**Entregables:**
+- [ ] Detectar monorepo: `workspaces` en package.json, `packages/`, `apps/`
 - [ ] Agregar `is_monorepo` y `workspaces` a StructureFacts
-- [ ] Mostrar info de workspaces en status y init
-- [ ] Tests: proyecto monorepo con 2+ packages
+- [ ] Escanear cada workspace como sub-proyecto
+- [ ] Tests con monorepo de 2+ packages
 
-**Archivos a tocar:**
-- `src/loom_context/scanners/structure.py` — deteccion de workspaces
-- `src/loom_context/models.py` — agregar campos a StructureFacts
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** generators/, auditors/, cli/, store/, selector/
-
-**Criterio de salida:**
-- `core_monorepo_enn` se detecta como monorepo con N workspaces
-- Cada workspace tiene su propio project_type
+**Criterio de salida:** `core_monorepo_enn` se detecta como monorepo con N workspaces listados.
 
 ---
 
 ### Tarea 5: Observabilidad (.loom/reports/)
 
-> Agente: puede trabajar solo en `store/` y un nuevo `reporter.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `store/reporter.py` NUEVO, `cli/commands/report.py` NUEVO, `cli/__init__.py`
+- **No tocar:** scanners/, generators/, auditors/, selector/
 
-**Problema:** No hay registro de como se usa Loom. No se sabe que comandos se corren, cuanto tardan, que sale. Sin esto no hay datos para decidir que mejorar.
+**Problema:** No hay registro de como se usa Loom. Sin datos de uso, no se puede decidir que mejorar.
 
-**Que hacer:**
-- [ ] Crear `.loom/reports/` para analytics de uso
-- [ ] Registrar cada comando: nombre, duracion, resultado, timestamp
-- [ ] `loom report` comando para ver analytics
-- [ ] Metricas: comandos mas usados, tiempo promedio, errores frecuentes
-- [ ] Tests: verificar que reports se crean y leen
+**Entregables:**
+- [ ] Crear `.loom/reports/usage.jsonl` con registro por comando
+- [ ] Registrar: comando, duracion, resultado, timestamp, SHA
+- [ ] Comando `loom report` para ver analytics de uso
+- [ ] Tests de registro y lectura
 
-**Archivos a tocar:**
-- `src/loom_context/store/reporter.py` — NUEVO
-- `src/loom_context/cli/commands/report.py` — NUEVO
-- `src/loom_context/cli/__init__.py` — registrar comando
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** scanners/, generators/, auditors/, selector/
-
-**Criterio de salida:**
-- Cada `loom <cmd>` registra uso en `.loom/reports/usage.jsonl`
-- `loom report` muestra: "init: 5 runs, avg 0.8s | audit: 3 runs, avg 0.2s"
+**Criterio de salida:** `loom report` muestra "init: 5 runs, avg 0.8s | audit: 3 runs".
 
 ---
 
 ### Tarea 6: Python Logging
 
-> Agente: puede trabajar solo en `git.py`, `engine.py`
+- **Status:** `- [ ]` pendiente
+- **Agente:** cualquiera (no depende de otras tareas)
+- **Archivos:** `engine.py`, `git.py`, `cli/__init__.py`
+- **No tocar:** generators/, auditors/, store/, selector/, scanners/
 
-**Problema:** Cuando Loom no detecta algo, no hay forma de saber por que. Sin logging, debuggear es ciego.
+**Problema:** Cuando Loom no detecta algo, no hay forma de saber por que. Debugging es ciego.
 
-**Que hacer:**
-- [ ] Agregar `logging.getLogger("loom")` al engine y scanners
-- [ ] Log level: DEBUG para detalles, INFO para resumen, WARNING para problemas
-- [ ] `--verbose` flag global para activar DEBUG en CLI
-- [ ] No romper output Rich (logging a stderr, Rich a stdout)
-- [ ] Tests: verificar que logs se emiten correctamente
+**Entregables:**
+- [ ] Agregar `logging.getLogger("loom")` a engine y git
+- [ ] Flag global `--verbose` para activar DEBUG
+- [ ] Logging a stderr (no romper output Rich en stdout)
+- [ ] Tests de logging
 
-**Archivos a tocar:**
-- `src/loom_context/engine.py` — agregar logger
-- `src/loom_context/cli/__init__.py` — flag --verbose
-- `src/loom_context/git.py` — log de errores git
-- `tests/test_cli.py` — tests nuevos
-
-**NO tocar:** generators/, auditors/, store/, selector/, scanners/ (solo engine)
-
-**Criterio de salida:**
-- `loom init . --verbose` muestra logs de cada scanner
-- Sin --verbose, output identico al actual
+**Criterio de salida:** `loom init . --verbose` muestra log de cada scanner. Sin flag, output identico.
 
 ---
 
 ## Mapa de Independencia
 
 ```
-Tarea 1 (naming)     → scanners/code.py        ← INDEPENDIENTE
-Tarea 2 (audit)      → auditors/ + audit.py     ← INDEPENDIENTE
-Tarea 3 (metricas)   → metrics.py NUEVO         ← INDEPENDIENTE
-Tarea 4 (monorepo)   → scanners/structure.py    ← INDEPENDIENTE
-Tarea 5 (reports)    → store/reporter.py NUEVO  ← INDEPENDIENTE
-Tarea 6 (logging)    → engine.py + git.py       ← INDEPENDIENTE
+Tarea    Archivos exclusivos                  Conflicto
+─────    ─────────────────────────────────    ─────────
+  1      scanners/code.py, naming.md.j2       Ninguno
+  2      auditors/, audit.py, findings.py     Ninguno
+  3      metrics.py NUEVO, metrics cmd        Ninguno
+  4      scanners/structure.py                Ninguno
+  5      store/reporter.py NUEVO, report cmd  Ninguno
+  6      engine.py, git.py                    Ninguno
 ```
 
-Ningun agente toca los mismos archivos que otro. Pueden ejecutarse en paralelo sin conflictos de merge.
+Solo `cli/__init__.py` se toca en tareas 3, 5 y 6 (para registrar comandos nuevos). Ese merge es trivial — una linea de import + una de add_command.
 
 ---
 
-## Orden sugerido (si se hacen secuenciales)
+## Criterios de Salida (version completa)
 
-1. Tarea 2 (audit agrupado) — mayor impacto inmediato en Akana
-2. Tarea 1 (naming por rol) — resuelve el 50% de confianza
-3. Tarea 3 (metricas) — nuevo comando con valor propio
-4. Tarea 4 (monorepo) — desbloquea core_monorepo_enn
-5. Tarea 5 (reports) — observabilidad de uso
-6. Tarea 6 (logging) — infraestructura para debugging
+- [ ] Tarea 1: naming por rol completada
+- [ ] Tarea 2: audit agrupado completada
+- [ ] Tarea 3: metricas por capa completada
+- [ ] Tarea 4: monorepo support completada
+- [ ] Tarea 5: observabilidad completada
+- [ ] Tarea 6: logging completada
+- [ ] Tests nuevos pasan (meta: mantener 95%+ cobertura)
+- [ ] Probado en Akana + core_monorepo_enn
+- [ ] Lint + format + mypy limpios
+
+---
+
+## Dependencias nuevas
+
+Ninguna.
