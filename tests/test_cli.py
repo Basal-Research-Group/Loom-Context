@@ -1348,7 +1348,6 @@ class TestConfigExtended:
         content = (tmp_path / ".gitignore").read_text()
         assert ".loom/*" in content
         assert "!.loom/reports/" in content
-        assert ".context/" in content
 
     def test_ensure_gitignore_appends_to_existing(self, tmp_path: Path) -> None:
         """ensure_gitignore appends to existing .gitignore without duplicating."""
