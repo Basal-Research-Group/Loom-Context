@@ -18,6 +18,8 @@ class StructureFacts:
     total_files: int
     file_counts_by_dir: dict[str, int] = field(default_factory=dict)
     project_name: str = ""
+    is_monorepo: bool = False
+    workspaces: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -51,6 +53,7 @@ class CodeAnalysis:
     prefix_patterns: list[dict[str, Any]]
     import_aliases: dict[str, str]
     total_code_files: int
+    naming_by_role: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
