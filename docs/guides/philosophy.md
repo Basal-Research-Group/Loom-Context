@@ -229,4 +229,32 @@ Lo que Loom agrega es la **compilacion**: tomar esa informacion dispersa en 700 
 
 ---
 
+## 🔷 Contexto Axiomatico
+
+Los LLMs son probabilisticos. Loom es axiomatico.
+
+> 📚 *"An axiom is a statement that is taken to be true, to serve as a premise or starting point for further reasoning."* — Euclid, *Elements* (~300 BCE)
+
+Las reglas de boundaries, naming, arquitectura de tu proyecto no son opiniones — son **invariantes**. No cambian segun el modelo, la sesion, ni el prompt. Son axiomas del proyecto.
+
+Loom los extrae una vez, los persiste, y todos los agentes los respetan. No porque "crean" que son correctos (probabilidad), sino porque estan **definidos** como correctos (axioma).
+
+### Por que importa
+
+| Enfoque | Tipo | Riesgo |
+|---------|------|--------|
+| Agente lee el repo completo | Probabilistico | Re-interpreta reglas en cada sesion, deriva |
+| Agente lee `.context/` de Loom | Axiomatico | Reglas fijas, consistentes, verificables |
+
+### Implicaciones
+
+- **Menos tokens** — no re-descubrir lo que ya se sabe
+- **Menos deriva** — mismas reglas para todos los agentes
+- **Menos costo** — contexto comprimido, no diluido
+- **Menos impacto energetico** — menos computo por tarea
+
+> La propuesta de valor no es "Loom usa IA". Es "Loom evita desperdiciar IA".
+
+---
+
 *Siguiente: [🏗️ Arquitectura de Loom →](../architecture/overview.md)*

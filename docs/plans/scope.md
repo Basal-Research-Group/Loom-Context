@@ -6,7 +6,9 @@ type: scope
 
 ## TL;DR
 
-Loom es un compilador de contexto para proyectos de software. Escanea un repo, extrae metadata arquitectonica y genera `.context/` para que agentes de IA entiendan el proyecto sin leer todo el codigo. No es para tareas generales — funciona porque los repos codifican mucha informacion en su estructura.
+Loom no usa IA. Loom evita desperdiciar IA.
+
+Es un compilador de contexto determinista que escanea un repo, extrae arquitectura y convenciones, y genera contexto compacto para que los agentes trabajen con señal, no con ruido. Menos tokens, menos deriva, menos costo. Contexto axiomatico — derivado de reglas, no de probabilidad.
 
 ---
 
@@ -139,16 +141,55 @@ El agente ejecuta Loom como parte de su flujo:
 
 ---
 
+## Por que adoptarlo
+
+### El problema que nadie resuelve bien
+
+Cada sesion con un agente de IA empieza desde cero. El agente re-lee el repo, gasta tokens en archivos irrelevantes, ignora convenciones que el equipo lleva meses refinando. Multiplica eso por 5 agentes, 10 devs, 20 tareas al dia.
+
+### Lo que Loom hace diferente
+
+No agrega IA. Agrega estructura determinista ANTES de la IA.
+
+| Sin Loom | Con Loom |
+|----------|---------|
+| 35KB de prompt generico | 2.6KB de contexto relevante |
+| Agente re-lee 700 archivos | Agente lee 7 archivos compactos |
+| Cada sesion empieza de cero | Handoff con estado, decisiones, findings |
+| Reglas se pierden entre sesiones | Rules persistidas y auditables |
+| Cada agente inventa su propia vision | Todos comparten el mismo contexto |
+
+### Narrativa
+
+- "Loom evita desperdiciar IA"
+- "Menos tokens, mas senal"
+- "Menos relectura, mas continuidad"
+- "Menos consumo, mas precision"
+
+### Concepto: contexto axiomatico
+
+Axiomatico = derivado de principios, no de probabilidad.
+
+Los LLMs son probabilisticos. Loom es axiomatico. Las reglas de boundaries, naming, arquitectura son invariantes del proyecto — no cambian segun el modelo ni la sesion. Loom las extrae una vez y las persiste como axiomas que todos los agentes respetan.
+
+> No todo debe depender de probabilidad. Hay una capa de principios que debe mantenerse estable.
+
+---
+
 ## Direccion futura
 
-### Context-first scaffolding (v0.5.0+, no confirmado)
+### v0.4.0: Adopcion y ahorro medible
 
-**Analogia:** hoy el inspector solo revisa casas existentes. En el futuro, podria entregar los planos base para que el constructor arranque desde una estructura ya validada.
+- Metricas de tokens ahorrados en CLI
+- Ahorro visible por bundle/focus/compact
+- Integracion sin friccion con Claude, Codex, Cursor
+- Repos de ejemplo
+- Demo en 60 segundos
 
-```bash
-loom seed --type backend-clean --stack python
-```
+### v0.5.0+: Multiagente y gobernanza
 
-Generaria estructura, docs minimos, decisiones iniciales y `.context/` base. Asi un agente arrancaria desde contexto estructurado en vez de una carpeta vacia.
-
-**No es prioridad ahora.** Primero consolidar el flujo repo-existente → contexto.
+- Contexto compartido entre agentes
+- Deteccion de conflictos entre tareas
+- Worktrees/locks para bundles
+- Boundaries explicitos via loom.json
+- Bootstrap de proyecto (loom seed)

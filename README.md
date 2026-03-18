@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/loom-context)](https://pypi.org/project/loom-context/)
 [![License](https://img.shields.io/github/license/jadruiz/Loom-Context)](LICENSE)
 
-**Architecture context engine for AI-first engineering.**
+**Deterministic, axiomatic context for AI-first engineering.**
 
 ```
         .  *  .  *  .
@@ -14,10 +14,19 @@
          /  |  \
         *  .  *  .  *
 
-  weaving context, one thread at a time
+  less tokens, more signal
 ```
 
-Loom scans your repository, infers architecture and conventions, and generates compact `.context/` that any AI agent can consume as project memory. No cloud, no LLM, no heavy deps — just deterministic analysis in <2 seconds.
+Loom doesn't use AI. Loom prevents wasting AI.
+
+It scans your repo, infers architecture and conventions, and compiles compact context that any agent (Claude, Codex, Cursor) can consume — so they stop re-reading 700 files and start working with the right 7.
+
+```
+Without Loom:  35KB prompt  →  agent reads everything  →  drift, waste, hallucinations
+With Loom:     2.6KB bundle →  agent reads what matters →  precision, consistency, savings
+```
+
+No cloud. No LLM. No heavy deps. Deterministic analysis in <2 seconds. 93% fewer tokens.
 
 ```bash
 pip install loom-context
