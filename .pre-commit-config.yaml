@@ -1,4 +1,5 @@
 repos:
+  # === File hygiene ===
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -10,12 +11,17 @@ repos:
       - id: check-added-large-files
         args: ["--maxkb=500"]
       - id: check-merge-conflict
-      - id: detect-private-key
       - id: check-case-conflict
       - id: check-symlinks
       - id: check-ast
         files: \.py$
+      # Security
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+      - id: no-commit-to-branch
+        args: ["--branch", "main"]
 
+  # === Lint + format ===
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.0
     hooks:
@@ -23,6 +29,7 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  # === Type checking ===
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
     hooks:
@@ -31,6 +38,7 @@ repos:
         additional_dependencies: [click, rich, pathspec, jinja2]
         files: ^src/
 
+  # === Commit message ===
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.0.0
     hooks:
@@ -48,3 +56,11 @@ repos:
           - ci
           - chore
           - revert
+
+  # === Security scanning ===
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.8
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml", "--recursive", "src/"]
+        additional_dependencies: ["bandit[toml]"]

@@ -153,3 +153,13 @@ omit = ["tests/*"]
 show_missing = true
 skip_empty = true
 fail_under = 80
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = [
+    "B603",  # subprocess calls to git are intentional
+    "B607",  # git is expected on PATH
+    "B701",  # jinja2 autoescape=False — generating .md, not HTML
+    "B404",  # subprocess import — used for git commands only
+    "B311",  # random.sample — file sampling, not security
+]
