@@ -47,12 +47,12 @@ class LoomConfig:
         """Add Loom entries to .gitignore if missing. Returns True if modified."""
         gitignore = self.root / ".gitignore"
 
-        # Required entries: ignore .loom/* but track .loom/reports/, ignore .context/
+        # Required entries: ignore .loom/* but track .loom/reports/
+        # Note: .context/ is NOT ignored — each project decides if they track it
         loom_entries = [
             ("# Loom-Context", None),
             (".loom/*", ".loom"),
             ("!.loom/reports/", None),
-            (".context/", ".context"),
         ]
 
         content = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
