@@ -63,6 +63,13 @@ ARCHITECTURE_PATTERNS: dict[str, list[set[str]]] = {
         {"controllers", "services", "repositories"},
         {"api", "services", "data"},
     ],
+    "pipeline": [
+        {"scanners", "generators"},
+        {"scanners", "generators", "auditors"},
+        {"parsers", "transformers", "emitters"},
+        {"extractors", "processors", "loaders"},
+        {"collectors", "analyzers", "reporters"},
+    ],
 }
 
 # Semantic annotations for directory names
@@ -95,7 +102,7 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "routing": "App routing configuration",
     "routes": "Route definitions",
     "state": "State management",
-    "store": "State store",
+    "store": "State store / persistence layer",
     "slices": "State slices",
     "actions": "State actions/thunks",
     "selectors": "State selectors/queries",
@@ -111,6 +118,15 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "definitions": "Schema/table definitions",
     "migrations": "Database migrations",
     "seeds": "Database seed data",
+    "scanners": "Input scanners (pipeline pattern)",
+    "generators": "Output generators (pipeline pattern)",
+    "auditors": "Rule validators (pipeline pattern)",
+    "parsers": "Input parsers (pipeline pattern)",
+    "transformers": "Data transformers (pipeline pattern)",
+    "emitters": "Output emitters (pipeline pattern)",
+    "extractors": "Data extractors (ETL pattern)",
+    "processors": "Data processors (ETL pattern)",
+    "loaders": "Data loaders (ETL pattern)",
     "utils": "Utility functions",
     "helpers": "Helper functions",
     "lib": "Shared library code",
@@ -146,7 +162,6 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "tracking": "Event tracking",
     "error": "Error handling",
     "devtools": "Development tools/debug utilities",
-    "generators": "Code/data generators",
     "strategies": "Strategy pattern implementations",
     "filters": "Data filters",
     "rules": "Business/validation rules",
@@ -215,6 +230,9 @@ class StructureScanner(BaseScanner):
         directory_tree = self._build_annotated_tree(src_root, max_depth=4)
         boundaries = self._get_boundary_rules(architecture)
 
+        # Monorepo detection
+        is_monorepo, workspaces = self._detect_monorepo()
+
         return {
             "project_type": project_type,
             "architecture": architecture,
@@ -223,6 +241,8 @@ class StructureScanner(BaseScanner):
             "layer_boundaries": boundaries,
             "total_files": sum(self._file_count.values()),
             "file_counts_by_dir": self._file_count,
+            "is_monorepo": is_monorepo,
+            "workspaces": workspaces,
         }
 
     def _detect_project_type(self) -> str:
@@ -278,6 +298,17 @@ class StructureScanner(BaseScanner):
             for entry in src_root.iterdir():
                 if entry.is_dir() and entry.name not in {".git", "node_modules", "__pycache__"}:
                     dirs.add(entry.name)
+
+        # If only one dir exists and it looks like a Python package, look inside it
+        if len(dirs) == 1:
+            pkg_name = next(iter(dirs))
+            pkg_dir = src_root / pkg_name
+            init_file = pkg_dir / "__init__.py"
+            if init_file.exists():
+                for entry in pkg_dir.iterdir():
+                    if entry.is_dir() and entry.name not in {"__pycache__"}:
+                        dirs.add(entry.name)
+
         return dirs
 
     def _detect_architecture(self, top_dirs: set[str]) -> list[str]:
@@ -370,3 +401,61 @@ class StructureScanner(BaseScanner):
             if arch in BOUNDARY_RULES:
                 boundaries.update(BOUNDARY_RULES[arch])
         return boundaries
+
+    def _detect_monorepo(self) -> tuple[bool, list[str]]:
+        """Detect monorepo structure and list workspaces."""
+        workspaces: list[str] = []
+
+        # Check package.json workspaces
+        pkg_json = self.root / "package.json"
+        if pkg_json.exists():
+            try:
+                with open(pkg_json, encoding="utf-8") as f:
+                    pkg = json.load(f)
+                ws = pkg.get("workspaces", [])
+                if isinstance(ws, list) and ws:
+                    # Resolve glob patterns
+                    for pattern in ws:
+                        clean = pattern.rstrip("/*").rstrip("*")
+                        ws_dir = self.root / clean
+                        if ws_dir.is_dir():
+                            for entry in sorted(ws_dir.iterdir()):
+                                if entry.is_dir() and not entry.name.startswith("."):
+                                    workspaces.append(str(entry.relative_to(self.root)))
+                elif isinstance(ws, dict) and ws.get("packages"):
+                    for pattern in ws["packages"]:
+                        clean = pattern.rstrip("/*").rstrip("*")
+                        ws_dir = self.root / clean
+                        if ws_dir.is_dir():
+                            for entry in sorted(ws_dir.iterdir()):
+                                if entry.is_dir() and not entry.name.startswith("."):
+                                    workspaces.append(str(entry.relative_to(self.root)))
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Check common monorepo dirs
+        if not workspaces:
+            for mono_dir in ["packages", "apps", "libs", "modules"]:
+                candidate = self.root / mono_dir
+                if candidate.is_dir():
+                    for entry in sorted(candidate.iterdir()):
+                        if entry.is_dir() and not entry.name.startswith("."):
+                            workspaces.append(str(entry.relative_to(self.root)))
+
+        # Check pnpm-workspace.yaml
+        pnpm_ws = self.root / "pnpm-workspace.yaml"
+        if not workspaces and pnpm_ws.exists():
+            try:
+                content = pnpm_ws.read_text(encoding="utf-8")
+                for line in content.splitlines():
+                    line = line.strip().lstrip("- ").strip("'\"").rstrip("/*")
+                    if line and not line.startswith("#") and not line.startswith("packages"):
+                        ws_dir = self.root / line
+                        if ws_dir.is_dir():
+                            for entry in sorted(ws_dir.iterdir()):
+                                if entry.is_dir() and not entry.name.startswith("."):
+                                    workspaces.append(str(entry.relative_to(self.root)))
+            except OSError:
+                pass
+
+        return bool(workspaces), workspaces

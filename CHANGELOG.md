@@ -1,8 +1,77 @@
+---
+type: changelog
+---
+
 # Changelog
 
 All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [0.3.0] - 2026-03-18
+
+### Added — Analysis & Observability (v0.3.0)
+- `loom metrics`: health metrics per layer (files, code, dirs, balance score)
+- `loom report`: usage analytics from `.loom/reports/usage.jsonl`
+- `loom audit --summary`: violations grouped by directory and rule
+- `--verbose / -v`: global debug logging flag
+- Naming by role analysis (hooks=camelCase, components=PascalCase vs 50% global)
+- Monorepo detection (workspaces, packages/, apps/, pnpm-workspace.yaml)
+- `.loom/reports/metrics.json` persistence
+- 12 new tests (269 total, 95% coverage)
+
+### Added — Context Engine (v0.2.0, included)
+
+### Added — Commands (9 new, 15 total)
+- `loom enrich`: re-audit, regenerate context, persist findings
+- `loom decide`: record/show/clear architectural decisions
+- `loom bundle`: task-specific context with heuristic selection (93% smaller than prompt)
+- `loom handoff`: session continuity summary for resuming work
+- `loom doctor`: 11-check health diagnostic
+- `loom export --agent claude|cursor|codex|generic`: agent-specific output
+- `--compact` flag on `prompt` and `bundle`: token-efficient format (71-89% reduction)
+- `--top-k` and `--token-budget` flags on `bundle`: control output size
+- `loom focus`: task-filtered prompt (existing, from v0.1.x)
+
+### Added — Infrastructure
+- `.loom/` directory for live operational state (separate from `.context/`)
+- `store/` package: sessions, findings, decisions, mutations
+- `selector/` package: heuristic strategy, bundle builder, handoff builder, compact formatter
+- `exporters/` package: 4 agent adapters (Claude, Cursor, Codex, Generic) with Registry pattern
+- `models.py`: typed contracts with frozen dataclasses
+- `brand.py`: Loomy mascot with 8 expressions
+- `GitHelper`: shared git utility (DRY)
+- Frontmatter YAML parsing in DocsScanner (no PyYAML dependency)
+- Pipeline architecture detection (scanners + generators)
+- Audit integrated in `loom init` (non-blocking)
+- Session migration from `.context/` to `.loom/`
+
+### Added — Documentation
+- Complete rewrite of README, quickstart, CLI reference, context output, security, best practices
+- Philosophy guide with 8 scientific references (Miller, Hebb, Gibson, Ausubel, etc.)
+- Loomy mascot guide with expressions and design philosophy
+- Standard document format with frontmatter (docs/plans/format.md)
+- Per-version delivery plans with lifecycle (planned → released → archived)
+- Product scope definition (docs/plans/scope.md)
+
+### Changed
+- CLI modularized: `cli.py` (566 lines) → `cli/` package (15 command files, each <90 lines)
+- `engine.scan()` returns `ScanResult` (typed) instead of `dict[str, Any]`
+- `Violation.severity` now `Literal["error", "warning", "info"]`
+- Session log moved from `.context/` to `.loom/`
+- Exports write to `.context/exports/` (never overwrite user files)
+- StructureScanner detects Python packages one level deep
+- License updated from MIT to Apache-2.0 with `NOTICE`, contributor credit, and trademark guidance
+
+### Removed
+- Duplicated git command logic across 4 files (replaced by GitHelper)
+- Monolithic `cli.py`
+
+### Tests
+- 108 tests (was 25 in v0.1.0), all passing in ~3s
+- Coverage: file filter, scanners, engine, CLI, auditors, edge cases, sessions, focus, status, findings, decisions, mutations, init+audit, enrich, decide, bundle, handoff, doctor, export, compact, pipeline detection, frontmatter, typed contracts
+
+[0.2.0]: https://github.com/jadruiz/Loom-Context/releases/tag/v0.2.0
 
 ## [0.1.0] - 2026-03-14
 

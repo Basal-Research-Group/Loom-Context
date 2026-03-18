@@ -1,6 +1,21 @@
+---
+type: architecture
+scope: infra, generator
+status: future
+target_version: "future"
+---
+
 # Estrategia de Integracion de IA Local
 
 > Objetivo: usar modelos abiertos para mejorar seleccion, resumen y handoff, sin convertir a Loom en una herramienta dependiente de LLMs.
+
+## Estado (2026-03-16)
+
+La IA de retrieval/ranking sigue como linea futura opcional, posterior a `v0.3.0`. Las decisiones aqui siguen vigentes pero no se implementan hasta tener:
+
+- contratos tipados (v0.2.1)
+- bundles heuristicos funcionando (v0.2.2)
+- evidencia medible de que las heuristicas no alcanzan
 
 ## Decision Principal
 
@@ -52,6 +67,15 @@ La IA puede ayudar a producir:
 
 ## Arquitectura Objetivo
 
+La capa de IA solo debe entrar despues del hardening base de arquitectura.
+
+Prerequisito:
+
+- contratos tipados para resultados y manifests
+- separacion `.context/` vs `.loom/`
+- puertos claros para seleccion, ranking y storage
+- casos de uso fuera del CLI
+
 ### Capa 1: analisis determinista
 
 Responsabilidad:
@@ -80,10 +104,11 @@ Responsabilidad:
 
 Paquetes propuestos:
 
-- `selector/heuristics.py`
-- `selector/embeddings.py`
-- `selector/rerank.py`
-- `selector/budget.py`
+- `selector/strategies/heuristic.py`
+- `selector/strategies/hybrid.py`
+- `selector/policies/budget.py`
+- `domain/models/selection.py`
+- `domain/ports/ranker.py`
 
 ### Capa 3: sintesis opcional
 
@@ -95,9 +120,36 @@ Responsabilidad:
 
 Paquetes propuestos:
 
-- `assistants/export.py`
-- `assistants/handoff.py`
-- `assistants/summarize.py`
+- `application/use_cases/export_agent_payload.py`
+- `application/use_cases/build_handoff.py`
+- `application/use_cases/summarize_bundle.py`
+- `infrastructure/ai/summarizer.py`
+
+## Patrones de Diseno Recomendados
+
+### Strategy
+
+Para alternar entre:
+
+- heuristicas puras
+- ranking hibrido
+- modos futuros sin reescribir el flujo completo
+
+### Adapter
+
+Para encapsular modelos y proveedores locales de embeddings o generacion.
+
+### Policy Objects
+
+Para reglas de:
+
+- token budget
+- inclusion minima de `quick_rules`
+- thresholds de score
+
+### Registry
+
+Para registrar capacidades opcionales sin acoplar todo a un switch central.
 
 ## Modelos Recomendados
 
@@ -199,13 +251,13 @@ El usuario no debe instalar stack pesado si solo quiere `init`, `scan`, `audit` 
 
 ## Pipeline Propuesto para `loom bundle`
 
-1. leer `.context/index.json`
-2. leer reglas y docs disponibles
-3. generar candidatos con heuristicas
-4. si `--ai local`, rankear semanticamente
+1. cargar `ScanResult` o indice canonico
+2. resolver candidatos con strategy heuristica
+3. aplicar policy de inclusion minima
+4. si `--ai local`, usar adapter de ranking semantico
 5. cortar por `top-k` y `token-budget`
 6. generar `bundle.md`
-7. generar `manifest.json`
+7. serializar `manifest.json`
 8. opcionalmente sintetizar handoff
 
 ## Cache e Incrementalidad
@@ -216,6 +268,11 @@ El usuario no debe instalar stack pesado si solo quiere `init`, `scan`, `audit` 
 - embedding
 - timestamp
 - tipo de artefacto
+
+Ubicacion recomendada:
+
+- `.loom/cache/embeddings/`
+- `.loom/cache/bundles/`
 
 ### Invalidacion
 
@@ -258,6 +315,7 @@ La estrategia correcta es:
 - deterministic-first
 - local-first
 - optional-AI
+- contracts-first
 - reproducible outputs
 - small-core, heavy-extras
 
@@ -267,4 +325,3 @@ No:
 - prompt-first
 - monolithic dependency tree
 - dependencia total de un proveedor
-

@@ -1,6 +1,15 @@
+---
+type: contributing
+---
+
 # Contributing to Loom-Context
 
 Thanks for your interest in contributing! This guide covers everything you need to set up your development environment, follow our conventions, and submit quality contributions.
+
+Before contributing, also review:
+
+- `CODE_OF_CONDUCT.md` for collaboration expectations
+- `SECURITY.md` for private vulnerability reporting
 
 ---
 
@@ -48,7 +57,7 @@ loom --version
 # loom, version 0.1.0
 
 pytest
-# 25 passed
+# 78 passed
 ```
 
 ### Alternative: Install Without Virtual Environment
@@ -67,25 +76,47 @@ pip install -e ".[dev]"
 Loom-Context/
 ├── src/loom_context/           # Main package
 │   ├── __init__.py             # Version
-│   ├── cli.py                  # Click CLI
+│   ├── cli.py                  # Click CLI (commands)
 │   ├── engine.py               # Central orchestrator
-│   ├── config.py               # Configuration
+│   ├── config.py               # Configuration (.context/ + .loom/)
+│   ├── git.py                  # Shared git utilities
+│   ├── session.py              # Session logger (.loom/sessions.jsonl)
+│   ├── status.py               # Project health dashboard
+│   ├── findings.py             # Audit persistence (.loom/inconsistencies.json)
+│   ├── decisions.py            # Decision records (.loom/decisions.jsonl)
+│   ├── mutations.py            # Context change log (.loom/mutations.jsonl)
 │   ├── scanners/               # Project analysis
 │   ├── generators/             # .context/ output
 │   ├── auditors/               # Rule validation
 │   ├── security/               # File filtering
 │   └── templates/              # Jinja2 templates
-├── tests/                      # Pytest tests
-│   ├── conftest.py             # Fixtures
+├── tests/                      # Pytest tests (78+)
+│   ├── conftest.py             # Fixtures (tmp_project)
 │   └── test_cli.py             # All tests
-├── docs/                       # Documentation
+├── docs/
+│   ├── guides/                 # User-facing guides
+│   └── plans/                  # Delivery plans by version
+│       ├── scope.md
+│       ├── format.md
+│       ├── roadmap-v0.2-v0.4.md
+│       └── v0.X.Y/delivery.md
 ├── pyproject.toml              # Package config
 ├── CONTRIBUTING.md             # This file
+├── CHANGELOG.md                # Release history
 ├── README.md                   # Project readme
-└── LICENSE                     # MIT
+└── LICENSE                     # Apache-2.0
 ```
 
 See [docs/architecture/directory-structure.md](docs/architecture/directory-structure.md) for full annotated structure.
+
+## License and Attribution
+
+By contributing to Loom-Context, you agree that your contributions are submitted
+under the Apache License 2.0 used by this repository.
+
+Contributors are credited through Git history, release notes, and
+`CONTRIBUTORS.md`. Please use your preferred public Git identity in commits so
+that attribution remains accurate.
 
 ---
 
@@ -173,7 +204,20 @@ Tests are in `tests/test_cli.py` organized by component:
 | `TestCodeScanner` | 2 | Naming detection, import aliases |
 | `TestDocsScanner` | 3 | Finds docs, classifies, extracts status |
 | `TestEngine` | 3 | Full init, index.json structure, prompt generation |
-| `TestCLI` | 7 | All CLI commands work |
+| `TestCLI` | 10 | All CLI commands work |
+| `TestNamingAuditor` | 2 | Interface prefix detection |
+| `TestStructureAuditor` | 2 | Layer boundary violations |
+| `TestEdgeCases` | 5 | Empty projects, Python, secrets, contextignore |
+| `TestSessionLogger` | 6 | Append, read, clear, migration to .loom/ |
+| `TestFocusGenerator` | 6 | Task-specific context matching |
+| `TestStatusCommand` | 4 | Dashboard, JSON output, sessions |
+| `TestLogCommand` | 4 | Session logging via CLI |
+| `TestFindingsStore` | 4 | Audit persistence |
+| `TestDecisionLog` | 4 | Decision records |
+| `TestMutationLog` | 2 | Context change tracking |
+| `TestInitWithAudit` | 4 | Audit in init, .loom/ creation |
+| `TestEnrichCommand` | 3 | Enrichment pipeline |
+| `TestDecideCommand` | 4 | Decision recording via CLI |
 
 ### Writing New Tests
 
@@ -272,13 +316,15 @@ Current: `0.1.0` (pre-1.0, API may change between minor versions).
 
 ## Pull Request Process
 
-1. **Fork** the repo and create a branch from `main`
+Open pull requests with the repository template and keep the validation checklist accurate. If your change is user-facing, update `README.md`, `docs/`, or `CHANGELOG.md` as appropriate.
+
+1. **Fork** the repo and create a branch from `develop` (main triggers PyPI deploy)
 2. **Write code** following the style guide above
 3. **Add tests** for new functionality
 4. **Run tests** locally: `pytest`
 5. **Update docs** if your change affects user-facing behavior
 6. **Commit** following Conventional Commits
-7. **Open PR** against `main` with:
+7. **Open PR** against `develop` with:
    - Clear title (Conventional Commits format)
    - Description of what and why
    - Link to related issue if applicable

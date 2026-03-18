@@ -1,0 +1,23 @@
+{
+  "naming": {
+    "files": {
+      "dominant_style": "camelCase"
+    },
+    "code": {
+      "classes": {
+        "format": "PascalCase",
+        "count": 64
+      },
+      "functions": {
+        "format": "camelCase",
+        "count": 148
+      }
+    }
+  },
+  "architecture": {
+    "layer_boundaries": {},
+    "patterns": [
+      "pipeline"
+    ]
+  }
+}

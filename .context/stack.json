@@ -1,0 +1,27 @@
+{
+  "package_manager": "pip",
+  "dependency_files": [
+    "pyproject.toml"
+  ],
+  "stack_summary": {
+    "cli": [
+      "click@8.1",
+      "rich@13.0"
+    ],
+    "other": [
+      "pathspec@0.12",
+      "jinja2@3.1",
+      "dev = [",
+      "ruff@0.4",
+      "mypy@1.0",
+      "build@1.0",
+      "twine@5.0",
+      "]"
+    ],
+    "testing": [
+      "pytest@7.0",
+      "pytest-cov@4.0"
+    ]
+  },
+  "total_dependencies": 12
+}

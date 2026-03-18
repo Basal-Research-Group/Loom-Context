@@ -90,13 +90,18 @@ class DocsScanner(BaseScanner):
         except OSError:
             content = ""
 
-        title = self._extract_title(content)
-        sections = self._extract_sections(content)
-        doc_type = self._classify_doc(path, content)
-        status_items = self._extract_status(content)
+        frontmatter = self._extract_frontmatter(content)
+        body = self._strip_frontmatter(content)
+
+        title = self._extract_title(body)
+        sections = self._extract_sections(body)
+        status_items = self._extract_status(body)
         size_kb = round(len(content.encode("utf-8")) / 1024, 1)
 
-        return {
+        # Frontmatter type takes priority over heuristic
+        doc_type = frontmatter.get("type") or self._classify_doc(path, body)
+
+        result: dict[str, Any] = {
             "path": str(path.relative_to(self.root)),
             "title": title,
             "type": doc_type,
@@ -104,6 +109,63 @@ class DocsScanner(BaseScanner):
             "status_items": status_items,
             "size_kb": size_kb,
         }
+
+        # Add frontmatter fields if present
+        if "version" in frontmatter:
+            result["version"] = frontmatter["version"]
+        if "status" in frontmatter:
+            result["doc_status"] = frontmatter["status"]
+        if "scope" in frontmatter:
+            result["scope"] = frontmatter["scope"]
+        if "prerequisite" in frontmatter:
+            result["prerequisite"] = frontmatter["prerequisite"]
+        if "patterns" in frontmatter:
+            result["patterns"] = frontmatter["patterns"]
+        if "progress" in frontmatter:
+            result["progress"] = frontmatter["progress"]
+
+        return result
+
+    def _extract_frontmatter(self, content: str) -> dict[str, Any]:
+        """Extract YAML frontmatter from markdown (between --- delimiters)."""
+        if not content.startswith("---"):
+            return {}
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return {}
+        fm_text = parts[1].strip()
+        if not fm_text:
+            return {}
+
+        # Simple YAML parsing without PyYAML dependency
+        result: dict[str, Any] = {}
+        for line in fm_text.split("\n"):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if ":" not in line:
+                continue
+            key, _, value = line.partition(":")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+
+            # Parse lists: [item1, item2]
+            if value.startswith("[") and value.endswith("]"):
+                items = value[1:-1].split(",")
+                result[key] = [item.strip().strip('"').strip("'") for item in items if item.strip()]
+            else:
+                result[key] = value
+
+        return result
+
+    def _strip_frontmatter(self, content: str) -> str:
+        """Remove YAML frontmatter from content."""
+        if not content.startswith("---"):
+            return content
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return content
+        return parts[2]
 
     def _extract_title(self, content: str) -> str:
         """Extract the main title from markdown."""

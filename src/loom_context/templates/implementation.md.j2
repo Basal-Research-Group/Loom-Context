@@ -1,0 +1,99 @@
+# Implementation Plan — {{ project_name }}
+
+> Generated: {{ generated_at }}
+> Loom: v{{ loom_version }} | SHA: {{ git_sha or "unknown" }} | Branch: {{ branch or "unknown" }}
+
+## Current State
+
+| Metric | Value |
+|--------|-------|
+| Project Type | {{ project_type }} |
+| Architecture | {{ architecture | join(", ") if architecture else "not detected" }} |
+| Layers | {{ total_layers }} active |
+| Total Files | {{ total_files }} |
+| Balance Score | {{ "%.2f" | format(balance_score) }} |
+| Open Violations | {{ violations_total }} |
+{% if delta %}
+| Resolved (last delta) | {{ delta.resolved }} |
+| New (last delta) | {{ delta.new }} |
+{% endif %}
+
+## Violation Summary
+
+{% if violations_by_severity %}
+| Severity | Count |
+|----------|-------|
+{% for sev, count in violations_by_severity.items() %}
+| {{ sev }} | {{ count }} |
+{% endfor %}
+{% else %}
+No violations detected.
+{% endif %}
+
+{% if clusters %}
+## Priority Clusters
+
+{% for cluster in clusters %}
+### {{ loop.index }}. {{ cluster.source }} → {{ cluster.target }}
+
+- **Violations**: {{ cluster.count }}
+- **Rule**: {{ cluster.rule }}
+{% if cluster.files %}
+- **Files** ({{ cluster.files | length }}):
+{% for file in cluster.files[:10] %}
+  - `{{ file }}`
+{% endfor %}
+{% if cluster.files | length > 10 %}
+  - ... and {{ cluster.files | length - 10 }} more
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+{% if phases %}
+## Recommended Sequence
+
+{% for phase in phases %}
+### Phase {{ loop.index }}: {{ phase.name }}
+
+{% for task in phase.tasks %}
+- [ ] {{ task }}
+{% endfor %}
+{% if phase.validation %}
+
+**Validation**: `{{ phase.validation }}`
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+{% if existing_plans %}
+## Existing Plans
+
+| Document | Status | Progress |
+|----------|--------|----------|
+{% for plan in existing_plans %}
+| `{{ plan.path }}` | {{ plan.doc_status or "—" }} | {{ plan.progress or "—" }} |
+{% endfor %}
+{% endif %}
+
+{% if open_decisions %}
+## Open Decisions
+
+{% for decision in open_decisions %}
+- {{ decision.summary }} ({{ decision.scope or "global" }})
+{% endfor %}
+{% endif %}
+
+{% if pending_items %}
+## Pending Items from Plans
+
+{% for item in pending_items[:20] %}
+- [ ] {{ item }}
+{% endfor %}
+{% if pending_items | length > 20 %}
+
+... and {{ pending_items | length - 20 }} more pending items.
+{% endif %}
+{% endif %}

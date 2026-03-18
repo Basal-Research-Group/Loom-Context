@@ -100,5 +100,22 @@ temp/
 .codeium/
 .continue/
 
-# Loom output (uncomment to exclude from version control)
-# .context/
+# Loom canonical context — KEEP in git (this is the value Loom provides)
+# .context/index.json
+# .context/architecture.md
+# .context/naming.md
+# .context/directory-map.md
+# .context/stack.json
+# .context/rules.json
+# .context/plans-summary.md
+
+# Loom ephemeral outputs — regenerated on demand, don't commit
+.context/exports/
+.context/bundles/
+.context/sessions.jsonl
+.context/cache/
+.context/tmp/
+
+# Loom live state — local per user, never commit
+.loom/*
+!.loom/reports/

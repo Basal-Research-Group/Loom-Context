@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "loom-context"
-version = "0.1.0"
+version = "0.3.0"
 description = "Architecture Context Engine for AI-First Engineering"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [
     { name = "J. Adrian Ruiz C.", email = "153795808+jadruiz@users.noreply.github.com" },
@@ -33,7 +33,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -121,9 +121,12 @@ ignore = [
 "src/loom_context/cli.py" = [
     "T201",    # print/click.echo is the CLI's job
 ]
-"src/loom_context/session.py" = [
+"src/loom_context/git.py" = [
     "S603",    # subprocess call to git is intentional
     "S607",    # git is expected on PATH
+]
+"src/loom_context/cli/commands/*.py" = [
+    "T201",    # print/click.echo is the CLI's job
 ]
 
 [tool.ruff.lint.isort]
@@ -150,3 +153,13 @@ omit = ["tests/*"]
 show_missing = true
 skip_empty = true
 fail_under = 80
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = [
+    "B603",  # subprocess calls to git are intentional
+    "B607",  # git is expected on PATH
+    "B701",  # jinja2 autoescape=False — generating .md, not HTML
+    "B404",  # subprocess import — used for git commands only
+    "B311",  # random.sample — file sampling, not security
+]
