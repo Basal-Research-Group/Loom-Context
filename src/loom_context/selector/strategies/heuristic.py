@@ -132,7 +132,8 @@ class HeuristicStrategy:
         if not content:
             return {}
         try:
-            return json.loads(content)
+            data: dict[str, Any] = json.loads(content)
+            return data
         except (json.JSONDecodeError, ValueError):
             return {}
 

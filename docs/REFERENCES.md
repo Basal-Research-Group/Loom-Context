@@ -144,7 +144,7 @@
   title = {Loom-Context: Architecture Context Engine for AI-First Engineering},
   year = {2026},
   url = {https://github.com/jadruiz/Loom-Context},
-  license = {MIT}
+  license = {Apache-2.0}
 }
 ```
 

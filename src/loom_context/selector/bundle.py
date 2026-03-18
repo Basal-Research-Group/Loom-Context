@@ -6,7 +6,7 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from loom_context import __version__
 from loom_context.git import GitHelper
@@ -143,7 +143,8 @@ class BundleBuilder:
             return {}
         try:
             with open(path, encoding="utf-8") as f:
-                return json.load(f)
+                data: dict[Any, Any] = json.load(f)
+                return data
         except (json.JSONDecodeError, OSError):
             return {}
 

@@ -61,6 +61,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Session log moved from `.context/` to `.loom/`
 - Exports write to `.context/exports/` (never overwrite user files)
 - StructureScanner detects Python packages one level deep
+- License updated from MIT to Apache-2.0 with `NOTICE`, contributor credit, and trademark guidance
 
 ### Removed
 - Duplicated git command logic across 4 files (replaced by GitHelper)

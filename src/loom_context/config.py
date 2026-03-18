@@ -38,6 +38,44 @@ class LoomConfig:
         return self.context_dir
 
     def ensure_loom_dir(self) -> Path:
-        """Create .loom/ directory if it doesn't exist."""
+        """Create .loom/ directory and reports/ subdirectory if they don't exist."""
         self.loom_dir.mkdir(exist_ok=True)
+        (self.loom_dir / "reports").mkdir(exist_ok=True)
         return self.loom_dir
+
+    def ensure_gitignore(self) -> bool:
+        """Add Loom entries to .gitignore if missing. Returns True if modified."""
+        gitignore = self.root / ".gitignore"
+
+        # Required entries: ignore .loom/* but track .loom/reports/, ignore .context/
+        loom_entries = [
+            ("# Loom-Context", None),
+            (".loom/*", ".loom"),
+            ("!.loom/reports/", None),
+            (".context/", ".context"),
+        ]
+
+        content = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
+
+        lines = content.splitlines()
+        modified = False
+
+        for entry, check_pattern in loom_entries:
+            if check_pattern is not None:
+                # Check if already covered by existing rules
+                already_present = any(
+                    line.strip() == entry or line.strip() == check_pattern for line in lines
+                )
+            else:
+                already_present = any(line.strip() == entry for line in lines)
+
+            if not already_present:
+                if not modified and content and not content.endswith("\n"):
+                    lines.append("")
+                lines.append(entry)
+                modified = True
+
+        if modified:
+            gitignore.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+        return modified

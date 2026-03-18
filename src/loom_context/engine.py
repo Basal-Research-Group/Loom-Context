@@ -154,8 +154,11 @@ class LoomEngine:
         scan_result = self.scan()
         generated = self.generate_context(scan_result)
 
-        # Ensure .loom/ exists
+        # Ensure .loom/ exists (includes reports/)
         self.config.ensure_loom_dir()
+
+        # Configure .gitignore on first init
+        self.config.ensure_gitignore()
 
         # Migrate sessions from .context/ to .loom/ if needed
         self._migrate_sessions()

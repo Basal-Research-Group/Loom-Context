@@ -104,10 +104,19 @@ Loom-Context/
 ├── CONTRIBUTING.md             # This file
 ├── CHANGELOG.md                # Release history
 ├── README.md                   # Project readme
-└── LICENSE                     # MIT
+└── LICENSE                     # Apache-2.0
 ```
 
 See [docs/architecture/directory-structure.md](docs/architecture/directory-structure.md) for full annotated structure.
+
+## License and Attribution
+
+By contributing to Loom-Context, you agree that your contributions are submitted
+under the Apache License 2.0 used by this repository.
+
+Contributors are credited through Git history, release notes, and
+`CONTRIBUTORS.md`. Please use your preferred public Git identity in commits so
+that attribution remains accurate.
 
 ---
 
