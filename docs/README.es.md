@@ -226,6 +226,8 @@ ruff format --check src/ tests/  # format
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — setup, convenciones, proceso de PR
 - [CHANGELOG.md](../CHANGELOG.md) — historial de releases
 - [SECURITY.md](../SECURITY.md) — reporte de vulnerabilidades
+- [CONTRIBUTORS.md](../CONTRIBUTORS.md) — credito a mantenedores y contribuidores
+- [TRADEMARKS.md](../TRADEMARKS.md) — uso del nombre y branding
 
 ---
 
@@ -238,3 +240,7 @@ ruff format --check src/ tests/  # format
 ## Licencia
 
 Apache License 2.0.
+
+Loom-Context es libre de usar, modificar y distribuir para uso personal y comercial
+bajo los terminos de la licencia. Los requisitos de atribucion y aviso se preservan
+a traves de [LICENSE](../LICENSE) y [NOTICE](../NOTICE).
