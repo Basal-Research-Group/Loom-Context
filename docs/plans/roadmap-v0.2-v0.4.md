@@ -211,7 +211,7 @@ Todo lo implementado en esta sesion. Ver [delivery unificado](./archive/v0.2.0/d
 
 ### v0.3.0 (siguiente, pendiente de uso real)
 
-Scope por definir basado en feedback de uso real en Akana. Areas candidatas:
+Scope por definir basado en feedback de uso real. Areas candidatas:
 - analisis profundo de arquitecturas mixtas
 - metricas y KPIs por capa
 - observabilidad y logging

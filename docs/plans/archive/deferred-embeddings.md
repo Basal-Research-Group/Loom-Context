@@ -19,7 +19,7 @@ Embeddings locales como capa opcional para mejorar precision de seleccion en bun
 
 ## Por que se postergo
 
-- Heuristicas de bundle funcionan bien en Akana (674 archivos, contexto relevante)
+- Heuristicas de bundle funcionan bien en a 674-file React Native project (contexto relevante)
 - `sentence-transformers` trae PyTorch (~2GB), rompe principio de ligereza
 - No hay evidencia medible de que embeddings mejorarian el resultado
 
