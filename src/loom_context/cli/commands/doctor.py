@@ -108,14 +108,18 @@ def doctor(path: str) -> None:
         else:
             warn("no decisions recorded — use 'loom decide'")
 
-    # 6. .gitignore includes .loom/
+    # 6. .gitignore includes .loom/ with reports exception
     gitignore = root / ".gitignore"
     if gitignore.exists():
         gi_content = gitignore.read_text(encoding="utf-8")
-        if ".loom/" in gi_content or ".loom" in gi_content:
-            ok(".loom/ in .gitignore")
+        has_loom_ignore = ".loom/*" in gi_content or ".loom/" in gi_content or ".loom" in gi_content
+        has_reports_exception = "!.loom/reports/" in gi_content or "!.loom/reports" in gi_content
+        if has_loom_ignore and has_reports_exception:
+            ok(".loom/* ignored, .loom/reports/ tracked")
+        elif has_loom_ignore:
+            warn(".loom/ ignored but .loom/reports/ not tracked — run 'loom init .' to fix")
         else:
-            warn(".loom/ not in .gitignore — add it to avoid committing state")
+            warn(".loom/ not in .gitignore — run 'loom init .' to configure")
     else:
         warn("no .gitignore found")
 

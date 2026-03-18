@@ -1,4 +1,4 @@
-"""loom plan: read and summarize existing docs/plans."""
+"""loom plan: read and summarize existing docs/plans, or generate implementation plan."""
 
 from __future__ import annotations
 
@@ -11,8 +11,37 @@ from loom_context.cli import console
 
 @click.command()
 @click.argument("path", default=".", type=click.Path(exists=True))
-def plan(path: str) -> None:
+@click.option("--generate", is_flag=True, help="Generate implementation plan from Loom data")
+def plan(path: str, generate: bool) -> None:
     """Read and summarize existing docs/plans for AI consumption."""
+    if generate:
+        _generate_plan(path)
+    else:
+        _list_plans(path)
+
+
+def _generate_plan(path: str) -> None:
+    """Generate an implementation plan from .context/ and .loom/ data."""
+    from loom_context.brand import LOOMY_HAPPY
+    from loom_context.generators.plan import PlanGenerator
+
+    root = Path(path).resolve()
+    context_dir = root / ".context"
+
+    if not context_dir.exists():
+        console.print("  [red]No .context/ found.[/red] Run [cyan]loom init .[/cyan] first.")
+        return
+
+    generator = PlanGenerator(root)
+    output_path = generator.generate()
+
+    rel_path = Path(output_path).relative_to(root)
+    console.print(f"\n  {LOOMY_HAPPY} Implementation plan generated")
+    console.print(f"  [green]+[/green] {rel_path}\n")
+
+
+def _list_plans(path: str) -> None:
+    """List and summarize existing documentation plans."""
     from loom_context.brand import LOOMY_HAPPY
     from loom_context.engine import LoomEngine
 

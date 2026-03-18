@@ -205,6 +205,8 @@ ruff format --check src/ tests/  # format
 - [CONTRIBUTING.md](CONTRIBUTING.md) — setup, conventions, PR process
 - [CHANGELOG.md](CHANGELOG.md) — release history
 - [SECURITY.md](SECURITY.md) — vulnerability reporting
+- [CONTRIBUTORS.md](CONTRIBUTORS.md) — maintainer and contributor credit
+- [TRADEMARKS.md](TRADEMARKS.md) — project name and branding guidance
 
 ---
 
@@ -216,4 +218,8 @@ ruff format --check src/ tests/  # format
 
 ## License
 
-MIT
+Apache License 2.0.
+
+Loom-Context is free to use, modify, and distribute for personal and commercial
+purposes under the terms of the license. Attribution and notice requirements are
+preserved through [LICENSE](LICENSE) and [NOTICE](NOTICE).

@@ -1337,6 +1337,68 @@ class TestConfigExtended:
         config = LoomConfig(tmp_path)
         assert config.project_type == "custom"
 
+    def test_ensure_gitignore_creates_entries(self, tmp_path: Path) -> None:
+        """ensure_gitignore adds Loom entries to new .gitignore."""
+        from loom_context.config import LoomConfig
+
+        config = LoomConfig(tmp_path)
+        modified = config.ensure_gitignore()
+        assert modified is True
+
+        content = (tmp_path / ".gitignore").read_text()
+        assert ".loom/*" in content
+        assert "!.loom/reports/" in content
+        assert ".context/" in content
+
+    def test_ensure_gitignore_appends_to_existing(self, tmp_path: Path) -> None:
+        """ensure_gitignore appends to existing .gitignore without duplicating."""
+        from loom_context.config import LoomConfig
+
+        (tmp_path / ".gitignore").write_text("node_modules/\n.env\n")
+        config = LoomConfig(tmp_path)
+        modified = config.ensure_gitignore()
+        assert modified is True
+
+        content = (tmp_path / ".gitignore").read_text()
+        assert "node_modules/" in content
+        assert ".loom/*" in content
+        assert "!.loom/reports/" in content
+
+    def test_ensure_gitignore_idempotent(self, tmp_path: Path) -> None:
+        """ensure_gitignore does not duplicate entries on second run."""
+        from loom_context.config import LoomConfig
+
+        config = LoomConfig(tmp_path)
+        config.ensure_gitignore()
+        modified = config.ensure_gitignore()
+        assert modified is False
+
+        content = (tmp_path / ".gitignore").read_text()
+        assert content.count(".loom/*") == 1
+        assert content.count("!.loom/reports/") == 1
+
+    def test_ensure_gitignore_skips_if_loom_already_present(self, tmp_path: Path) -> None:
+        """ensure_gitignore skips .loom entry if .loom/ already in .gitignore."""
+        from loom_context.config import LoomConfig
+
+        (tmp_path / ".gitignore").write_text(".loom/\n")
+        config = LoomConfig(tmp_path)
+        modified = config.ensure_gitignore()
+        assert modified is True
+
+        content = (tmp_path / ".gitignore").read_text()
+        # Should not add .loom/* since .loom/ already covers it
+        assert ".loom/" in content
+        assert "!.loom/reports/" in content
+
+    def test_ensure_loom_dir_creates_reports(self, tmp_path: Path) -> None:
+        """ensure_loom_dir also creates reports/ subdirectory."""
+        from loom_context.config import LoomConfig
+
+        config = LoomConfig(tmp_path)
+        config.ensure_loom_dir()
+        assert (tmp_path / ".loom" / "reports").is_dir()
+
 
 class TestWatchCommand:
     def test_watch_help(self) -> None:
@@ -3001,3 +3063,171 @@ class TestBundleCommand:
         assert manifest.loom_version == "0.3.0"
         assert manifest.selection_strategy == "heuristic"
         assert len(manifest.included_sections) > 0
+
+
+class TestPlanGenerate:
+    def test_plan_generate_creates_report(self, tmp_project: Path) -> None:
+        """loom plan --generate creates a plan file in .loom/reports/."""
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["plan", str(tmp_project), "--generate"])
+        assert result.exit_code == 0
+        assert "Implementation plan generated" in result.output
+
+        reports = list((tmp_project / ".loom" / "reports").glob("plan-*.md"))
+        assert len(reports) == 1
+
+    def test_plan_generate_contains_sections(self, tmp_project: Path) -> None:
+        """Generated plan contains expected markdown sections."""
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        from loom_context.generators.plan import PlanGenerator
+
+        gen = PlanGenerator(tmp_project)
+        output_path = gen.generate()
+        content = Path(output_path).read_text()
+
+        assert "# Implementation Plan" in content
+        assert "## Current State" in content
+        assert "## Recommended Sequence" in content
+
+    def test_plan_generate_no_context_fails(self, tmp_path: Path) -> None:
+        """loom plan --generate without .context/ shows error."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["plan", str(tmp_path), "--generate"])
+        assert result.exit_code == 0
+        assert "No .context/ found" in result.output
+
+    def test_plan_generate_with_violations(self, tmp_project: Path) -> None:
+        """Generated plan includes violation clusters when findings exist."""
+        engine = LoomEngine(tmp_project)
+        engine.init()
+
+        # Create mock findings with boundary violations
+        loom_dir = tmp_project / ".loom"
+        findings = {
+            "timestamp": "2026-03-18T00:00:00+00:00",
+            "git_sha": "abc1234",
+            "errors": 3,
+            "warnings": 0,
+            "violations": [
+                {
+                    "file": "src/core/boot.ts",
+                    "line": 10,
+                    "rule": "layer-boundary",
+                    "message": "core should not import from infrastructure",
+                    "severity": "error",
+                    "suggestion": "Use DI token",
+                },
+                {
+                    "file": "src/core/init.ts",
+                    "line": 5,
+                    "rule": "layer-boundary",
+                    "message": "core should not import from infrastructure",
+                    "severity": "error",
+                    "suggestion": "Use DI token",
+                },
+                {
+                    "file": "src/core/ui.ts",
+                    "line": 1,
+                    "rule": "layer-boundary",
+                    "message": "core should not import from presentation",
+                    "severity": "error",
+                    "suggestion": "Move to presentation",
+                },
+            ],
+        }
+        (loom_dir / "inconsistencies.json").write_text(json.dumps(findings))
+
+        from loom_context.generators.plan import PlanGenerator
+
+        gen = PlanGenerator(tmp_project)
+        output_path = gen.generate()
+        content = Path(output_path).read_text()
+
+        assert "core" in content
+        assert "infrastructure" in content
+        assert "Priority Clusters" in content
+
+
+class TestDeltaTracking:
+    def test_delta_created_on_second_save(self, tmp_project: Path) -> None:
+        """Delta report is created when saving findings a second time."""
+        from loom_context.models import Violation
+        from loom_context.store.findings import FindingsStore
+
+        loom_dir = tmp_project / ".loom"
+        loom_dir.mkdir(exist_ok=True)
+        (loom_dir / "reports").mkdir(exist_ok=True)
+
+        store = FindingsStore(loom_dir, tmp_project)
+
+        # First save: 3 violations
+        v1 = [
+            Violation("a.ts", 1, "r1", "msg1", "error"),
+            Violation("b.ts", 2, "r1", "msg2", "error"),
+            Violation("c.ts", 3, "r1", "msg3", "error"),
+        ]
+        store.save(v1)
+
+        # Second save: 2 violations (one resolved, one new)
+        v2 = [
+            Violation("a.ts", 1, "r1", "msg1", "error"),
+            Violation("b.ts", 2, "r1", "msg2", "error"),
+            Violation("d.ts", 4, "r1", "msg4", "error"),
+        ]
+        store.save(v2)
+
+        delta_files = list((loom_dir / "reports").glob("delta-*.json"))
+        assert len(delta_files) == 1
+
+        delta = json.loads(delta_files[0].read_text())
+        assert delta["before"] == 3
+        assert delta["after"] == 3
+        assert delta["resolved"] == 1
+        assert delta["new"] == 1
+
+    def test_no_delta_on_first_save(self, tmp_project: Path) -> None:
+        """No delta report on first save (no previous findings)."""
+        from loom_context.models import Violation
+        from loom_context.store.findings import FindingsStore
+
+        loom_dir = tmp_project / ".loom"
+        loom_dir.mkdir(exist_ok=True)
+        (loom_dir / "reports").mkdir(exist_ok=True)
+
+        store = FindingsStore(loom_dir, tmp_project)
+        store.save([Violation("a.ts", 1, "r1", "msg1", "error")])
+
+        delta_files = list((loom_dir / "reports").glob("delta-*.json"))
+        assert len(delta_files) == 0
+
+    def test_delta_resolved_files(self, tmp_project: Path) -> None:
+        """Delta tracks which files had their violations resolved."""
+        from loom_context.models import Violation
+        from loom_context.store.findings import FindingsStore
+
+        loom_dir = tmp_project / ".loom"
+        loom_dir.mkdir(exist_ok=True)
+        (loom_dir / "reports").mkdir(exist_ok=True)
+
+        store = FindingsStore(loom_dir, tmp_project)
+        store.save(
+            [
+                Violation("a.ts", 1, "r1", "msg1", "error"),
+                Violation("b.ts", 2, "r1", "msg2", "error"),
+            ]
+        )
+        store.save(
+            [
+                Violation("a.ts", 1, "r1", "msg1", "error"),
+            ]
+        )
+
+        delta_files = list((loom_dir / "reports").glob("delta-*.json"))
+        delta = json.loads(delta_files[0].read_text())
+        assert delta["resolved"] == 1
+        assert "b.ts" in delta["resolved_files"]

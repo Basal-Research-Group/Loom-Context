@@ -7,7 +7,7 @@ name = "loom-context"
 version = "0.3.0"
 description = "Architecture Context Engine for AI-First Engineering"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [
     { name = "J. Adrian Ruiz C.", email = "153795808+jadruiz@users.noreply.github.com" },
@@ -33,7 +33,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
