@@ -11,15 +11,14 @@ versions: ["0.2.0", "0.2.1", "0.2.2", "0.3.0"]
 
 Loom es un compilador de contexto para proyectos de software. Ver [scope.md](./scope.md) para limites y direccion.
 
-## Estado Actual (2026-03-17)
+## Estado Actual (2026-03-18)
 
 | Version | Estado | Entregables | Detalle |
 |---------|--------|-------------|---------|
 | v0.1.0 | Publicado en PyPI | 6 comandos, 25 tests | — |
-| v0.2.0 | En develop (listo para release) | 15 comandos, 257 tests, 95% cobertura | [delivery](./archive/v0.2.0/delivery.md) |
-| v0.3.0 | Postergado | Embeddings (sin evidencia de necesidad) | [deferred](./archive/v0.3.0/delivery.md) |
-| v0.5.0+ | Futuro | Analisis profundo, observabilidad, metricas | Pendiente de uso real |
-- Compact formatter para output denso sin markdown
+| v0.3.0 | Listo para release | 17 comandos, 281 tests, Apache-2.0 | [archive](./archive/v0.2.0/delivery.md) + [v0.3.0](./v0.3.0/delivery.md) |
+| v0.4.0 | Planificado | Ahorro medible, cache, zero-friction, demo | [delivery](./v0.4.0/delivery.md) |
+| v0.5.0+ | Futuro | Multiagente, gobernanza, boundaries explicitos | Pendiente |
 
 ---
 
