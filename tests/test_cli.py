@@ -295,7 +295,7 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(main, ["--version"])
         assert result.exit_code == 0
-        assert "0.3.0" in result.output
+        assert "0.3.1" in result.output
 
     def test_init_command(self, tmp_project: Path) -> None:
         runner = CliRunner()
@@ -1704,7 +1704,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.3.0",
+            "0.3.1",
         )
         assert result["project"]["language"] == "TypeScript"
 
@@ -1723,7 +1723,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.3.0",
+            "0.3.1",
         )
         assert result["project"]["language"] == "Rust"
 
@@ -1742,7 +1742,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.3.0",
+            "0.3.1",
         )
         assert result["project"]["language"] == "Go"
 
@@ -2730,7 +2730,7 @@ class TestIndexRuntime:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.3.0",
+            "0.3.1",
         )
         assert "react@19" in r["project"]["runtime"]
 
@@ -2745,7 +2745,7 @@ class TestIndexRuntime:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.3.0",
+            "0.3.1",
         )
         assert r["project"]["runtime"] == "Go"
 
@@ -3059,7 +3059,7 @@ class TestBundleCommand:
         assert result is not None
         _, manifest = result
         assert manifest.task == "architecture boundaries"
-        assert manifest.loom_version == "0.3.0"
+        assert manifest.loom_version == "0.3.1"
         assert manifest.selection_strategy == "heuristic"
         assert len(manifest.included_sections) > 0
 
