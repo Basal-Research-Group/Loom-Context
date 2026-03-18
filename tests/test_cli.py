@@ -2689,6 +2689,118 @@ class TestIndexRuntime:
         assert r["project"]["runtime"] == "Go"
 
 
+class TestNamingByRole:
+    def test_naming_by_role_detected(self, tmp_project: Path) -> None:
+        engine = LoomEngine(tmp_project)
+        result = engine.scan()
+        # tmp_project has hooks (useUser.ts) and components
+        nbr = result.code.naming_by_role
+        assert isinstance(nbr, dict)
+
+    def test_hooks_detected_as_camelcase(self, tmp_path: Path) -> None:
+        src = tmp_path / "src" / "hooks"
+        src.mkdir(parents=True)
+        for name in ["useAuth.ts", "useUser.ts", "useTheme.ts"]:
+            (src / name).write_text("export {};")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.code.naming_by_role.get("hook", {}).get("style") == "camelCase"
+
+
+class TestMetricsCommand:
+    def test_metrics_with_layers(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["metrics", str(tmp_project)])
+        assert result.exit_code == 0
+        assert "Layer Metrics" in result.output
+        assert "Balance" in result.output
+
+    def test_metrics_json(self, tmp_project: Path) -> None:
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["metrics", str(tmp_project), "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert "layers" in data
+        assert "balance_score" in data
+
+    def test_metrics_no_layers(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["metrics", str(tmp_path)])
+        assert result.exit_code == 0
+
+
+class TestAuditSummary:
+    def test_audit_summary_flag(self, tmp_project: Path) -> None:
+        bad = tmp_project / "src" / "domain" / "entities" / "SumBad.ts"
+        bad.write_text('import { X } from "@infrastructure/repos/X";\n')
+        runner = CliRunner()
+        runner.invoke(main, ["init", str(tmp_project)])
+        result = runner.invoke(main, ["audit", str(tmp_project), "--summary"])
+        assert result.exit_code == 1
+        assert "by Directory" in result.output
+        assert "by Rule" in result.output
+
+
+class TestReportCommand:
+    def test_report_empty(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["report", str(tmp_path)])
+        assert result.exit_code == 0
+        assert "No usage data" in result.output
+
+    def test_reporter_record_and_read(self, tmp_path: Path) -> None:
+        from loom_context.store.reporter import UsageReporter
+
+        loom = tmp_path / ".loom"
+        loom.mkdir()
+        reporter = UsageReporter(loom, tmp_path)
+        reporter.record("init", 800, success=True)
+        reporter.record("audit", 200, success=True)
+        reporter.record("init", 900, success=True)
+        summary = reporter.summary()
+        assert "init" in summary
+        assert summary["init"]["runs"] == 2
+        assert summary["audit"]["runs"] == 1
+
+
+class TestMonorepoDetection:
+    def test_detects_workspaces_from_package_json(self, tmp_path: Path) -> None:
+        (tmp_path / "package.json").write_text('{"workspaces": ["packages/*"]}')
+        pkgs = tmp_path / "packages"
+        pkgs.mkdir()
+        (pkgs / "app-a").mkdir()
+        (pkgs / "app-b").mkdir()
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.is_monorepo
+        assert len(result.structure.workspaces) == 2
+
+    def test_detects_packages_dir(self, tmp_path: Path) -> None:
+        pkgs = tmp_path / "packages"
+        pkgs.mkdir()
+        (pkgs / "core").mkdir()
+        (pkgs / "ui").mkdir()
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert result.structure.is_monorepo
+
+    def test_not_monorepo(self, tmp_path: Path) -> None:
+        (tmp_path / "src").mkdir()
+        (tmp_path / "src" / "main.py").write_text("pass")
+        engine = LoomEngine(tmp_path)
+        result = engine.scan()
+        assert not result.structure.is_monorepo
+
+
+class TestVerboseFlag:
+    def test_verbose_flag_exists(self) -> None:
+        runner = CliRunner()
+        result = runner.invoke(main, ["--help"])
+        assert "--verbose" in result.output or "-v" in result.output
+
+
 class TestHandoffCommand:
     def test_handoff_stdout(self, tmp_project: Path) -> None:
         runner = CliRunner()

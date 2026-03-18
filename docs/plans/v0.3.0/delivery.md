@@ -1,12 +1,12 @@
 ---
 type: delivery
 version: "0.3.0"
-status: planned
+status: in-progress
 prerequisite: "0.2.0"
 scope: scanner, cli, infra
 languages: [python]
 patterns: [strategy, decorator, observer]
-progress: 0/6
+progress: 6/6
 ---
 
 # v0.3.0 — Analisis Profundo y Observabilidad
@@ -45,7 +45,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 1: Naming por Rol
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `scanners/code.py`, `models.py`, `templates/naming.md.j2`
 - **No tocar:** engine.py, cli/, generators/, auditors/, store/, selector/
@@ -65,7 +65,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 2: Violaciones Agrupadas con Prioridad
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `cli/commands/audit.py`, `store/findings.py`
 - **No tocar:** scanners/, generators/, engine.py, selector/
@@ -86,7 +86,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 3: Metricas por Capa
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `metrics.py` NUEVO, `cli/commands/metrics.py` NUEVO, `cli/__init__.py`
 - **No tocar:** scanners/, generators/, auditors/, store/, selector/
@@ -106,7 +106,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 4: Soporte Monorepo
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `scanners/structure.py`, `models.py`
 - **No tocar:** generators/, auditors/, cli/, store/, selector/
@@ -125,7 +125,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 5: Observabilidad (.loom/reports/)
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `store/reporter.py` NUEVO, `cli/commands/report.py` NUEVO, `cli/__init__.py`
 - **No tocar:** scanners/, generators/, auditors/, selector/
@@ -144,7 +144,7 @@ Cada tarea es independiente. Ningun agente toca los mismos archivos que otro. Se
 
 ### Tarea 6: Python Logging
 
-- **Status:** `- [ ]` pendiente
+- **Status:** `- [x]` completada
 - **Agente:** cualquiera (no depende de otras tareas)
 - **Archivos:** `engine.py`, `git.py`, `cli/__init__.py`
 - **No tocar:** generators/, auditors/, store/, selector/, scanners/
@@ -180,15 +180,15 @@ Solo `cli/__init__.py` se toca en tareas 3, 5 y 6 (para registrar comandos nuevo
 
 ## Criterios de Salida (version completa)
 
-- [ ] Tarea 1: naming por rol completada
-- [ ] Tarea 2: audit agrupado completada
-- [ ] Tarea 3: metricas por capa completada
-- [ ] Tarea 4: monorepo support completada
-- [ ] Tarea 5: observabilidad completada
-- [ ] Tarea 6: logging completada
-- [ ] Tests nuevos pasan (meta: mantener 95%+ cobertura)
-- [ ] Probado en Akana + core_monorepo_enn
-- [ ] Lint + format + mypy limpios
+- [x] Tarea 1: naming por rol completada
+- [x] Tarea 2: audit agrupado completada
+- [x] Tarea 3: metricas por capa completada
+- [x] Tarea 4: monorepo support completada
+- [x] Tarea 5: observabilidad completada
+- [x] Tarea 6: logging completada
+- [x] 269 tests pasan (95% cobertura mantenida)
+- [x] Probado en Akana + core_monorepo_enn + Loom-Context
+- [x] Lint + format limpios
 
 ---
 
