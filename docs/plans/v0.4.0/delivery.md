@@ -193,6 +193,37 @@ Ninguna.
 
 ---
 
+## Mejoras pendientes de feedback real
+
+Observaciones de uso en proyectos reales que alimentan esta version:
+
+### Monorepo: scan por workspace
+
+Hoy el monorepo se detecta (`is_monorepo=True`, lista workspaces) pero la arquitectura
+dice "flat" porque analiza la raiz, no cada workspace. Cada workspace puede tener su
+propia arquitectura (clean, hexagonal, etc.).
+
+**Mejora:** escanear cada workspace como sub-proyecto con su propio tipo y arquitectura.
+
+### Deep audit gaps
+
+Un audit manual en un proyecto real encontro 20 problemas que Loom no detecta:
+- Race conditions en hooks
+- Memory leaks por subscripciones no canceladas
+- Keys basadas en indice en listas dinamicas
+- Async sin cancelacion
+- Accesibilidad
+
+**Mejora:** ampliar auditors mas alla de naming + boundaries. Posible en v0.5.0.
+
+### .loom/reports/ como input de planes
+
+Los reportes de `.loom/reports/` (metrics.json, delta, deep-audit) ya se generan
+pero `loom plan --generate` todavia no los consume todos. El plan generado deberia
+incluir findings de deep audits y deltas acumulados.
+
+---
+
 ## Metricas de exito
 
 | Metrica | Target |
