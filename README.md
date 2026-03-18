@@ -3,7 +3,7 @@
 [![CI](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml/badge.svg)](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/loom-context)](https://pypi.org/project/loom-context/)
 [![Python](https://img.shields.io/pypi/pyversions/loom-context)](https://pypi.org/project/loom-context/)
-[![License](https://img.shields.io/github/license/jadruiz/Loom-Context)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
 **Deterministic, axiomatic context for AI-first engineering.**
 
@@ -19,9 +19,11 @@
   less tokens, more signal
 ```
 
-Loom doesn't use AI. Loom prevents wasting AI.
+Loom's core is deterministic — no AI required. It prevents wasting AI.
 
 It scans your repo, infers architecture and conventions, and compiles compact context that any agent (Claude, Codex, Cursor) can consume — so they stop re-reading 700 files and start working with the right 7.
+
+> AI can optionally enhance selection (future), but the foundation is always deterministic and reproducible.
 
 ```
 Without Loom:  35KB prompt  →  agent reads everything  →  drift, waste, hallucinations

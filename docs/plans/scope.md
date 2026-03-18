@@ -6,9 +6,11 @@ type: scope
 
 ## TL;DR
 
-Loom no usa IA. Loom evita desperdiciar IA.
+El core de Loom es determinista — no requiere IA. Evita desperdiciar IA.
 
-Es un compilador de contexto determinista que escanea un repo, extrae arquitectura y convenciones, y genera contexto compacto para que los agentes trabajen con señal, no con ruido. Menos tokens, menos deriva, menos costo. Contexto axiomatico — derivado de reglas, no de probabilidad.
+Compilador de contexto que escanea un repo, extrae arquitectura y convenciones, y genera contexto compacto para que los agentes trabajen con senal, no con ruido. Menos tokens, menos deriva, menos costo.
+
+Contexto axiomatico — derivado de reglas, no de probabilidad. La IA puede opcionalmente mejorar la seleccion en el futuro, pero la base siempre es determinista y reproducible.
 
 ---
 
