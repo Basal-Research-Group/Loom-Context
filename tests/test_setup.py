@@ -70,11 +70,11 @@ class TestSetupCommand:
 
     def test_setup_interactive_yes(self, tmp_project: Path) -> None:
         runner = CliRunner()
-        # Simulate: yes to claude, yes to cursor, yes to codex, no to generic
+        # Simulate: yes to claude, cursor, codex, copilot; no to generic
         result = runner.invoke(
             main,
             ["setup", str(tmp_project)],
-            input="y\ny\ny\nn\n",
+            input="y\ny\ny\ny\nn\n",
         )
         assert result.exit_code == 0
         assert "Setup complete" in result.output
