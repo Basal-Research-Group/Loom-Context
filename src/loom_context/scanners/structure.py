@@ -11,10 +11,18 @@ from loom_context.security.filter import FileFilter
 
 # Project type detection: (marker_file, json_key_reserved, project_type)
 PROJECT_MARKERS: list[tuple[str, Optional[str], str]] = [
+    # Terraform (check early — often combined with other stacks)
+    ("main.tf", None, "terraform"),
+    # Monorepo tools (check before framework-specific markers)
+    ("turbo.json", None, "turborepo"),
+    ("nx.json", None, "nx-monorepo"),
+    ("lerna.json", None, "lerna-monorepo"),
+    # Mobile
     ("app.config.js", None, "react-native-expo"),
     ("app.config.ts", None, "react-native-expo"),
     ("expo-env.d.ts", None, "react-native-expo"),
     ("react-native.config.js", None, "react-native"),
+    # Web frameworks
     ("next.config.js", None, "nextjs"),
     ("next.config.ts", None, "nextjs"),
     ("next.config.mjs", None, "nextjs"),
@@ -22,9 +30,11 @@ PROJECT_MARKERS: list[tuple[str, Optional[str], str]] = [
     ("angular.json", None, "angular"),
     ("svelte.config.js", None, "svelte"),
     ("astro.config.mjs", None, "astro"),
+    # Build tools
     ("vite.config.ts", None, "vite"),
     ("vite.config.js", None, "vite"),
     ("webpack.config.js", None, "webpack"),
+    # Backend languages
     ("Cargo.toml", None, "rust"),
     ("go.mod", None, "go"),
     ("pom.xml", None, "java-maven"),
@@ -32,7 +42,12 @@ PROJECT_MARKERS: list[tuple[str, Optional[str], str]] = [
     ("Gemfile", None, "ruby"),
     ("composer.json", None, "php"),
     ("Package.swift", None, "swift"),
+    # Infrastructure
     ("Dockerfile", None, "docker"),
+    ("serverless.yml", None, "serverless"),
+    ("serverless.ts", None, "serverless"),
+    ("cdk.json", None, "aws-cdk"),
+    ("pulumi.yaml", None, "pulumi"),
 ]
 
 # Architecture pattern detection based on top-level src directories
@@ -63,12 +78,21 @@ ARCHITECTURE_PATTERNS: dict[str, list[set[str]]] = {
         {"controllers", "services", "repositories"},
         {"api", "services", "data"},
     ],
+    "nestjs-modular": [
+        {"modules", "common"},
+        {"modules", "config"},
+        {"health", "modules"},
+    ],
     "pipeline": [
         {"scanners", "generators"},
         {"scanners", "generators", "auditors"},
         {"parsers", "transformers", "emitters"},
         {"extractors", "processors", "loaders"},
         {"collectors", "analyzers", "reporters"},
+    ],
+    "terraform": [
+        {"modules", "environments"},
+        {"modules", "providers"},
     ],
 }
 
@@ -179,6 +203,16 @@ DIR_ANNOTATIONS: dict[str, str] = {
     "layouts": "Layout components",
     "containers": "Container components",
     "compound": "Compound/composite components",
+    "environments": "Terraform environments (dev/staging/prod)",
+    "tfmodules": "Terraform modules",
+    "stacks": "Infrastructure stacks",
+    "lambdas": "AWS Lambda functions",
+    "functions": "Cloud functions",
+    "policies": "IAM/security policies",
+    "e2e": "End-to-end tests",
+    "health": "Health check endpoints",
+    "interceptors": "Request interceptors",
+    "dto": "Data transfer objects",
     "renderers": "UI renderers (Strategy pattern)",
     "data": "Data layer",
     "sources": "Data sources",
@@ -251,7 +285,11 @@ class StructureScanner(BaseScanner):
             if (self.root / marker).exists():
                 return ptype
 
-        # Check package.json for React
+        # Check for Terraform in subdirs (e.g., infra/main.tf)
+        if list(self.root.glob("**/*.tf"))[:1]:
+            return "terraform"
+
+        # Check package.json for framework detection
         pkg_json = self.root / "package.json"
         if pkg_json.exists():
             try:
@@ -260,8 +298,12 @@ class StructureScanner(BaseScanner):
                 deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
                 if "react-native" in deps:
                     return "react-native"
+                if "@nestjs/core" in deps:
+                    return "nestjs"
                 if "react" in deps:
                     return "react"
+                if "@angular/core" in deps:
+                    return "angular"
                 return "nodejs"
             except (json.JSONDecodeError, KeyError):
                 return "nodejs"

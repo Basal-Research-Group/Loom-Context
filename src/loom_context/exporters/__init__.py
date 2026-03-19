@@ -7,6 +7,7 @@ from typing import Optional
 from loom_context.exporters.base import BaseExporter
 from loom_context.exporters.claude import ClaudeExporter
 from loom_context.exporters.codex import CodexExporter
+from loom_context.exporters.copilot import CopilotExporter
 from loom_context.exporters.cursor import CursorExporter
 from loom_context.exporters.generic import GenericExporter
 
@@ -14,6 +15,7 @@ EXPORTERS: dict[str, type[BaseExporter]] = {
     "claude": ClaudeExporter,
     "cursor": CursorExporter,
     "codex": CodexExporter,
+    "copilot": CopilotExporter,
     "generic": GenericExporter,
 }
 

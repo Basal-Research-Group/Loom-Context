@@ -39,6 +39,28 @@ class BaseExporter(ABC):
         """Where the agent expects the file in the project root."""
         return self.root / self.default_filename()
 
+    def existing_install_exists(self) -> bool:
+        """Check if the install target already exists in the project root."""
+        return self.install_path().exists()
+
+    def install_with_backup(self, skip_backup: bool = False) -> tuple[Path, Optional[Path]]:
+        """Export to install_path(), backing up any existing file first.
+
+        Returns (installed_path, backup_path_or_None).
+        """
+        from loom_context.store.backups import BackupStore
+
+        target = self.install_path()
+        backup_path = None
+
+        if target.exists() and not skip_backup:
+            loom_dir = self.root / ".loom"
+            store = BackupStore(loom_dir)
+            backup_path = store.backup(target)
+
+        self.export_to_file(target)
+        return target, backup_path
+
     def _read_file(self, filename: str) -> str:
         """Read a .context/ file."""
         path = self.context_dir / filename

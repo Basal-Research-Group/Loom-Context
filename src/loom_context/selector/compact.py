@@ -124,6 +124,66 @@ class CompactFormatter:
 
         return "\n".join(lines)
 
+    def format_ultra(self) -> str:
+        """Generate ultra-compact context (<1KB target).
+
+        Strips everything non-essential: no dirs, no stack details,
+        only rules and core architecture identity.
+        """
+        lines: list[str] = []
+
+        index = self._read_json("index.json")
+        if not index:
+            return ""
+
+        project = index.get("project", {})
+        stats = index.get("stats", {})
+
+        # Single-line identity
+        lines.append(
+            f"{project.get('name', '?')}|"
+            f"{project.get('type', '?')}|"
+            f"{','.join(project.get('architecture', []))}|"
+            f"f={stats.get('total_files', 0)}"
+        )
+
+        # Rules: deduplicated, compressed
+        rules = index.get("quick_rules", [])
+        seen: set[str] = set()
+        if rules:
+            for rule in rules:
+                compressed = self._compress_rule(rule)
+                # Deduplicate similar rules
+                key = compressed.split("!->")[0] if "!->" in compressed else compressed
+                if key not in seen:
+                    seen.add(key)
+                    lines.append(compressed)
+
+        rules_json = self._read_json("rules.json")
+        boundaries = rules_json.get("architecture", {}).get("layer_boundaries", {})
+        if boundaries:
+            bound_parts = []
+            for layer, config in boundaries.items():
+                forbidden = config.get("forbidden_imports", [])
+                if forbidden:
+                    short = ",".join(f[0] for f in forbidden)  # first letter only
+                    bound_parts.append(f"{layer[0]}!{short}")
+            if bound_parts:
+                lines.append(" ".join(bound_parts))
+
+        # Code naming: one line
+        naming = rules_json.get("naming", {})
+        code_naming = naming.get("code", {})
+        if code_naming:
+            parts = []
+            for kind, info in code_naming.items():
+                if isinstance(info, dict) and info.get("format"):
+                    parts.append(f"{kind[0]}={info['format']}")
+            if parts:
+                lines.append(" ".join(parts))
+
+        return "\n".join(lines)
+
     def format_for_task(self, task: str, candidates: list) -> str:
         """Generate compact format for a bundle."""
         lines: list[str] = []

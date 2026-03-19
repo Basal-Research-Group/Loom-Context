@@ -16,18 +16,36 @@
 These rules MUST be enforced. Any import that violates these boundaries is a bug.
 
 {% if boundaries %}
-| Layer | MUST NOT import from |
-|-------|---------------------|
+| Layer | Path | MUST NOT import from |
+|-------|------|---------------------|
 {% for layer, config in boundaries.items() %}
-| `{{ layer }}` | {{ config.get('forbidden_imports', []) | join(', ') }} |
+| `{{ layer }}` | `{{ config.get('path', '') }}` | {{ config.get('forbidden_imports', []) | join(', ') }} |
 {% endfor %}
 {% else %}
 No explicit layer boundaries detected. Consider defining them in `.context/loom.json`.
 {% endif %}
 
+{% if loom_boundary_rules %}
+### Boundary Rules
+{% for rule in loom_boundary_rules %}
+- {{ rule }}
+{% endfor %}
+{% endif %}
+
+{% if loom_import_aliases %}
+### Import Aliases
+{% for alias, target in loom_import_aliases.items() %}
+- `{{ alias }}` → `{{ target }}`
+{% endfor %}
+{% endif %}
+
 ## Dependency Direction
 
-{% if 'clean-architecture' in architecture %}
+{% if loom_layers %}
+{% for layer in loom_layers %}
+- **{{ layer.name }}** (`{{ layer.path }}`): {{ layer.description }}
+{% endfor %}
+{% elif 'clean-architecture' in architecture %}
 The dependency rule flows inward:
 ```
 presentation → core → domain ← infrastructure

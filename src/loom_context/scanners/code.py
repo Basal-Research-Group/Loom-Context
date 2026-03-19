@@ -34,7 +34,9 @@ CODE_EXTENSIONS = {
 
 # Regex patterns for naming detection
 PASCAL_CASE = re.compile(r"^[A-Z][a-zA-Z0-9]*$")
-CAMEL_CASE = re.compile(r"^[a-z][a-zA-Z0-9]*$")
+# camelCase requires at least one uppercase transition (e.g., myFile, useState)
+# Single lowercase words (engine, models, config) are NOT camelCase
+CAMEL_CASE = re.compile(r"^[a-z][a-z0-9]*[A-Z][a-zA-Z0-9]*$")
 KEBAB_CASE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)+$")
 SNAKE_CASE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)+$")
 UPPER_SNAKE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
