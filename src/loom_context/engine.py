@@ -111,7 +111,7 @@ class LoomEngine:
             project_hash = cache.compute_project_hash(files)
             self.config.ensure_loom_dir()
             cache.save(project_hash, result.to_dict())
-        except Exception:
+        except Exception:  # noqa: S110 — cache is best-effort
             pass
 
         return result
