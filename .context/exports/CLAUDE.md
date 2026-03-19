@@ -9,7 +9,7 @@
 **Runtime:** Python
 
 ## Quick Rules (MUST follow)
-- Files use camelCase naming (78% of codebase)
+- Files use mixed naming (95% of codebase)
 
 # Architecture
 
@@ -37,8 +37,8 @@ No standard architecture pattern detected. Define boundaries in `.context/loom.j
 
 ## File Naming
 
-- **Dominant style:** camelCase (78% of files)
-- Distribution: mixed: 20% camelCase: 78% snake_case: 2% 
+- **Dominant style:** mixed (95% of files)
+- Distribution: mixed: 95% snake_case: 5% 
 
 ## Suffix Patterns
 
@@ -52,8 +52,8 @@ No consistent prefix patterns detected.
 
 ## Code-Level Naming
 
-- **Classes:** PascalCase (54 found)
-- **Functions:** camelCase (129 found)
+- **Classes:** PascalCase (69 found)
+- **Functions:** mixed (181 found)
 
 ## Import Aliases
 
@@ -66,20 +66,20 @@ No import aliases configured.
 **Source root:** `src/`
 
 ```
-loom_context/  # (8 files)
+loom_context/  # (10 files)
   auditors/  # Rule validators (pipeline pattern) (3 files)
   cli/  # (1 files)
-    commands/  # (16 files)
+    commands/  # (19 files)
 
-  exporters/  # (6 files)
-  generators/  # Output generators (pipeline pattern) (5 files)
+  exporters/  # (7 files)
+  generators/  # Output generators (pipeline pattern) (6 files)
   scanners/  # Input scanners (pipeline pattern) (6 files)
   security/  # (2 files)
-  selector/  # (4 files)
+  selector/  # (5 files)
     strategies/  # Strategy pattern implementations (2 files)
 
-  store/  # State store / persistence layer (5 files)
-  templates/  # (3 files)
+  store/  # State store / persistence layer (7 files)
+  templates/  # (4 files)
 
 
 ```
@@ -89,14 +89,15 @@ loom_context/  # (8 files)
 
 
 ## Technology Stack
-- **other:** dev = [, ruff@0.4, mypy@1.0, build@1.0, twine@5.0, ]
+- **cli:** click@8.1, rich@13.0
+- **other:** pathspec@0.12, jinja2@3.1, dev = [, ruff@0.4, mypy@1.0, build@1.0, twine@5.0, ]
 - **testing:** pytest@7.0, pytest-cov@4.0
 
 # Project Plans & Documentation Summary
 
 ## Architecture Documentation
 
-- **Loom-Context — AI Agent Guidelines** (`CLAUDE.md`, 2.9KB)
+- **Loom-Context — AI Agent Guidelines** (`CLAUDE.md`, 3.7KB)
   - Project Overview
   - Architecture
   - Layer Rules
@@ -119,13 +120,13 @@ loom_context/  # (8 files)
   - Hexagonal (Ports & Adapters)
   - MVC (Model-View-Controller)
   - Feature-Based
-- **Estrategia de Integracion de IA Local** (`docs/plans/ai-integration-strategy.md`, 6.0KB)
+- **Estrategia de Integracion de IA Local** (`docs/plans/ai-integration-strategy.md`, 6.1KB)
   - Estado (2026-03-16)
   - Decision Principal
   - Donde Agrega Valor la IA
   - Seleccion
   - Sintesis
-- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 11.2KB)
+- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 10.8KB)
   - Estado (actualizado 2026-03-16)
   - Ya completado
   - Pendiente
@@ -143,30 +144,21 @@ loom_context/  # (8 files)
   - Si, ya puedes probar Loom en un proyecto real
   - Pero todavia no lo venderia como estable
   - Objetivo del Piloto
-
-## Implementation Plans
-
-### Loom-Context
-Path: `README.md` (6.5KB)
-
-Sections:
-  - Install
-  - Quick Start
-  - Core Commands
-  - What Loom Generates
-  - Example Workflow
-  - What It Detects
-  - Supported Project Types
-  - Security Model
+- **Loom para Dominios mas alla del Codigo** (`docs/plans/future-domains.md`, 9.7KB)
+  - TL;DR
+  - Indice
+  - Por que es posible
+  - Analogia
+  - Dominio: Research
 
 ## Other Documentation
 
 - **changelog**: 1 file(s)
 - **code-of-conduct**: 1 file(s)
 - **contributing**: 1 file(s)
-- **delivery**: 5 file(s)
-- **general**: 3 file(s)
-- **guide**: 9 file(s)
+- **delivery**: 4 file(s)
+- **general**: 7 file(s)
+- **guide**: 12 file(s)
 - **roadmap**: 1 file(s)
 - **scope**: 1 file(s)
 - **security**: 1 file(s)
@@ -179,22 +171,28 @@ Sections:
 
 Loom-Context is a Python CLI tool that scans software projects and generates
 a `.context/` folder with architectural metadata for AI agents.
+Deterministic core — no AI required. 17 commands, 281 tests, Apache-2.0.
 
 ## Architecture
 
 - **Pattern**: Clean pipeline — scanners → engine → generators
 - **Language**: Python 3.9+ (use `from __future__ import annotations`, `Optional[X]` not `X | None`)
-- **Entry point**: `loom` CLI via Click (`src/loom_context/cli.py`)
+- **Entry point**: `loom` CLI via Click (`src/loom_context/cli/__init__.py`)
 
 ## Layer Rules
 
 ```
-security/filter.py  ← foundation, no internal deps
-scanners/*          ← depend on security + base only
-generators/*        ← depend on scan results (dict), no scanner imports
-auditors/*          ← depend on security + rules.json
-engine.py           ← orchestrates scanners + generators
-cli.py              ← depends on engine, auditors
+security/filter.py    ← foundation, no internal deps
+scanners/*            ← depend on security + base only
+generators/*          ← depend on scan results, no scanner imports
+auditors/*            ← depend on security + rules.json
+store/*               ← .loom/ persistence (sessions, findings, decisions, mutations)
+selector/*            ← bundle, handoff, compact, heuristic strategy
+exporters/*           ← agent-specific output (claude, cursor, codex, generic)
+models.py             ← typed contracts (frozen dataclasses)
+metrics.py            ← per-layer health metrics
+engine.py             ← orchestrates scanners + generators + audit
+cli/commands/*.py     ← one file per command, no business logic
 ```
 
 ## Naming Conventions
@@ -205,40 +203,45 @@ cli.py              ← depends on engine, auditors
 - **Constants**: UPPER_SNAKE (`HARDCODED_DIR_EXCLUSIONS`, `CODE_EXTENSIONS`)
 - **Private methods**: underscore prefix (`_load_gitignore`, `_scan_package_json`)
 - **Scanner naming**: `{What}Scanner` (`StructureScanner`, `DependencyScanner`)
-- **Generator naming**: `{What}Generator` (`IndexGenerator`, `ContextGenerator`)
+- **Generator naming**: `{What}Generator` (`IndexGenerator`, `PlanGenerator`)
 - **Auditor naming**: `{What}Auditor` (`NamingAuditor`, `StructureAuditor`)
+- **Store naming**: `{What}Store` or `{What}Log` (`FindingsStore`, `DecisionLog`)
+- **Exporter naming**: `{What}Exporter` (`ClaudeExporter`, `CursorExporter`)
 
 ## Code Standards
 
-- **Lint**: `ruff check src/ tests/` must pass (rules: E, F, I, N, W, UP, B, SIM, S, C4, DTZ, RET, PTH, ERA, RUF)
+- **Lint**: `ruff check src/ tests/` must pass
 - **Format**: `ruff format src/ tests/` — double quotes, 100 char line length
 - **Types**: all public functions must have type annotations
+- **Security**: `bandit -c pyproject.toml --recursive src/` must pass
 - **Docstrings**: one-line for simple functions, required on public classes
-- **Security**: never persist file contents in output, only metadata
 - **No print()**: use `console.print()` (Rich) in CLI, or `click.echo()` for stdout piping
+- **No project-specific references**: keep docs generic, no named projects
 
 ## Git Conventions
 
-- **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `ci:`, `refactor:`, `perf:`)
+- **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
 - **Scopes**: `scanner`, `generator`, `auditor`, `cli`, `security`, `engine`, `docs`
 - **Branches**: `feat/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`
-- **Versioning**: SemVer (0.x = pre-stable, API may change)
+- **Flow**: develop → release/vX.Y.Z → PR to main → tag → PyPI via CI
+- **Never commit directly to main**
 
 ## Testing
 
-- Run: `pytest` (99+ tests expected)
+- Run: `pytest` (281+ tests, 95% coverage)
 - Fixture `tmp_project` in `conftest.py` provides a complete mock project
-- Test classes by component: `TestFileFilter`, `TestStructureScanner`, etc.
-- Edge cases: empty projects, missing deps, secrets exclusion
+- Quality: `make qa` runs lint + format + types + security + tests
 
 ## Key Design Principles
 
-1. **Scan much, ask nothing** — auto-detect, don't prompt the user
-2. **Metadata only** — never include source code in `.context/` output
-3. **Security first** — 3-layer file filtering, secrets always excluded
-4. **Progressive consumption** — quick_rules (30s) → full context (5min)
-5. **Stay fast** — scanning 700 files must complete in < 2 seconds
-6. **Stay light** — 4 runtime dependencies only
+1. **Deterministic core** — no AI required, reproducible output
+2. **Scan much, ask nothing** — auto-detect, don't prompt the user
+3. **Metadata only** — never include source code in `.context/` output
+4. **Security first** — 3-layer file filtering, secrets always excluded
+5. **Progressive consumption** — quick_rules (30s) → bundle (2min) → full (5min)
+6. **Stay fast** — scanning 700 files must complete in < 2 seconds
+7. **Stay light** — 4 runtime dependencies only
+8. **Axiomatic context** — rules as invariants, not probability
 
 
 ---

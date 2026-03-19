@@ -41,6 +41,7 @@ class LoomConfig:
         """Create .loom/ directory and reports/ subdirectory if they don't exist."""
         self.loom_dir.mkdir(exist_ok=True)
         (self.loom_dir / "reports").mkdir(exist_ok=True)
+        (self.loom_dir / "backups").mkdir(exist_ok=True)
         return self.loom_dir
 
     def ensure_gitignore(self) -> bool:
