@@ -157,6 +157,9 @@ fail_under = 80
 [tool.bandit]
 exclude_dirs = ["tests"]
 skips = [
+    "B110",  # try-except-pass — used for best-effort cache/tracking
+    "B324",  # MD5 — used for change detection, not security
+    "B602",  # shell=True — used in loom infra --start (user-initiated)
     "B603",  # subprocess calls to git are intentional
     "B607",  # git is expected on PATH
     "B701",  # jinja2 autoescape=False — generating .md, not HTML

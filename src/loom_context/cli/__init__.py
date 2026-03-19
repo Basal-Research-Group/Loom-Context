@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
 
 import click
@@ -38,10 +37,9 @@ def _record_usage() -> None:
         cmd_name = ctx.invoked_subcommand
 
     # Find project root (.loom/ directory)
-    cwd = os.getcwd()
     from pathlib import Path
 
-    root = Path(cwd)
+    root = Path.cwd()
     loom_dir = root / ".loom"
     if not loom_dir.exists():
         return
@@ -51,8 +49,8 @@ def _record_usage() -> None:
 
         reporter = UsageReporter(loom_dir, root)
         reporter.record(cmd_name, duration_ms, success=True)
-    except Exception:
-        pass  # Never fail the command because of usage tracking
+    except Exception:  # noqa: S110 — intentional: never fail CLI for tracking
+        pass
 
 
 @click.group()
