@@ -1,16 +1,16 @@
 {
   "naming": {
     "files": {
-      "dominant_style": "camelCase"
+      "dominant_style": "mixed"
     },
     "code": {
       "classes": {
         "format": "PascalCase",
-        "count": 64
+        "count": 73
       },
       "functions": {
-        "format": "camelCase",
-        "count": 148
+        "format": "mixed",
+        "count": 192
       }
     }
   },

@@ -2,12 +2,12 @@
 
 ## Architecture Documentation
 
-- **Loom-Context — AI Agent Guidelines** (`CLAUDE.md`, 3.7KB)
-  - Project Overview
-  - Architecture
-  - Layer Rules
-  - Naming Conventions
-  - Code Standards
+- **Project Context for Claude** (`CLAUDE.md`, 7.9KB)
+  - Quick Rules (MUST follow)
+  - Project Type
+  - Architecture Patterns
+  - Source Root
+  - Layer Boundaries
 - **Estructura de Directorios de Loom-Context** (`docs/architecture/directory-structure.md`, 6.6KB)
   - Vista General
   - Métricas del Código
@@ -49,13 +49,23 @@
   - Si, ya puedes probar Loom en un proyecto real
   - Pero todavia no lo venderia como estable
   - Objetivo del Piloto
+- **Loom para Dominios mas alla del Codigo** (`docs/plans/future-domains.md`, 9.7KB)
+  - TL;DR
+  - Indice
+  - Por que es posible
+  - Analogia
+  - Dominio: Research
+- **Demo Cross-Platform Readiness Plan** (`docs/plans/demo-cross-platform-plan.md`, 0.9KB)
+  - [ ] Validar la detección de SO en Git Bash/WSL
+  - [ ] Documentar las instrucciones de shell requerido
+  - [ ] Compartir el plan generado en `.loom/reports/`
 
 ## Other Documentation
 
 - **changelog**: 1 file(s)
 - **code-of-conduct**: 1 file(s)
 - **contributing**: 1 file(s)
-- **delivery**: 4 file(s)
+- **delivery**: 5 file(s)
 - **general**: 7 file(s)
 - **guide**: 12 file(s)
 - **roadmap**: 1 file(s)
