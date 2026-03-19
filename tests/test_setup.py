@@ -70,11 +70,12 @@ class TestSetupCommand:
 
     def test_setup_interactive_yes(self, tmp_project: Path) -> None:
         runner = CliRunner()
-        # Simulate: yes to claude, cursor, codex, copilot; no to generic
+        # Simulate: yes to claude, cursor, codex (overwrite AGENTS.md=yes), copilot; no to generic
+        # tmp_project has AGENTS.md from conftest, so codex triggers overwrite confirm
         result = runner.invoke(
             main,
             ["setup", str(tmp_project)],
-            input="y\ny\ny\ny\nn\n",
+            input="y\ny\ny\ny\ny\nn\n",
         )
         assert result.exit_code == 0
         assert "Setup complete" in result.output
