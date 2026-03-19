@@ -68,14 +68,43 @@ class ContextGenerator:
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
+    def _read_loom_json(self) -> dict[str, Any]:
+        """Read .context/loom.json if it exists."""
+        loom_path = self.context_dir / "loom.json"
+        if not loom_path.exists():
+            return {}
+        try:
+            with open(loom_path, encoding="utf-8") as f:
+                data: dict[str, Any] = json.load(f)
+                return data
+        except (json.JSONDecodeError, OSError):
+            return {}
+
     def _generate_architecture(self, scan_result: dict[str, Any]) -> None:
         template = self.env.get_template("architecture.md.j2")
         structure = scan_result.get("structure", {})
+
+        # Read loom.json for manual layer definitions (monorepo support)
+        loom_json = self._read_loom_json()
+        loom_arch = loom_json.get("architecture", {})
+        loom_layers = loom_arch.get("layers", [])
+
+        # Use loom.json layers if auto-detection found nothing
+        boundaries = structure.get("layer_boundaries", {})
+        if not boundaries and loom_layers:
+            for layer in loom_layers:
+                name = layer.get("name", "")
+                cannot = layer.get("cannot_import", [])
+                boundaries[name] = {"forbidden_imports": cannot, "path": layer.get("path", "")}
+
         content = template.render(
             project_type=structure.get("project_type", "unknown"),
             architecture=structure.get("architecture", []),
-            boundaries=structure.get("layer_boundaries", {}),
+            boundaries=boundaries,
             src_root=structure.get("src_root", "."),
+            loom_layers=loom_layers,
+            loom_boundary_rules=loom_arch.get("boundary_rules", []),
+            loom_import_aliases=loom_arch.get("import_aliases", {}),
         )
         self._write_md("architecture.md", content)
 
@@ -176,29 +205,29 @@ class ContextGenerator:
             lines.append("")
 
         if plans:
-            lines.append("## Implementation Plans\n")
+            # Separate active from completed plans
+            active_plans = []
+            completed_plans = []
             for plan in plans:
-                lines.append(f"### {plan['title'] or plan['path']}")
-                lines.append(f"Path: `{plan['path']}` ({plan['size_kb']}KB)\n")
+                items = plan.get("status_items", [])
+                if items:
+                    pending = sum(1 for s in items if s["status"] in ("pending", "partial"))
+                    if pending == 0:
+                        completed_plans.append(plan)
+                    else:
+                        active_plans.append(plan)
+                else:
+                    active_plans.append(plan)
 
-                if plan["status_items"]:
-                    done = sum(1 for s in plan["status_items"] if s["status"] == "done")
-                    pending = sum(1 for s in plan["status_items"] if s["status"] == "pending")
-                    partial = sum(1 for s in plan["status_items"] if s["status"] == "partial")
-                    lines.append(f"Status: {done} done, {partial} in-progress, {pending} pending\n")
+            if active_plans:
+                lines.append("## Active Plans\n")
+                for plan in active_plans:
+                    self._render_plan(plan, lines)
 
-                    for item in plan["status_items"]:
-                        icon = {"done": "[x]", "pending": "[ ]", "partial": "[-]"}.get(
-                            item["status"], "[ ]"
-                        )
-                        lines.append(f"- {icon} {item['name']}")
-                    lines.append("")
-
-                if plan["sections"]:
-                    lines.append("Sections:")
-                    for section in plan["sections"][:8]:
-                        lines.append(f"  - {section}")
-                    lines.append("")
+            if completed_plans:
+                lines.append("## Completed Plans\n")
+                for plan in completed_plans:
+                    self._render_plan(plan, lines)
 
         # Other doc types summary
         by_type = docs.get("by_type", {})
@@ -210,3 +239,27 @@ class ContextGenerator:
             lines.append("")
 
         self._write_md("plans-summary.md", "\n".join(lines))
+
+    def _render_plan(self, plan: dict[str, Any], lines: list[str]) -> None:
+        """Render a single plan entry into lines."""
+        lines.append(f"### {plan['title'] or plan['path']}")
+        lines.append(f"Path: `{plan['path']}` ({plan['size_kb']}KB)\n")
+
+        if plan["status_items"]:
+            done = sum(1 for s in plan["status_items"] if s["status"] == "done")
+            pending = sum(1 for s in plan["status_items"] if s["status"] == "pending")
+            partial = sum(1 for s in plan["status_items"] if s["status"] == "partial")
+            lines.append(f"Status: {done} done, {partial} in-progress, {pending} pending\n")
+
+            for item in plan["status_items"]:
+                icon = {"done": "[x]", "pending": "[ ]", "partial": "[-]"}.get(
+                    item["status"], "[ ]"
+                )
+                lines.append(f"- {icon} {item['name']}")
+            lines.append("")
+
+        if plan["sections"]:
+            lines.append("Sections:")
+            for section in plan["sections"][:8]:
+                lines.append(f"  - {section}")
+            lines.append("")

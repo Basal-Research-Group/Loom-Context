@@ -40,9 +40,35 @@ class LoomEngine:
     def __init__(self, root: str | Path) -> None:
         self.config = LoomConfig(Path(root))
         self.file_filter = FileFilter(self.config.root)
+        self._last_scan_cached = False
 
-    def scan(self) -> ScanResult:
-        """Run all scanners and return typed results."""
+    @property
+    def was_cached(self) -> bool:
+        """Whether the last scan() call returned cached results."""
+        return self._last_scan_cached
+
+    def scan(self, force: bool = False) -> ScanResult:
+        """Run all scanners and return typed results.
+
+        If force=False and cache is fresh, returns cached results.
+        """
+        from loom_context.store.cache import ScanCache
+
+        cache = ScanCache(self.config.loom_dir)
+
+        # Check cache unless forced
+        if not force:
+            files = list(self.file_filter.walk())
+            project_hash = cache.compute_project_hash(files)
+            if cache.is_fresh(project_hash):
+                cached = cache.load_scan_result()
+                if cached:
+                    logger.debug("scan cache hit — no changes detected")
+                    self._last_scan_cached = True
+                    return self._dict_to_scan_result(cached)
+
+        self._last_scan_cached = False
+
         structure_scanner = StructureScanner(self.config.root, self.file_filter)
         deps_scanner = DependencyScanner(self.config.root, self.file_filter)
         code_scanner = CodeScanner(self.config.root, self.file_filter)
@@ -61,7 +87,7 @@ class LoomEngine:
         # Add project name
         structure_raw["project_name"] = self.config.root.name
 
-        return ScanResult(
+        result = ScanResult(
             structure=StructureFacts(**structure_raw),
             deps=DependencyInfo(
                 package_manager=deps_raw["package_manager"],
@@ -78,6 +104,17 @@ class LoomEngine:
             ),
             scanned_at=datetime.now(timezone.utc).isoformat(),
         )
+
+        # Save to cache
+        try:
+            files = list(self.file_filter.walk())
+            project_hash = cache.compute_project_hash(files)
+            self.config.ensure_loom_dir()
+            cache.save(project_hash, result.to_dict())
+        except Exception:
+            pass
+
+        return result
 
     def generate_context(
         self, scan_result: Optional[Union[ScanResult, dict[str, Any]]] = None
@@ -192,3 +229,26 @@ class LoomEngine:
         """Migrate sessions.jsonl from .context/ to .loom/ if it exists."""
         logger = SessionLogger(self.config.loom_dir, self.config.root)
         logger.migrate_from_context(self.config.context_dir)
+
+    @staticmethod
+    def _dict_to_scan_result(data: dict[str, Any]) -> ScanResult:
+        """Reconstruct ScanResult from cached dict."""
+        return ScanResult(
+            structure=StructureFacts(**data.get("structure", {})),
+            deps=DependencyInfo(
+                package_manager=data.get("deps", {}).get("package_manager", "unknown"),
+                dependency_files=data.get("deps", {}).get("dependency_files", []),
+                dependencies=[
+                    Dependency(**d) for d in data.get("deps", {}).get("dependencies", [])
+                ],
+                stack_summary=data.get("deps", {}).get("stack_summary", {}),
+            ),
+            code=CodeAnalysis(**data.get("code", {})),
+            docs=DocsInventory(
+                docs=[DocEntry(**d) for d in data.get("docs", {}).get("docs", [])],
+                agents_md=data.get("docs", {}).get("agents_md"),
+                doc_count=data.get("docs", {}).get("doc_count", 0),
+                by_type=data.get("docs", {}).get("by_type", {}),
+            ),
+            scanned_at=data.get("scanned_at", ""),
+        )

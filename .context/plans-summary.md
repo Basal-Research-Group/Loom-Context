@@ -49,6 +49,12 @@
   - Si, ya puedes probar Loom en un proyecto real
   - Pero todavia no lo venderia como estable
   - Objetivo del Piloto
+- **Loom para Dominios mas alla del Codigo** (`docs/plans/future-domains.md`, 9.7KB)
+  - TL;DR
+  - Indice
+  - Por que es posible
+  - Analogia
+  - Dominio: Research
 
 ## Other Documentation
 

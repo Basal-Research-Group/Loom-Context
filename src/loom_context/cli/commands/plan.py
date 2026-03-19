@@ -12,15 +12,16 @@ from loom_context.cli import console
 @click.command()
 @click.argument("path", default=".", type=click.Path(exists=True))
 @click.option("--generate", is_flag=True, help="Generate implementation plan from Loom data")
-def plan(path: str, generate: bool) -> None:
+@click.option("--stdout", "to_stdout", is_flag=True, help="Print generated plan to stdout")
+def plan(path: str, generate: bool, to_stdout: bool) -> None:
     """Read and summarize existing docs/plans for AI consumption."""
     if generate:
-        _generate_plan(path)
+        _generate_plan(path, to_stdout=to_stdout)
     else:
         _list_plans(path)
 
 
-def _generate_plan(path: str) -> None:
+def _generate_plan(path: str, to_stdout: bool = False) -> None:
     """Generate an implementation plan from .context/ and .loom/ data."""
     from loom_context.brand import LOOMY_HAPPY
     from loom_context.generators.plan import PlanGenerator
@@ -34,6 +35,11 @@ def _generate_plan(path: str) -> None:
 
     generator = PlanGenerator(root)
     output_path = generator.generate()
+
+    if to_stdout:
+        content = Path(output_path).read_text(encoding="utf-8")
+        click.echo(content)
+        return
 
     rel_path = Path(output_path).relative_to(root)
     console.print(f"\n  {LOOMY_HAPPY} Implementation plan generated")

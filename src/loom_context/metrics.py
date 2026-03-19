@@ -49,12 +49,27 @@ class MetricsCollector:
         boundaries = index.get("architecture", {}).get("layer_boundaries", {})
         src_root = self._find_src_root()
 
+        # Fallback: read layers from loom.json if rules.json has no boundaries
+        if not boundaries:
+            boundaries = self._read_loom_json_layers()
+
+        # Fallback: auto-detect layers from src_root subdirectories
+        if not boundaries:
+            boundaries = self._detect_layers(src_root)
+
         if not boundaries:
             return ProjectMetrics()
 
         layers: list[LayerMetrics] = []
         for layer_name in sorted(boundaries.keys()):
-            layer_dir = src_root / layer_name
+            # Check if boundary has an explicit path (from loom.json)
+            layer_info = boundaries[layer_name]
+            custom_path = layer_info.get("path", "") if isinstance(layer_info, dict) else ""
+
+            if custom_path:
+                layer_dir = self.root / custom_path.rstrip("/")
+            else:
+                layer_dir = src_root / layer_name
             if not layer_dir.exists():
                 layer_dir = self.root / layer_name
             if not layer_dir.exists():
@@ -128,10 +143,69 @@ class MetricsCollector:
         except (json.JSONDecodeError, OSError):
             return {}
 
+    def _read_loom_json_layers(self) -> dict[str, dict[str, Any]]:
+        """Read layer definitions from .context/loom.json."""
+        path = self.root / ".context" / "loom.json"
+        if not path.exists():
+            return {}
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            layers = data.get("architecture", {}).get("layers", [])
+            if not layers:
+                return {}
+            # Convert list format to boundaries dict
+            boundaries: dict[str, dict[str, Any]] = {}
+            for layer in layers:
+                name = layer.get("name", "")
+                if name:
+                    boundaries[name] = {"path": layer.get("path", f"{name}/")}
+            return boundaries
+        except (json.JSONDecodeError, OSError):
+            return {}
+
+    def _detect_layers(self, src_root: Path) -> dict[str, dict[str, Any]]:
+        """Auto-detect layers from src_root subdirectories with known roles."""
+        known_layers = {
+            "scanners",
+            "generators",
+            "auditors",
+            "exporters",
+            "store",
+            "selector",
+            "security",
+            "cli",
+            "templates",
+            "domain",
+            "infrastructure",
+            "presentation",
+            "core",
+            "controllers",
+            "services",
+            "models",
+            "views",
+            "api",
+            "lib",
+            "utils",
+            "adapters",
+            "ports",
+        }
+        if not src_root.is_dir():
+            return {}
+        subdirs = [d.name for d in src_root.iterdir() if d.is_dir()]
+        matching = [d for d in subdirs if d in known_layers]
+        if len(matching) < 2:
+            return {}
+        return {name: {} for name in matching}
+
     def _find_src_root(self) -> Path:
         """Find src root directory."""
         for name in ["src", "lib", "app"]:
             candidate = self.root / name
             if candidate.is_dir():
+                # Check for nested package dirs (e.g., src/loom_context/)
+                subdirs = [d for d in candidate.iterdir() if d.is_dir()]
+                if len(subdirs) == 1 and not subdirs[0].name.startswith("."):
+                    return subdirs[0]
                 return candidate
         return self.root
