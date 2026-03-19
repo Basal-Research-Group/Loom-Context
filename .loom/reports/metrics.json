@@ -1,0 +1,63 @@
+{
+  "layers": [
+    {
+      "name": "auditors",
+      "file_count": 3,
+      "code_files": 3,
+      "directories": 0
+    },
+    {
+      "name": "cli",
+      "file_count": 21,
+      "code_files": 21,
+      "directories": 1
+    },
+    {
+      "name": "exporters",
+      "file_count": 8,
+      "code_files": 8,
+      "directories": 0
+    },
+    {
+      "name": "generators",
+      "file_count": 6,
+      "code_files": 6,
+      "directories": 0
+    },
+    {
+      "name": "scanners",
+      "file_count": 7,
+      "code_files": 7,
+      "directories": 0
+    },
+    {
+      "name": "security",
+      "file_count": 2,
+      "code_files": 2,
+      "directories": 0
+    },
+    {
+      "name": "selector",
+      "file_count": 7,
+      "code_files": 7,
+      "directories": 1
+    },
+    {
+      "name": "store",
+      "file_count": 8,
+      "code_files": 8,
+      "directories": 0
+    },
+    {
+      "name": "templates",
+      "file_count": 4,
+      "code_files": 0,
+      "directories": 0
+    }
+  ],
+  "total_files": 66,
+  "total_layers": 9,
+  "largest_layer": "cli",
+  "smallest_layer": "security",
+  "balance_score": 0.55
+}
