@@ -71,7 +71,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - 108 tests (was 25 in v0.1.0), all passing in ~3s
 - Coverage: file filter, scanners, engine, CLI, auditors, edge cases, sessions, focus, status, findings, decisions, mutations, init+audit, enrich, decide, bundle, handoff, doctor, export, compact, pipeline detection, frontmatter, typed contracts
 
-[0.2.0]: https://github.com/jadruiz/Loom-Context/releases/tag/v0.2.0
+[0.2.0]: https://github.com/Basal-Research-Group/Loom-Context/releases/tag/v0.2.0
 
 ## [0.1.0] - 2026-03-14
 
@@ -97,4 +97,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Auditors only check TypeScript/JavaScript files for naming and imports
 - No plugin system yet (scanners/auditors are hardcoded)
 
-[0.1.0]: https://github.com/jadruiz/Loom-Context/releases/tag/v0.1.0
+[0.1.0]: https://github.com/Basal-Research-Group/Loom-Context/releases/tag/v0.1.0

@@ -68,11 +68,11 @@ dev = [
 loom = "loom_context.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/jadruiz/Loom-Context"
-Repository = "https://github.com/jadruiz/Loom-Context"
-Documentation = "https://github.com/jadruiz/Loom-Context/blob/main/docs/INDEX.md"
-Issues = "https://github.com/jadruiz/Loom-Context/issues"
-Changelog = "https://github.com/jadruiz/Loom-Context/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Basal-Research-Group/Loom-Context"
+Repository = "https://github.com/Basal-Research-Group/Loom-Context"
+Documentation = "https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/INDEX.md"
+Issues = "https://github.com/Basal-Research-Group/Loom-Context/issues"
+Changelog = "https://github.com/Basal-Research-Group/Loom-Context/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/loom_context"]

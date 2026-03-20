@@ -38,7 +38,7 @@ Before contributing, also review:
 
 ```bash
 # Clone
-git clone https://github.com/jadruiz/Loom-Context.git
+git clone https://github.com/Basal-Research-Group/Loom-Context.git
 cd Loom-Context
 
 # Create virtual environment (recommended)
@@ -396,7 +396,7 @@ The repo includes two workflows in `.github/workflows/`:
    - Ensure "Allow GitHub Actions to create and approve pull requests" is enabled
 5. **Trusted Publisher** (recommended, no API token needed):
    - Go to [pypi.org/manage/project/loom-context/settings/publishing/](https://pypi.org/manage/project/loom-context/settings/publishing/)
-   - Add new publisher: GitHub, owner `jadruiz`, repo `Loom-Context`, workflow `pypi-publish.yml`, environment `pypi`
+   - Add new publisher: GitHub, owner `Basal-Research-Group`, repo `Loom-Context`, workflow `pypi-publish.yml`, environment `pypi`
    - Same for TestPyPI at [test.pypi.org](https://test.pypi.org)
 
 #### Manual Test Publish
@@ -459,4 +459,4 @@ See [docs/architecture/overview.md](docs/architecture/overview.md) for full arch
 
 ## Questions?
 
-Open an issue on [GitHub](https://github.com/jadruiz/Loom-Context/issues).
+Open an issue on [GitHub](https://github.com/Basal-Research-Group/Loom-Context/issues).

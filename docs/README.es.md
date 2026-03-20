@@ -1,6 +1,6 @@
 # 🕸️ Loom-Context
 
-[![CI](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml/badge.svg)](https://github.com/jadruiz/Loom-Context/actions/workflows/ci.yml)
+[![CI](https://github.com/Basal-Research-Group/Loom-Context/actions/workflows/ci.yml/badge.svg)](https://github.com/Basal-Research-Group/Loom-Context/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/loom-context)](https://pypi.org/project/loom-context/)
 [![Python](https://img.shields.io/pypi/pyversions/loom-context)](https://pypi.org/project/loom-context/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](../LICENSE)
@@ -216,7 +216,7 @@ Probado en un proyecto React Native de 674 archivos:
 ## 🛠️ Desarrollo
 
 ```bash
-git clone https://github.com/jadruiz/Loom-Context.git
+git clone https://github.com/Basal-Research-Group/Loom-Context.git
 cd Loom-Context
 pip install -e ".[dev]"
 

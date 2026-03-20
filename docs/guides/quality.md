@@ -185,7 +185,7 @@ Reglas activas (en `pyproject.toml`):
 
 ```bash
 # 1. Clonar y setup
-git clone https://github.com/jadruiz/Loom-Context.git
+git clone https://github.com/Basal-Research-Group/Loom-Context.git
 cd Loom-Context
 pip install -e ".[dev]"
 

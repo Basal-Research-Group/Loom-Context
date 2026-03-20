@@ -143,7 +143,7 @@
   author = {Ruiz C., J. Adrian},
   title = {Loom-Context: Architecture Context Engine for AI-First Engineering},
   year = {2026},
-  url = {https://github.com/jadruiz/Loom-Context},
+  url = {https://github.com/Basal-Research-Group/Loom-Context},
   license = {Apache-2.0}
 }
 ```
