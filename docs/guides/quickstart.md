@@ -12,34 +12,51 @@ architectural context ready for any AI agent.
 
 ---
 
-## Install
+## Prerequisites
+
+You need **Python 3.9+** installed. Check with:
 
 ```bash
-# Recommended — installs in isolated environment, no venv needed
+python3 --version
+```
+
+If you don't have Python:
+- **macOS**: `brew install python@3.12`
+- **Linux**: `sudo apt install python3 python3-pip python3-venv`
+- **Windows**: Download from [python.org](https://www.python.org/downloads/) (check "Add to PATH")
+
+---
+
+## Install
+
+### Option A: pipx (recommended)
+
+pipx installs Loom in its own isolated environment — no venv, no warnings, no conflicts:
+
+```bash
+# Install pipx first (if you don't have it)
+# macOS:  brew install pipx && pipx ensurepath
+# Linux:  sudo apt install pipx && pipx ensurepath
+# Windows: pip install --user pipx && pipx ensurepath
+
+# Then install Loom
 pipx install loom-context
 ```
 
-> Don't have pipx? `brew install pipx` (macOS) or `sudo apt install pipx` (Linux).
-
-Or try it first without installing:
-
-```bash
-pipx run loom-context init .
-```
-
-<details>
-<summary>Alternative: pip with virtual environment</summary>
+### Option B: pip + virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate    # macOS/Linux
 # .venv\Scripts\activate     # Windows
+
 pip install loom-context
 ```
 
-</details>
+> Without a virtual environment, `pip install` on modern systems will
+> show "externally-managed-environment" errors. Always use pipx or venv.
 
-Verify:
+### Verify
 
 ```bash
 loom --version

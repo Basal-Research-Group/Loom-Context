@@ -32,39 +32,105 @@ No cloud. No LLM. No heavy deps. Deterministic analysis in <2 seconds. 91% fewer
 
 ---
 
-## Install
+## Prerequisites
+
+Loom requires **Python 3.9 or higher**. It has 4 lightweight dependencies (`click`, `rich`, `pathspec`, `jinja2`) — no AI/ML libraries.
+
+<details>
+<summary><strong>macOS</strong> — install Python if you don't have it</summary>
 
 ```bash
-# Recommended — installs in isolated environment, no venv needed
-pipx install loom-context
+# Check if Python is installed
+python3 --version
+
+# If not installed, use Homebrew
+brew install python@3.12
+
+# Install pipx (recommended for CLI tools)
+brew install pipx
+pipx ensurepath
 ```
 
-> Don't have pipx? `brew install pipx` (macOS) or `sudo apt install pipx` (Linux).
+</details>
+
+<details>
+<summary><strong>Linux (Ubuntu/Debian)</strong></summary>
+
+```bash
+# Python is usually pre-installed, verify version
+python3 --version
+
+# If needed
+sudo apt update && sudo apt install python3 python3-pip python3-venv
+
+# Install pipx
+sudo apt install pipx
+pipx ensurepath
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+# Option 1: Download from python.org
+# https://www.python.org/downloads/ (check "Add to PATH" during install)
+
+# Option 2: Via winget
+winget install Python.Python.3.12
+
+# Install pipx
+pip install --user pipx
+pipx ensurepath
+```
+
+> After installing, restart your terminal so PATH changes take effect.
+
+</details>
+
+---
+
+## Install Loom
+
+### Option A: pipx (recommended)
+
+pipx installs Loom in its own isolated environment — no venv needed, no warnings, no conflicts:
+
+```bash
+pipx install loom-context
+```
 
 Or try it without installing:
 
 ```bash
-pipx run loom-context init .
+pipx run loom-context --help
 ```
 
-<details>
-<summary>Alternative: pip with virtual environment</summary>
+### Option B: pip with virtual environment
+
+If you prefer pip, always use a virtual environment to avoid system conflicts:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate    # macOS/Linux
 # .venv\Scripts\activate     # Windows
+
 pip install loom-context
 ```
 
-</details>
+> Without a virtual environment, `pip install` on modern macOS/Linux will
+> show "externally-managed-environment" errors (PEP 668). Use pipx or venv.
 
-Verify:
+### Verify
 
 ```bash
 loom --version
 # loom, version 0.4.0
 ```
+
+> If `loom` is not found: with pipx, run `pipx ensurepath` and restart terminal.
+> With venv, make sure it's activated (`source .venv/bin/activate`).
 
 ---
 
@@ -214,7 +280,8 @@ loom export . --agent generic --install  # → .loom-export.md
 
 ## Infrastructure Check
 
-Loom reads your project's dependencies and checks if required services are running:
+Loom reads your project's dependencies and checks if required services are running.
+**These are your project's requirements, not Loom's** — Loom itself only needs Python.
 
 ```bash
 loom infra .
@@ -228,16 +295,63 @@ loom infra .
 │ PostgreSQL │ database │ 5432 │ yes       │ running │ DATABASE_URL │
 │ Redis      │ cache    │ 6379 │ no        │ stopped │ REDIS_URL    │
 └────────────┴──────────┴──────┴───────────┴─────────┴──────────────┘
-
-  Redis is not running
-    Install: brew install redis
-    Docker:  docker run -d --name redis -p 6379:6379 redis:alpine
-
-  Run loom infra --start to auto-start stopped services
 ```
 
-> These are YOUR project's requirements, not Loom's.
-> Loom itself only needs Python + 4 libraries.
+Auto-start stopped services:
+
+```bash
+loom infra . --start              # native (brew/systemctl)
+loom infra . --start --docker     # Docker containers
+```
+
+<details>
+<summary><strong>Manual install guides per service</strong></summary>
+
+#### Redis
+
+| Platform | Install | Start |
+|----------|---------|-------|
+| macOS | `brew install redis` | `brew services start redis` |
+| Linux | `sudo apt install redis-server` | `sudo systemctl start redis` |
+| Docker | `docker run -d --name redis -p 6379:6379 redis:alpine` | — |
+| Windows | [Download](https://github.com/microsoftarchive/redis/releases) or WSL | — |
+
+Verify: `redis-cli ping` should return `PONG`. Default port: **6379**.
+Config env: `REDIS_URL=redis://localhost:6379`
+
+#### PostgreSQL
+
+| Platform | Install | Start |
+|----------|---------|-------|
+| macOS | `brew install postgresql@16` | `brew services start postgresql@16` |
+| Linux | `sudo apt install postgresql` | `sudo systemctl start postgresql` |
+| Docker | `docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16-alpine` | — |
+| Windows | [Download installer](https://www.postgresql.org/download/windows/) | — |
+
+Verify: `pg_isready` should return `accepting connections`. Default port: **5432**.
+Config env: `DATABASE_URL=postgresql://user:pass@localhost:5432/dbname`
+
+#### MongoDB
+
+| Platform | Install | Start |
+|----------|---------|-------|
+| macOS | `brew install mongodb-community` | `brew services start mongodb-community` |
+| Linux | [Install guide](https://www.mongodb.com/docs/manual/administration/install-on-linux/) | `sudo systemctl start mongod` |
+| Docker | `docker run -d --name mongo -p 27017:27017 mongo:7` | — |
+
+Default port: **27017**. Config env: `MONGODB_URI=mongodb://localhost:27017/dbname`
+
+#### MySQL
+
+| Platform | Install | Start |
+|----------|---------|-------|
+| macOS | `brew install mysql` | `brew services start mysql` |
+| Linux | `sudo apt install mysql-server` | `sudo systemctl start mysql` |
+| Docker | `docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:8` | — |
+
+Default port: **3306**. Config env: `MYSQL_URL=mysql://user:pass@localhost:3306/dbname`
+
+</details>
 
 Supports: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, RabbitMQ, Kafka, Meilisearch, MinIO.
 
