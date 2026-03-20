@@ -35,11 +35,29 @@ No cloud. No LLM. No heavy deps. Deterministic analysis in <2 seconds. 91% fewer
 ## Install
 
 ```bash
-# Recommended: use a virtual environment
-python3 -m venv .venv && source .venv/bin/activate
+# Recommended — installs in isolated environment, no venv needed
+pipx install loom-context
+```
 
+> Don't have pipx? `brew install pipx` (macOS) or `sudo apt install pipx` (Linux).
+
+Or try it without installing:
+
+```bash
+pipx run loom-context init .
+```
+
+<details>
+<summary>Alternative: pip with virtual environment</summary>
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate    # macOS/Linux
+# .venv\Scripts\activate     # Windows
 pip install loom-context
 ```
+
+</details>
 
 Verify:
 
@@ -47,9 +65,6 @@ Verify:
 loom --version
 # loom, version 0.4.0
 ```
-
-> If `loom` is not in your PATH after install, make sure your venv is activated
-> or add `~/.local/bin` to your PATH.
 
 ---
 

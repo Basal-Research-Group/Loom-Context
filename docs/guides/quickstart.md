@@ -15,14 +15,29 @@ architectural context ready for any AI agent.
 ## Install
 
 ```bash
-# Create a virtual environment (recommended)
+# Recommended — installs in isolated environment, no venv needed
+pipx install loom-context
+```
+
+> Don't have pipx? `brew install pipx` (macOS) or `sudo apt install pipx` (Linux).
+
+Or try it first without installing:
+
+```bash
+pipx run loom-context init .
+```
+
+<details>
+<summary>Alternative: pip with virtual environment</summary>
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate    # macOS/Linux
 # .venv\Scripts\activate     # Windows
-
-# Install Loom
 pip install loom-context
 ```
+
+</details>
 
 Verify:
 
@@ -30,10 +45,6 @@ Verify:
 loom --version
 # loom, version 0.4.0
 ```
-
-> If `loom` is not found after install, make sure your virtual environment
-> is activated. If you installed without venv, check that `~/.local/bin`
-> is in your PATH.
 
 ---
 
