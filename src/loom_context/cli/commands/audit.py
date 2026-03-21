@@ -16,9 +16,7 @@ from loom_context.cli import console
 @click.option("--summary", "show_summary", is_flag=True, help="Show grouped summary only")
 def audit(path: str, show_summary: bool) -> None:
     """Validate code against rules defined in .context/."""
-    from loom_context.auditors.naming import NamingAuditor
-    from loom_context.auditors.structure import StructureAuditor
-    from loom_context.security.filter import FileFilter
+    from loom_context.engine import LoomEngine
 
     root = Path(path).resolve()
     context_dir = root / ".context"
@@ -29,18 +27,10 @@ def audit(path: str, show_summary: bool) -> None:
         console.print(f"  {LOOMY_FAIL} [red]No .context/ found.[/red] Run 'loom init' first.")
         sys.exit(1)
 
-    file_filter = FileFilter(root)
     console.print(f"  Auditing [cyan]{root}[/cyan]...\n")
 
-    naming_auditor = NamingAuditor(root, file_filter)
-    naming_auditor.load_rules()
-    naming_violations = naming_auditor.audit()
-
-    structure_auditor = StructureAuditor(root, file_filter)
-    structure_auditor.load_rules()
-    structure_violations = structure_auditor.audit()
-
-    all_violations = naming_violations + structure_violations
+    engine = LoomEngine(root)
+    all_violations = engine.audit()
 
     if not all_violations:
         from loom_context.brand import LOOMY_HAPPY
