@@ -53,21 +53,40 @@ class IndexGenerator:
         code = scan_result.get("code", {})
         docs = scan_result.get("docs", {})
 
-        # Determine primary language
-        language = self._detect_language(structure.get("project_type", "unknown"), code)
+        # Language: prefer structure.language (from registry), fallback to heuristic
+        language = structure.get("language", "") or self._detect_language(
+            structure.get("project_type", "unknown"), code
+        )
 
         # Build runtime string
         runtime = self._build_runtime(structure.get("project_type", ""), deps)
 
+        project: dict[str, Any] = {
+            "name": structure.get("project_name", ""),
+            "type": structure.get("project_type", "unknown"),
+            "architecture": structure.get("architecture", []),
+            "language": language,
+            "runtime": runtime,
+        }
+
+        # Monorepo info
+        if structure.get("is_monorepo"):
+            project["is_monorepo"] = True
+            project["workspaces"] = structure.get("workspaces", [])
+
+        # Architecture confidence
+        arch_conf = structure.get("architecture_confidence", {})
+        if arch_conf:
+            project["architecture_confidence"] = arch_conf
+
+        # Ecosystem
+        ecosystem = deps.get("ecosystem", "unknown")
+        if ecosystem != "unknown":
+            project["ecosystem"] = ecosystem
+
         return {
             "loom_version": version,
-            "project": {
-                "name": structure.get("project_name", ""),
-                "type": structure.get("project_type", "unknown"),
-                "architecture": structure.get("architecture", []),
-                "language": language,
-                "runtime": runtime,
-            },
+            "project": project,
             "context_files": {
                 "architecture": ".context/architecture.md",
                 "naming": ".context/naming.md",

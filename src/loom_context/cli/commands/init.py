@@ -62,6 +62,13 @@ def init(path: str) -> None:
     table.add_row("Dependencies", str(len(scan.deps.dependencies)))
     table.add_row("Ecosystem", scan.deps.ecosystem)
     table.add_row("Package Manager", scan.deps.package_manager)
+    if scan.structure.is_monorepo:
+        ws_str = ", ".join(scan.structure.workspaces[:5])
+        if len(scan.structure.workspaces) > 5:
+            ws_str += f", +{len(scan.structure.workspaces) - 5} more"
+        ws_count = len(scan.structure.workspaces)
+        table.add_row("Monorepo", f"[green]yes[/green] ({ws_count} workspaces)")
+        table.add_row("Workspaces", ws_str)
 
     console.print(table)
 
