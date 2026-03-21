@@ -1,0 +1,41 @@
+{
+  "filename_rules": [
+    {"pattern": "AGENTS", "doc_type": "agent-guidelines"},
+    {"pattern": "CONTRIBUTING", "doc_type": "contributing"},
+    {"pattern": "CHANGELOG", "doc_type": "changelog"},
+    {"pattern": "setup", "doc_type": "setup"},
+    {"pattern": "install", "doc_type": "setup"},
+    {"pattern": "getting-started", "doc_type": "setup"},
+    {"pattern": "README", "doc_type": "readme"},
+    {"pattern": "SECURITY", "doc_type": "security"},
+    {"pattern": "LICENSE", "doc_type": "license"},
+    {"pattern": "CODE_OF_CONDUCT", "doc_type": "code-of-conduct"},
+    {"pattern": "ADR", "doc_type": "architecture-decision"},
+    {"pattern": "RFC", "doc_type": "rfc"},
+    {"pattern": "CLAUDE", "doc_type": "agent-guidelines"},
+    {"pattern": "CURSOR", "doc_type": "agent-guidelines"},
+    {"pattern": "COPILOT", "doc_type": "agent-guidelines"}
+  ],
+  "path_rules": [
+    {"pattern": "architecture", "doc_type": "architecture"},
+    {"pattern": "arch", "doc_type": "architecture"},
+    {"pattern": "plan", "doc_type": "plan"},
+    {"pattern": "roadmap", "doc_type": "plan"},
+    {"pattern": "feature", "doc_type": "feature"},
+    {"pattern": "spec", "doc_type": "specification"},
+    {"pattern": "design", "doc_type": "design"},
+    {"pattern": "api", "doc_type": "api"},
+    {"pattern": "guide", "doc_type": "guide"},
+    {"pattern": "tutorial", "doc_type": "guide"},
+    {"pattern": "research", "doc_type": "research"},
+    {"pattern": "ui", "doc_type": "ui"},
+    {"pattern": "test", "doc_type": "testing"},
+    {"pattern": "adr", "doc_type": "architecture-decision"},
+    {"pattern": "rfc", "doc_type": "rfc"},
+    {"pattern": "decision", "doc_type": "architecture-decision"},
+    {"pattern": "migration", "doc_type": "migration"},
+    {"pattern": "deploy", "doc_type": "deployment"},
+    {"pattern": "ops", "doc_type": "operations"},
+    {"pattern": "runbook", "doc_type": "operations"}
+  ]
+}

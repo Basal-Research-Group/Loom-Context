@@ -18,6 +18,8 @@ class StructureFacts:
     total_files: int
     file_counts_by_dir: dict[str, int] = field(default_factory=dict)
     project_name: str = ""
+    language: str = ""
+    architecture_confidence: dict[str, Any] = field(default_factory=dict)
     is_monorepo: bool = False
     workspaces: list[str] = field(default_factory=list)
 
@@ -41,6 +43,7 @@ class DependencyInfo:
     dependency_files: list[str]
     dependencies: list[Dependency]
     stack_summary: dict[str, list[str]]
+    ecosystem: str = "unknown"
 
 
 @dataclass(frozen=True)

@@ -4,7 +4,7 @@
 
 Loom-Context is a Python CLI tool that scans software projects and generates
 a `.context/` folder with architectural metadata for AI agents.
-Deterministic core — no AI required. 17 commands, 281 tests, Apache-2.0.
+Deterministic core — no AI required. 17 commands, 365 tests, Apache-2.0.
 
 ## Architecture
 
@@ -15,10 +15,11 @@ Deterministic core — no AI required. 17 commands, 281 tests, Apache-2.0.
 ## Layer Rules
 
 ```
-security/filter.py    ← foundation, no internal deps
-scanners/*            ← depend on security + base only
+knowledge/            ← centralized knowledge base (JSON + registry), no internal deps
+security/filter.py    ← foundation, depends on knowledge only
+scanners/*            ← depend on knowledge + security + base
 generators/*          ← depend on scan results, no scanner imports
-auditors/*            ← depend on security + rules.json
+auditors/*            ← depend on knowledge + security + rules.json
 store/*               ← .loom/ persistence (sessions, findings, decisions, mutations)
 selector/*            ← bundle, handoff, compact, heuristic strategy
 exporters/*           ← agent-specific output (claude, cursor, codex, generic)
@@ -27,6 +28,49 @@ metrics.py            ← per-layer health metrics
 engine.py             ← orchestrates scanners + generators + audit
 cli/commands/*.py     ← one file per command, no business logic
 ```
+
+## Knowledge Registry
+
+All detection patterns live in `knowledge/*.json` — never hardcode patterns in scanners.
+
+```
+knowledge/
+├── __init__.py         ← get_registry() singleton API
+├── registry.py         ← KnowledgeRegistry: lazy load + query
+├── scorer.py           ← SignalScorer: multi-signal architecture detection
+├── models.py           ← Typed dataclasses for knowledge entities
+├── languages.json      ← 22 languages (extensions, markers, naming, frameworks)
+├── ecosystems.json     ← 332 packages across 8 ecosystems
+├── architectures.json  ← 15 architecture patterns with weighted scoring
+├── directories.json    ← 170+ semantic directory annotations
+├── security.json       ← dir exclusions + secret patterns
+├── infrastructure.json ← service definitions + package mapping
+├── roles.json          ← 47 suffixes + 8 prefixes (architectural roles)
+├── docs.json           ← documentation classification rules
+├── design_patterns.json ← 22 GoF + modern patterns with detection signals
+├── stop_words.json     ← EN + ES stop words for query tokenization
+└── domains/            ← domain definitions (code, research, data)
+```
+
+To add a new language or pattern: edit the JSON, never modify scanner Python code.
+
+### Local Overrides
+
+Users can extend the knowledge base locally without modifying the package:
+
+```
+.loom/knowledge/           ← not tracked in git
+├── languages.json         ← adds/overrides languages
+├── ecosystems.json        ← adds packages to ecosystems
+├── architectures.json     ← adds custom architecture patterns
+├── directories.json       ← adds directory annotations
+└── ...                    ← any knowledge/*.json can be extended
+```
+
+Local overrides are **deep-merged** with built-in data:
+- Dicts: local keys extend/override built-in keys
+- Lists: local items are appended (no duplicates)
+- Scalars: local value wins
 
 ## Naming Conventions
 
@@ -61,7 +105,7 @@ cli/commands/*.py     ← one file per command, no business logic
 
 ## Testing
 
-- Run: `pytest` (281+ tests, 95% coverage)
+- Run: `pytest` (365+ tests, 95% coverage)
 - Fixture `tmp_project` in `conftest.py` provides a complete mock project
 - Quality: `make qa` runs lint + format + types + security + tests
 

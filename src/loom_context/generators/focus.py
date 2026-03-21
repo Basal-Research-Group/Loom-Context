@@ -7,52 +7,9 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
-# Common stop words to filter from queries
-STOP_WORDS = {
-    "a",
-    "an",
-    "the",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "of",
-    "with",
-    "and",
-    "or",
-    "not",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "do",
-    "does",
-    "did",
-    "will",
-    "would",
-    "could",
-    "should",
-    "el",
-    "la",
-    "los",
-    "las",
-    "de",
-    "del",
-    "en",
-    "con",
-    "por",
-    "para",
-    "un",
-    "una",
-    "que",
-    "es",
-    "y",
-    "o",
-    "no",
-}
+from loom_context.knowledge import get_registry
+
+STOP_WORDS = get_registry().get_stop_words()
 
 
 def _tokenize(query: str) -> list[str]:

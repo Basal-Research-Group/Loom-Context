@@ -1,0 +1,33 @@
+{
+  "name": "code",
+  "display_name": "Software Project",
+  "description": "Source code projects with package managers, build tools, and version control",
+  "markers": [
+    "package.json",
+    "pyproject.toml",
+    "setup.py",
+    "Cargo.toml",
+    "go.mod",
+    "Gemfile",
+    "pom.xml",
+    "build.gradle",
+    "composer.json",
+    "Package.swift",
+    "mix.exs",
+    "pubspec.yaml",
+    "Makefile",
+    ".git"
+  ],
+  "file_extensions": [
+    ".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
+    ".rb", ".erb", ".go", ".rs", ".java", ".kt", ".scala",
+    ".cs", ".php", ".swift", ".ex", ".exs", ".dart",
+    ".c", ".cpp", ".h", ".hpp", ".lua", ".zig",
+    ".hs", ".ml", ".mli", ".r", ".jl"
+  ],
+  "directory_patterns": [
+    "src", "lib", "app", "source", "packages", "modules",
+    "tests", "test", "spec", "__tests__",
+    "docs", "scripts", "config", "bin"
+  ]
+}

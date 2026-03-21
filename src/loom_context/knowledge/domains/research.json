@@ -1,0 +1,58 @@
+{
+  "name": "research",
+  "display_name": "Research Project",
+  "description": "Academic research, theses, papers, experiments, and data analysis",
+  "markers": [
+    "bibliography.bib",
+    "references.bib",
+    "paper.tex",
+    "thesis.tex",
+    "main.tex",
+    "experiments/config.yaml",
+    "data/raw",
+    "notebooks"
+  ],
+  "file_extensions": [
+    ".tex", ".bib", ".ipynb", ".csv", ".json", ".yaml", ".yml",
+    ".md", ".rst", ".r", ".rmd", ".py", ".jl",
+    ".parquet", ".feather", ".h5", ".hdf5"
+  ],
+  "directory_patterns": [
+    "data", "raw", "processed", "analysis",
+    "notebooks", "experiments", "references", "figures",
+    "docs", "paper", "thesis", "chapters",
+    "results", "models", "scripts"
+  ],
+  "structure_patterns": {
+    "academic-paper": {
+      "signals": [
+        {"type": "file", "pattern": "*.tex", "weight": 0.30},
+        {"type": "file", "pattern": "*.bib", "weight": 0.25},
+        {"type": "directory", "pattern": "figures", "weight": 0.15},
+        {"type": "directory", "pattern": "chapters", "weight": 0.15},
+        {"type": "file", "pattern": "abstract.tex", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "data-analysis": {
+      "signals": [
+        {"type": "file", "pattern": "*.ipynb", "weight": 0.30},
+        {"type": "directory", "pattern": "data", "weight": 0.20},
+        {"type": "directory", "pattern": "notebooks", "weight": 0.20},
+        {"type": "file", "pattern": "*.csv", "weight": 0.15},
+        {"type": "directory", "pattern": "analysis", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "experiment": {
+      "signals": [
+        {"type": "directory", "pattern": "experiments", "weight": 0.30},
+        {"type": "file", "pattern": "config.yaml", "weight": 0.20},
+        {"type": "directory", "pattern": "results", "weight": 0.20},
+        {"type": "directory", "pattern": "models", "weight": 0.15},
+        {"type": "file", "pattern": "requirements.txt", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    }
+  }
+}

@@ -76,6 +76,7 @@ def main(ctx: click.Context, verbose: bool) -> None:
 from loom_context.cli.commands import (  # noqa: E402
     audit,
     bundle,
+    db,
     decide,
     doctor,
     enrich,
@@ -84,6 +85,7 @@ from loom_context.cli.commands import (  # noqa: E402
     handoff,
     infra,
     init,
+    knowledge,
     log,
     metrics,
     plan,
@@ -114,3 +116,5 @@ main.add_command(metrics.metrics)  # type: ignore[has-type]
 main.add_command(report.report)  # type: ignore[has-type]
 main.add_command(setup.setup)  # type: ignore[has-type]
 main.add_command(infra.infra)  # type: ignore[has-type]
+main.add_command(db.db)  # type: ignore[has-type]
+main.add_command(knowledge.knowledge)  # type: ignore[has-type]

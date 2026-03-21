@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
+from loom_context.knowledge import get_registry
 from loom_context.models import Violation
 from loom_context.security.filter import FileFilter
 
@@ -15,7 +16,7 @@ TS_IMPORT = re.compile(r"""(?:import|from)\s+['"](@?[^'"]+)['"]""")
 TS_REQUIRE = re.compile(r"""require\(['"]([^'"]+)['"]\)""")
 PY_IMPORT = re.compile(r"^(?:from|import)\s+([\w.]+)", re.MULTILINE)
 
-CODE_EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py"}
+CODE_EXTENSIONS = get_registry().get_all_extensions()
 
 
 class StructureAuditor:

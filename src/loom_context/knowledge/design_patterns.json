@@ -1,0 +1,592 @@
+{
+  "_comment": "Design patterns detection: signals to identify GoF and modern patterns in codebases.",
+  "categories": {
+    "creational": {
+      "name": "Creational Patterns",
+      "description": "Mechanisms for object creation, decoupling construction from representation."
+    },
+    "structural": {
+      "name": "Structural Patterns",
+      "description": "Composition of classes and objects into larger structures."
+    },
+    "behavioral": {
+      "name": "Behavioral Patterns",
+      "description": "Communication and responsibility assignment between objects."
+    },
+    "concurrency": {
+      "name": "Concurrency Patterns",
+      "description": "Multi-threaded and async execution patterns."
+    }
+  },
+  "patterns": {
+    "singleton": {
+      "name": "Singleton",
+      "category": "creational",
+      "intent": "Ensure a class has only one instance with a global access point.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Singleton", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "_instance\\s*=\\s*None", "weight": 0.25, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "static\\s+getInstance", "weight": 0.25, "languages": ["java", "typescript", "csharp"]},
+        {"type": "code_pattern", "pattern": "private\\s+constructor", "weight": 0.20, "languages": ["typescript", "java", "csharp"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "factory-method": {
+      "name": "Factory Method",
+      "category": "creational",
+      "intent": "Define an interface for creating objects, letting subclasses decide which class to instantiate.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Factory", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "def\\s+create_", "weight": 0.20, "languages": ["python", "ruby"]},
+        {"type": "code_pattern", "pattern": "create[A-Z]\\w+\\(", "weight": 0.20, "languages": ["typescript", "java"]},
+        {"type": "directory", "pattern": "factories", "weight": 0.25}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "abstract-factory": {
+      "name": "Abstract Factory",
+      "category": "creational",
+      "intent": "Produce families of related objects without specifying concrete classes.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Factory", "weight": 0.20},
+        {"type": "file_prefix", "pattern": "Abstract", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "AbstractFactory|abstract.*Factory", "weight": 0.30},
+        {"type": "directory", "pattern": "factories", "weight": 0.15},
+        {"type": "file_count", "pattern": "Factory", "min_count": 3, "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "builder": {
+      "name": "Builder",
+      "category": "creational",
+      "intent": "Construct complex objects step by step.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Builder", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "\\.build\\(\\)", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "def\\s+with_|def\\s+set_", "weight": 0.20, "languages": ["python", "ruby"]},
+        {"type": "code_pattern", "pattern": "return\\s+this|return\\s+self", "weight": 0.20}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "prototype": {
+      "name": "Prototype",
+      "category": "creational",
+      "intent": "Copy existing objects without depending on their classes.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "def\\s+clone|fn\\s+clone|func.*Clone", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "implements.*Cloneable", "weight": 0.30, "languages": ["java"]},
+        {"type": "code_pattern", "pattern": "copy\\.deepcopy|__copy__|__deepcopy__", "weight": 0.30, "languages": ["python"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "adapter": {
+      "name": "Adapter",
+      "category": "structural",
+      "intent": "Allow objects with incompatible interfaces to collaborate.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Adapter", "weight": 0.40},
+        {"type": "directory", "pattern": "adapters", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Adapter", "weight": 0.20},
+        {"type": "file_count", "pattern": "Adapter", "min_count": 2, "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "decorator": {
+      "name": "Decorator",
+      "category": "structural",
+      "intent": "Add functionality to objects by wrapping them.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Decorator", "weight": 0.35},
+        {"type": "directory", "pattern": "decorators", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "@\\w+\\s*\\n\\s*def\\s+", "weight": 0.20, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Decorator", "weight": 0.20}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "facade": {
+      "name": "Facade",
+      "category": "structural",
+      "intent": "Provide a simplified interface to a complex subsystem.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Facade", "weight": 0.40},
+        {"type": "file_suffix", "pattern": "Gateway", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Facade", "weight": 0.25},
+        {"type": "directory", "pattern": "gateway", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "proxy": {
+      "name": "Proxy",
+      "category": "structural",
+      "intent": "Provide a substitute to control access to an object.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Proxy", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Proxy", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "Proxy\\.new|newProxy", "weight": 0.30}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "composite": {
+      "name": "Composite",
+      "category": "structural",
+      "intent": "Compose objects into tree structures and treat them uniformly.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Composite", "weight": 0.35},
+        {"type": "directory", "pattern": "compound", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "children|add_child|remove_child", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "def\\s+add\\(.*self\\)|def\\s+remove\\(", "weight": 0.20}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "bridge": {
+      "name": "Bridge",
+      "category": "structural",
+      "intent": "Split a large class into two hierarchies (abstraction and implementation).",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Bridge", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Impl|class\\s+\\w+Implementation", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "self\\._impl|this\\.impl", "weight": 0.30}
+      ],
+      "confidence_threshold": 0.45
+    },
+    "observer": {
+      "name": "Observer",
+      "category": "behavioral",
+      "intent": "Define a subscription mechanism to notify multiple objects about events.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Observer", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "Listener", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "Subscriber", "weight": 0.20},
+        {"type": "directory", "pattern": "listeners", "weight": 0.15},
+        {"type": "directory", "pattern": "observers", "weight": 0.15},
+        {"type": "code_pattern", "pattern": "subscribe|notify|on_event|emit", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.30
+    },
+    "strategy": {
+      "name": "Strategy",
+      "category": "behavioral",
+      "intent": "Define a family of interchangeable algorithms.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Strategy", "weight": 0.35},
+        {"type": "directory", "pattern": "strategies", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Strategy", "weight": 0.20},
+        {"type": "file_count", "pattern": "Strategy", "min_count": 2, "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "command": {
+      "name": "Command",
+      "category": "behavioral",
+      "intent": "Turn a request into a stand-alone object containing all request information.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Command", "weight": 0.30},
+        {"type": "directory", "pattern": "commands", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "def\\s+execute|fn\\s+execute|func.*Execute", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "Handler", "weight": 0.10},
+        {"type": "code_pattern", "pattern": "CommandHandler|command_handler", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "chain-of-responsibility": {
+      "name": "Chain of Responsibility",
+      "category": "behavioral",
+      "intent": "Pass requests along a chain of handlers.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Handler", "weight": 0.20},
+        {"type": "directory", "pattern": "handlers", "weight": 0.20},
+        {"type": "directory", "pattern": "middleware", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "next_handler|set_next|_next", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "Middleware", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "iterator": {
+      "name": "Iterator",
+      "category": "behavioral",
+      "intent": "Traverse elements of a collection without exposing its underlying representation.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Iterator", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "__iter__|__next__|def\\s+next\\(", "weight": 0.30, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "implements.*Iterator|Iterable", "weight": 0.30, "languages": ["java", "typescript"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "state": {
+      "name": "State",
+      "category": "behavioral",
+      "intent": "Allow an object to alter its behavior when its internal state changes.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "State", "weight": 0.25},
+        {"type": "directory", "pattern": "state", "weight": 0.15},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+State|transition_to|set_state", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "state_machine|StateMachine|aasm", "weight": 0.30}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "repository": {
+      "name": "Repository",
+      "category": "behavioral",
+      "intent": "Mediate between domain and data mapping layers using a collection-like interface.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Repository", "weight": 0.40},
+        {"type": "directory", "pattern": "repositories", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "def\\s+find_by|def\\s+find_all|def\\s+save", "weight": 0.20},
+        {"type": "file_count", "pattern": "Repository", "min_count": 2, "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "mediator": {
+      "name": "Mediator",
+      "category": "behavioral",
+      "intent": "Reduce chaotic dependencies between objects via a central mediator object.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Mediator", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Mediator|MediatR|mediatr", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "def\\s+notify|def\\s+send", "weight": 0.25}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "event-sourcing": {
+      "name": "Event Sourcing",
+      "category": "behavioral",
+      "intent": "Store state changes as a sequence of events instead of current state.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Event", "weight": 0.15},
+        {"type": "directory", "pattern": "events", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "event_store|EventStore|apply_event", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "aggregate_root|AggregateRoot", "weight": 0.20},
+        {"type": "file_suffix", "pattern": "DomainEvent", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "specification": {
+      "name": "Specification",
+      "category": "behavioral",
+      "intent": "Encapsulate business rules as composable boolean predicates.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Specification", "weight": 0.35},
+        {"type": "file_suffix", "pattern": "Spec", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "is_satisfied_by|and_spec|or_spec", "weight": 0.30},
+        {"type": "directory", "pattern": "specifications", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "unit-of-work": {
+      "name": "Unit of Work",
+      "category": "behavioral",
+      "intent": "Maintain a list of affected objects and coordinate writing out changes.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "UnitOfWork", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "unit_of_work|UnitOfWork|commit|rollback", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "def\\s+begin|def\\s+commit|def\\s+rollback", "weight": 0.25}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "flyweight": {
+      "name": "Flyweight",
+      "category": "structural",
+      "intent": "Minimize memory usage by sharing data between similar objects.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Flyweight", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "FlyweightFactory|flyweight_factory", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "flyweight_cache|shared_state|intrinsic_state", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "__slots__|_cache\\s*=\\s*\\{\\}", "weight": 0.10, "languages": ["python"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "template-method": {
+      "name": "Template Method",
+      "category": "behavioral",
+      "intent": "Define skeleton of algorithm in superclass, letting subclasses override specific steps.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "def\\s+_do_\\w+|def\\s+_hook_\\w+", "weight": 0.30, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "abstract\\s+protected\\s+void\\s+\\w+", "weight": 0.30, "languages": ["java", "csharp"]},
+        {"type": "code_pattern", "pattern": "raise\\s+NotImplementedError", "weight": 0.20, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "@abstractmethod", "weight": 0.20, "languages": ["python"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "visitor": {
+      "name": "Visitor",
+      "category": "behavioral",
+      "intent": "Separate algorithms from the objects they operate on.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Visitor", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "def\\s+accept\\(.*visitor|def\\s+visit_\\w+", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Visitor", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "double_dispatch|double dispatch", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "memento": {
+      "name": "Memento",
+      "category": "behavioral",
+      "intent": "Save and restore previous state of an object without revealing its implementation.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Memento", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "save_state|restore_state|create_memento", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Memento|class\\s+\\w+Caretaker", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "caretaker|undo_stack|history", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "interpreter": {
+      "name": "Interpreter",
+      "category": "behavioral",
+      "intent": "Define a grammar representation and an interpreter to evaluate sentences in that grammar.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Expression", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "def\\s+interpret\\(|AbstractExpression", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Expression", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "parse_tree|AST|abstract_syntax", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "dependency-injection": {
+      "name": "Dependency Injection",
+      "category": "creational",
+      "intent": "Supply dependencies externally rather than creating them internally.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "@inject|@Inject|@Injectable", "weight": 0.30},
+        {"type": "file_suffix", "pattern": "Container", "weight": 0.20},
+        {"type": "directory", "pattern": "providers", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "inject\\(|Container\\(|bind\\(", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "constructor\\s*injection|provider", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "service-locator": {
+      "name": "Service Locator",
+      "category": "creational",
+      "intent": "Provide a central registry to locate and retrieve services at runtime.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "ServiceLocator", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "ServiceLocator|service_locator", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "get_service|locate|register_service", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Registry", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "null-object": {
+      "name": "Null Object",
+      "category": "behavioral",
+      "intent": "Provide default do-nothing behavior instead of null references.",
+      "signals": [
+        {"type": "file_prefix", "pattern": "Null", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "class\\s+Null\\w+|class\\s+NoOp\\w+", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "NullObject|null_object", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "missing_method|method_missing", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "object-pool": {
+      "name": "Object Pool",
+      "category": "creational",
+      "intent": "Reuse expensive objects from a pool instead of creating and destroying them.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Pool", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "acquire|release|pool_size", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "connection_pool|ConnectionPool|ObjectPool", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Pool", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "lazy-initialization": {
+      "name": "Lazy Initialization",
+      "category": "creational",
+      "intent": "Delay object creation until the first time it is needed.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "@lazy|@cached_property|lazy_attribute", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "def\\s+__get__\\(", "weight": 0.25, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "Lazy<|lazy\\s+val|by\\s+lazy", "weight": 0.25, "languages": ["kotlin", "scala", "typescript"]},
+        {"type": "code_pattern", "pattern": "functools\\.cached_property|cached_property", "weight": 0.20, "languages": ["python"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "data-mapper": {
+      "name": "Data Mapper",
+      "category": "structural",
+      "intent": "Transfer data between objects and database while keeping them independent.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Mapper", "weight": 0.35},
+        {"type": "directory", "pattern": "mappers", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "map_to_entity|map_to_dto|to_domain|from_domain", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Mapper", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "active-record": {
+      "name": "Active Record",
+      "category": "structural",
+      "intent": "Wrap a database row in an object with CRUD operations.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "ActiveRecord|ApplicationRecord", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+\\(.*Model\\)|class\\s+\\w+\\(.*ActiveRecord\\)", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "\\.save\\(\\)|\\.find\\(|\\.destroy\\(|\\.delete\\(", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "has_many|belongs_to|has_one", "weight": 0.15, "languages": ["ruby"]}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "data-transfer-object": {
+      "name": "Data Transfer Object",
+      "category": "structural",
+      "intent": "Carry data between layers without behavior.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "DTO", "weight": 0.35},
+        {"type": "file_suffix", "pattern": "Dto", "weight": 0.25},
+        {"type": "directory", "pattern": "dtos", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "@dataclass|data\\s+class|record\\s+\\w+", "weight": 0.10},
+        {"type": "file_count", "pattern": "DTO|Dto", "min_count": 2, "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "value-object": {
+      "name": "Value Object",
+      "category": "behavioral",
+      "intent": "Represent an immutable object defined by its attributes rather than identity.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "ValueObject", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "frozen=True|@frozen|immutable", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "def\\s+__eq__|def\\s+__hash__", "weight": 0.20, "languages": ["python"]},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+ValueObject|class\\s+\\w+VO", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "aggregate-root": {
+      "name": "Aggregate Root",
+      "category": "behavioral",
+      "intent": "Treat a cluster of domain objects as a single unit with a root entity.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Aggregate", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "AggregateRoot|aggregate_root", "weight": 0.30},
+        {"type": "directory", "pattern": "aggregates", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Aggregate", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "domain-event": {
+      "name": "Domain Event",
+      "category": "behavioral",
+      "intent": "Capture a record of something that happened in the domain.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "DomainEvent", "weight": 0.35},
+        {"type": "file_suffix", "pattern": "Event", "weight": 0.15},
+        {"type": "directory", "pattern": "events", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Event|publish_event|emit_event", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "occurred_at|event_type|event_data", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "saga": {
+      "name": "Saga",
+      "category": "behavioral",
+      "intent": "Manage distributed transactions as a coordinated sequence of compensatable steps.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "Saga", "weight": 0.40},
+        {"type": "directory", "pattern": "saga", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Saga|compensate|orchestrate", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "saga_step|step_\\w+|rollback_step", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "outbox": {
+      "name": "Outbox",
+      "category": "behavioral",
+      "intent": "Reliably publish events using a transactional outbox table.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "outbox|Outbox", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "outbox_events|transactional_outbox", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "outbox_table|process_outbox|relay", "weight": 0.20},
+        {"type": "file_suffix", "pattern": "Outbox", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.45
+    },
+    "circuit-breaker": {
+      "name": "Circuit Breaker",
+      "category": "behavioral",
+      "intent": "Prevent cascading failures by stopping calls to a failing service.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "CircuitBreaker", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "CircuitBreaker|circuit_breaker", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "open|closed|half.open|threshold", "weight": 0.20},
+        {"type": "code_pattern", "pattern": "fallback|trip|reset", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "retry": {
+      "name": "Retry",
+      "category": "behavioral",
+      "intent": "Retry failed operations with configurable backoff strategies.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "@retry|with_retry|retry_on", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "max_retries|retry_count|attempts", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "exponential_backoff|backoff|jitter", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "Retry", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "bulkhead": {
+      "name": "Bulkhead",
+      "category": "concurrency",
+      "intent": "Isolate resources into pools to prevent failure in one from affecting others.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "Bulkhead|bulkhead", "weight": 0.40},
+        {"type": "code_pattern", "pattern": "isolate|partition|resource_pool", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "max_concurrent|semaphore|thread_pool", "weight": 0.20},
+        {"type": "file_suffix", "pattern": "Bulkhead", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.45
+    },
+    "publish-subscribe": {
+      "name": "Publish-Subscribe",
+      "category": "behavioral",
+      "intent": "Decouple publishers from subscribers via a message broker or event bus.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "PubSub|pub_sub|EventBus", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "publish|subscribe|unsubscribe", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "topic|channel|broadcast", "weight": 0.20},
+        {"type": "file_suffix", "pattern": "PubSub", "weight": 0.15},
+        {"type": "directory", "pattern": "pubsub", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "throttle": {
+      "name": "Throttle",
+      "category": "concurrency",
+      "intent": "Rate-limit operations to control resource consumption.",
+      "signals": [
+        {"type": "code_pattern", "pattern": "throttle|Throttle|rate_limit", "weight": 0.35},
+        {"type": "code_pattern", "pattern": "RateLimiter|rate_limiter", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "per_second|per_minute|quota|tokens_per", "weight": 0.20},
+        {"type": "file_suffix", "pattern": "RateLimiter", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "cqrs-pattern": {
+      "name": "CQRS",
+      "category": "behavioral",
+      "intent": "Separate read and write models to optimize each independently.",
+      "signals": [
+        {"type": "file_suffix", "pattern": "CommandHandler", "weight": 0.25},
+        {"type": "file_suffix", "pattern": "QueryHandler", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "ReadModel|WriteModel|CommandBus|QueryBus", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Command|class\\s+\\w+Query", "weight": 0.15},
+        {"type": "directory", "pattern": "queries", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "middleware-pipeline": {
+      "name": "Middleware Pipeline",
+      "category": "behavioral",
+      "intent": "Chain processing steps where each can transform or short-circuit the request.",
+      "signals": [
+        {"type": "directory", "pattern": "middleware", "weight": 0.30},
+        {"type": "code_pattern", "pattern": "def\\s+use\\(|app\\.use\\(|add_middleware", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "next\\(\\)|call_next|pipeline", "weight": 0.25},
+        {"type": "code_pattern", "pattern": "class\\s+\\w+Middleware|def\\s+pipe\\(", "weight": 0.20}
+      ],
+      "confidence_threshold": 0.35
+    }
+  }
+}

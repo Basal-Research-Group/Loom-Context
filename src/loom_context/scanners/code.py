@@ -8,29 +8,14 @@ import re
 from pathlib import Path
 from typing import Any
 
+from loom_context.knowledge import get_registry
 from loom_context.scanners.base import BaseScanner
 from loom_context.security.filter import FileFilter
 
-# File extensions to analyze
-CODE_EXTENSIONS = {
-    ".ts",
-    ".tsx",
-    ".js",
-    ".jsx",
-    ".mjs",
-    ".cjs",
-    ".py",
-    ".pyi",
-    ".rs",
-    ".go",
-    ".java",
-    ".kt",
-    ".scala",
-    ".cs",
-    ".rb",
-    ".php",
-    ".swift",
-}
+_registry = get_registry()
+
+# Code extensions from Knowledge Registry
+CODE_EXTENSIONS = _registry.get_all_extensions()
 
 # Regex patterns for naming detection
 PASCAL_CASE = re.compile(r"^[A-Z][a-zA-Z0-9]*$")
@@ -41,47 +26,9 @@ KEBAB_CASE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)+$")
 SNAKE_CASE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)+$")
 UPPER_SNAKE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
-# Suffix patterns that indicate architectural role
-ROLE_SUFFIXES = [
-    "Service",
-    "Repository",
-    "Adapter",
-    "Mapper",
-    "Controller",
-    "Provider",
-    "Factory",
-    "Builder",
-    "Handler",
-    "Middleware",
-    "Guard",
-    "Pipe",
-    "Interceptor",
-    "Resolver",
-    "Validator",
-    "Strategy",
-    "Observer",
-    "Command",
-    "Query",
-    "Event",
-    "Renderer",
-    "Generator",
-    "Registry",
-    "Manager",
-    "Listener",
-    "UseCase",
-    "Interactor",
-    "Presenter",
-    "ViewModel",
-]
-
-# Prefix patterns
-ROLE_PREFIXES = [
-    ("I", "Interface prefix"),
-    ("use", "React hook prefix"),
-    ("Abstract", "Abstract class prefix"),
-    ("Base", "Base class prefix"),
-    ("Mock", "Mock/test double prefix"),
-]
+# Role patterns from Knowledge Registry
+ROLE_SUFFIXES = [r.value for r in _registry.get_role_suffixes()]
+ROLE_PREFIXES = [(r.value, r.description) for r in _registry.get_role_prefixes()]
 
 # Import alias detection patterns (tsconfig paths)
 TS_ALIAS_PATTERN = re.compile(r'"(@[^"]+/\*?)"\s*:\s*\["([^"]+)"\]')
@@ -241,33 +188,58 @@ class CodeScanner(BaseScanner):
         }
 
     def _analyze_code_naming(self, sample: list[Path]) -> dict[str, Any]:
-        """Analyze naming inside code files."""
+        """Analyze naming inside code files using language-specific patterns."""
         interfaces: list[str] = []
         classes: list[str] = []
         functions: list[str] = []
         enums: list[str] = []
         constants: list[str] = []
 
+        # Build compiled regex cache per extension from registry
+        lang_patterns: dict[str, dict[str, re.Pattern[str]]] = {}
+        for filepath in sample:
+            ext = filepath.suffix
+            if ext not in lang_patterns:
+                lang_info = _registry.get_language(ext)
+                if lang_info:
+                    compiled: dict[str, re.Pattern[str]] = {}
+                    if lang_info.class_pattern:
+                        compiled["class"] = re.compile(lang_info.class_pattern)
+                    if lang_info.function_pattern:
+                        compiled["function"] = re.compile(lang_info.function_pattern)
+                    if lang_info.constant_pattern:
+                        compiled["constant"] = re.compile(
+                            lang_info.constant_pattern, re.MULTILINE
+                        )
+                    lang_patterns[ext] = compiled
+                else:
+                    lang_patterns[ext] = {}
+
         for filepath in sample:
             try:
                 content = filepath.read_text(encoding="utf-8", errors="ignore")
-                # Only read first 100 lines for performance
                 lines = content.split("\n")[:100]
                 content = "\n".join(lines)
             except OSError:
                 continue
 
             ext = filepath.suffix
+
+            # TS/JS: also extract interfaces and enums (language-specific)
             if ext in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}:
                 interfaces.extend(INTERFACE_PATTERN.findall(content))
-                classes.extend(CLASS_PATTERN.findall(content))
-                functions.extend(FUNCTION_PATTERN.findall(content))
-                functions.extend(CONST_FUNC_PATTERN.findall(content))
                 enums.extend(ENUM_PATTERN.findall(content))
-            elif ext in {".py", ".pyi"}:
-                classes.extend(PY_CLASS_PATTERN.findall(content))
-                functions.extend(PY_FUNC_PATTERN.findall(content))
-                constants.extend(PY_CONST_PATTERN.findall(content))
+                # Also get const arrow functions for JS/TS
+                functions.extend(CONST_FUNC_PATTERN.findall(content))
+
+            # Use registry patterns for class/function/constant detection
+            patterns = lang_patterns.get(ext, {})
+            if "class" in patterns:
+                classes.extend(patterns["class"].findall(content))
+            if "function" in patterns:
+                functions.extend(patterns["function"].findall(content))
+            if "constant" in patterns:
+                constants.extend(patterns["constant"].findall(content))
 
         result: dict[str, Any] = {}
 
@@ -297,6 +269,12 @@ class CodeScanner(BaseScanner):
             result["enums"] = {
                 "format": self._dominant_case(enums),
                 "count": len(enums),
+            }
+
+        if constants:
+            result["constants"] = {
+                "format": self._dominant_case(constants),
+                "count": len(constants),
             }
 
         return result

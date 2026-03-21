@@ -8,53 +8,12 @@ from typing import Optional
 
 import pathspec
 
-# Always excluded regardless of .gitignore
-HARDCODED_DIR_EXCLUSIONS = {
-    ".git",
-    "node_modules",
-    "__pycache__",
-    ".expo",
-    ".next",
-    ".nuxt",
-    "dist",
-    "build",
-    ".cache",
-    ".turbo",
-    "vendor",
-    ".venv",
-    "venv",
-    "env",
-    ".tox",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    "coverage",
-    ".nyc_output",
-    ".parcel-cache",
-}
+from loom_context.knowledge import get_registry
 
-SECRETS_PATTERNS = [
-    "*.pem",
-    "*.key",
-    "*.p12",
-    "*.p8",
-    "*.jks",
-    "*.keystore",
-    "*.mobileprovision",
-    ".env",
-    ".env.*",
-    ".env.local",
-    ".env.production",
-    "credentials*",
-    "secrets*",
-    "*_rsa",
-    "id_rsa*",
-    "*.cert",
-    "*.crt",
-    "service-account*.json",
-    "google-services.json",
-    "GoogleService-Info.plist",
-]
+# Backward-compatible aliases (read from Knowledge Registry)
+_registry = get_registry()
+HARDCODED_DIR_EXCLUSIONS = _registry.get_dir_exclusions()
+SECRETS_PATTERNS = _registry.get_secret_patterns()
 
 
 class FileFilter:

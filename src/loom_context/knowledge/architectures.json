@@ -1,0 +1,352 @@
+{
+  "patterns": {
+    "clean-architecture": {
+      "name": "Clean Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "domain", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "infrastructure", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "presentation", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "use_cases", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "usecases", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "entities", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "application", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_use_case", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_repository", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.45,
+      "boundary_rules": {
+        "domain": {"forbidden_imports": ["infrastructure", "presentation"]},
+        "core": {"forbidden_imports": ["infrastructure", "presentation"]},
+        "infrastructure": {"forbidden_imports": ["presentation"]}
+      },
+      "legacy_dir_sets": [
+        ["domain", "infrastructure", "presentation"],
+        ["domain", "infra", "presentation"],
+        ["domain", "infrastructure", "ui"],
+        ["domain", "data", "presentation"]
+      ]
+    },
+    "hexagonal": {
+      "name": "Hexagonal Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "ports", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "adapters", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "domain", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "application", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "infrastructure", "weight": 0.05, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_port", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_adapter", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "domain": {"forbidden_imports": ["adapters", "infrastructure"]},
+        "ports": {"forbidden_imports": ["adapters", "infrastructure"]}
+      },
+      "legacy_dir_sets": [
+        ["ports", "adapters"],
+        ["domain", "ports", "adapters"]
+      ]
+    },
+    "mvc": {
+      "name": "Model-View-Controller",
+      "signals": [
+        {"type": "directory", "pattern": "models", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "views", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "controllers", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "helpers", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "app/models", "weight": 0.05, "depth": "top"},
+        {"type": "directory", "pattern": "app/views", "weight": 0.05, "depth": "top"},
+        {"type": "file_suffix", "pattern": "_controller", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_model", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.45,
+      "boundary_rules": {
+        "models": {"forbidden_imports": ["views", "controllers"]}
+      },
+      "legacy_dir_sets": [
+        ["models", "views", "controllers"],
+        ["model", "view", "controller"]
+      ]
+    },
+    "mvvm": {
+      "name": "Model-View-ViewModel",
+      "signals": [
+        {"type": "directory", "pattern": "models", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "views", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "viewmodels", "weight": 0.30, "depth": "any"},
+        {"type": "directory", "pattern": "viewModels", "weight": 0.30, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_view_model", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_viewmodel", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.50,
+      "boundary_rules": {},
+      "legacy_dir_sets": [
+        ["models", "views", "viewmodels"],
+        ["model", "view", "viewmodel"]
+      ]
+    },
+    "feature-based": {
+      "name": "Feature-Based Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "features", "weight": 0.30, "depth": "any"},
+        {"type": "directory", "pattern": "modules", "weight": 0.20, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_feature", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_module", "weight": 0.10},
+        {"type": "directory", "pattern": "screens", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "components", "weight": 0.05, "depth": "any"},
+        {"type": "directory", "pattern": "hooks", "weight": 0.05, "depth": "any"},
+        {"type": "directory", "pattern": "shared", "weight": 0.05, "depth": "any"},
+        {"type": "file_content", "pattern": "feature|Feature", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {},
+      "legacy_dir_sets": [
+        ["features"],
+        ["modules"]
+      ]
+    },
+    "layered": {
+      "name": "Layered Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "controllers", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "services", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "repositories", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "api", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "data", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_service", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_repository", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.45,
+      "boundary_rules": {
+        "controllers": {"forbidden_imports": ["repositories"]},
+        "repositories": {"forbidden_imports": ["controllers", "services"]}
+      },
+      "legacy_dir_sets": [
+        ["controllers", "services", "repositories"],
+        ["api", "services", "data"]
+      ]
+    },
+    "nestjs-modular": {
+      "name": "NestJS Modular",
+      "signals": [
+        {"type": "directory", "pattern": "modules", "weight": 0.30, "depth": "any"},
+        {"type": "directory", "pattern": "common", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "config", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "health", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": ".module.ts", "weight": 0.15},
+        {"type": "file_suffix", "pattern": ".controller.ts", "weight": 0.05},
+        {"type": "file_suffix", "pattern": ".service.ts", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {},
+      "legacy_dir_sets": [
+        ["modules", "common"],
+        ["modules", "config"],
+        ["health", "modules"]
+      ]
+    },
+    "pipeline": {
+      "name": "Pipeline Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "scanners", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "generators", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "auditors", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "parsers", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "transformers", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "emitters", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "extractors", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "processors", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "loaders", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "collectors", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "analyzers", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "reporters", "weight": 0.10, "depth": "any"}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {},
+      "legacy_dir_sets": [
+        ["scanners", "generators"],
+        ["scanners", "generators", "auditors"],
+        ["parsers", "transformers", "emitters"],
+        ["extractors", "processors", "loaders"],
+        ["collectors", "analyzers", "reporters"]
+      ]
+    },
+    "terraform": {
+      "name": "Terraform Infrastructure",
+      "signals": [
+        {"type": "directory", "pattern": "modules", "weight": 0.30, "depth": "top"},
+        {"type": "directory", "pattern": "environments", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "providers", "weight": 0.15, "depth": "any"},
+        {"type": "file_suffix", "pattern": ".tf", "weight": 0.20},
+        {"type": "file_content", "pattern": "main\\.tf", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {},
+      "legacy_dir_sets": [
+        ["modules", "environments"],
+        ["modules", "providers"]
+      ]
+    },
+    "ddd": {
+      "name": "Domain-Driven Design",
+      "signals": [
+        {"type": "directory", "pattern": "domains", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "aggregates", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "value_objects", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "bounded_contexts", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "entities", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_aggregate", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_value_object", "weight": 0.05},
+        {"type": "file_suffix", "pattern": "_domain_event", "weight": 0.05},
+        {"type": "package", "patterns": ["dry-types", "dry-struct", "sequent", "eventide"], "ecosystem": "gem", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "domain": {"forbidden_imports": ["infrastructure", "application", "presentation"]},
+        "application": {"forbidden_imports": ["infrastructure", "presentation"]}
+      },
+      "legacy_dir_sets": []
+    },
+    "event-driven": {
+      "name": "Event-Driven Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "events", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "listeners", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "handlers", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "subscribers", "weight": 0.15, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_event", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_listener", "weight": 0.10},
+        {"type": "package", "patterns": ["wisper", "dry-events"], "ecosystem": "gem", "weight": 0.05},
+        {"type": "package", "patterns": ["celery"], "ecosystem": "pip", "weight": 0.05},
+        {"type": "package", "patterns": ["kafkajs", "amqplib"], "ecosystem": "npm", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "cqrs": {
+      "name": "Command Query Responsibility Segregation",
+      "signals": [
+        {"type": "directory", "pattern": "commands", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "queries", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "read_models", "weight": 0.15, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_command", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_query", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_command_handler", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_query_handler", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "commands": {"forbidden_imports": ["queries"]},
+        "queries": {"forbidden_imports": ["commands"]}
+      },
+      "legacy_dir_sets": []
+    },
+    "microservices": {
+      "name": "Microservices Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "services", "weight": 0.30, "depth": "top"},
+        {"type": "directory", "pattern": "gateway", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "api-gateway", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "proto", "weight": 0.15, "depth": "any"},
+        {"type": "file_content", "pattern": "docker-compose\\.ya?ml", "weight": 0.15},
+        {"type": "file_suffix", "pattern": "_service", "weight": 0.10},
+        {"type": "package", "patterns": ["grpc", "protobuf"], "ecosystem": "any", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "serverless": {
+      "name": "Serverless Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "functions", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "handlers", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "stacks", "weight": 0.15, "depth": "any"},
+        {"type": "file_content", "pattern": "serverless\\.(yml|ts)", "weight": 0.20},
+        {"type": "file_content", "pattern": "(sam-template|template\\.yaml)", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_handler", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "monolith-modular": {
+      "name": "Modular Monolith",
+      "signals": [
+        {"type": "directory", "pattern": "modules", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "shared", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "common", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_module", "weight": 0.10},
+        {"type": "file_content", "pattern": "models.*services.*controllers", "weight": 0.20},
+        {"type": "directory", "pattern": "bounded_contexts", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "lib", "weight": 0.05, "depth": "any"},
+        {"type": "file_suffix", "pattern": "Module", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "onion": {
+      "name": "Onion Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "core", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "domain", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "application", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "infrastructure", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "interfaces", "weight": 0.10, "depth": "any"},
+        {"type": "file_suffix", "pattern": "_service", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_repository", "weight": 0.10},
+        {"type": "directory", "pattern": "persistence", "weight": 0.05, "depth": "any"}
+      ],
+      "confidence_threshold": 0.45,
+      "boundary_rules": {
+        "domain": {"forbidden_imports": ["infrastructure", "interfaces", "persistence"]},
+        "application": {"forbidden_imports": ["infrastructure", "persistence"]},
+        "core": {"forbidden_imports": ["infrastructure", "interfaces"]}
+      },
+      "legacy_dir_sets": []
+    },
+    "vertical-slice": {
+      "name": "Vertical Slice Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "features", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "slices", "weight": 0.25, "depth": "any"},
+        {"type": "file_suffix", "pattern": "Handler", "weight": 0.15},
+        {"type": "file_suffix", "pattern": "Request", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "Response", "weight": 0.10},
+        {"type": "package", "patterns": ["mediatr", "MediatR"], "ecosystem": "nuget", "weight": 0.15}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "space-based": {
+      "name": "Space-Based Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "processing-units", "weight": 0.30, "depth": "any"},
+        {"type": "directory", "pattern": "messaging-grid", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "data-grid", "weight": 0.20, "depth": "any"},
+        {"type": "package", "patterns": ["hazelcast", "ignite", "coherence"], "ecosystem": "maven", "weight": 0.15},
+        {"type": "file_suffix", "pattern": "_grid", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.45,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    },
+    "plugin": {
+      "name": "Plugin Architecture",
+      "signals": [
+        {"type": "directory", "pattern": "plugins", "weight": 0.30, "depth": "any"},
+        {"type": "directory", "pattern": "extensions", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "addons", "weight": 0.15, "depth": "any"},
+        {"type": "file_suffix", "pattern": "Plugin", "weight": 0.15},
+        {"type": "file_suffix", "pattern": "Extension", "weight": 0.10},
+        {"type": "code_pattern", "pattern": "register_plugin|load_plugins", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {},
+      "legacy_dir_sets": []
+    }
+  }
+}

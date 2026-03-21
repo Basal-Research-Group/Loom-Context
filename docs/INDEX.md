@@ -55,16 +55,20 @@ loom init .
 | Version | Estado | Que entrega | Plan |
 |---------|--------|-------------|------|
 | v0.1.0 | Publicado | 6 comandos, 25 tests | — |
-| v0.2.0 | Listo para release | 15 comandos, 257 tests, 95% cobertura | [delivery](plans/archive/v0.2.0/delivery.md) |
-| v0.3.0 | Pendiente | Basado en feedback de uso real | — |
+| v0.3.0 | Publicado | 17 comandos, 281 tests, 95% cobertura | [delivery](plans/archive/v0.2.0/delivery.md) |
+| v0.4.0 | Publicado | Cache, token counting, zero-friction agents | [delivery](plans/v0.4.0/delivery.md) |
+| v0.5.0 | Listo para release | Knowledge Registry, 22 lenguajes, 15 archs, 373 tests | [release notes](plans/v0.5.0/release-notes.md) |
+| v0.6.0-v1.0 | Planificado | IA, dominios multiples, gobernanza | [roadmap](plans/roadmap-v0.5-v1.0.md) |
 
 ### Estrategias transversales
 
 | Documento | Que cubre |
 |-----------|-----------|
-| [Roadmap v0.2-v0.4](plans/roadmap-v0.2-v0.4.md) | Vision completa con secuencia |
+| [Roadmap v0.2-v0.4](plans/roadmap-v0.2-v0.4.md) | Vision historica (completada) |
+| [Roadmap v0.5-v1.0](plans/roadmap-v0.5-v1.0.md) | Vision actual: Knowledge Registry, IA, dominios |
 | [Architecture Hardening](plans/architecture-hardening-plan.md) | Refactor: contratos, pipelines, CLI |
-| [AI Integration](plans/ai-integration-strategy.md) | Embeddings y ranking como linea futura opcional, post-v0.3.0 |
+| [AI Integration](plans/ai-integration-strategy.md) | Embeddings y ranking como capa opcional |
+| [Future Domains](plans/future-domains.md) | Research, data science, documentacion tecnica |
 
 ### Contribucion y comunidad
 
@@ -182,5 +186,6 @@ Los templates en `src/loom_context/templates/` son para generar archivos de `.co
 ### Si quieres entender el roadmap
 
 1. [Scope](plans/scope.md)
-2. [Roadmap](plans/roadmap-v0.2-v0.4.md) — vision completa
-3. Delivery de la version que te interese (`plans/vX.Y.Z/delivery.md`)
+2. [Roadmap v0.5-v1.0](plans/roadmap-v0.5-v1.0.md) — vision actual
+3. [Roadmap v0.2-v0.4](plans/roadmap-v0.2-v0.4.md) — historico (completado)
+4. Delivery de la version que te interese (`plans/vX.Y.Z/delivery.md`)

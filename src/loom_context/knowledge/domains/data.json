@@ -1,0 +1,61 @@
+{
+  "name": "data",
+  "display_name": "Data Engineering / Science Project",
+  "description": "Data pipelines, warehouses, ETL/ELT, analytics, and ML projects",
+  "markers": [
+    "dbt_project.yml",
+    "profiles.yml",
+    "airflow.cfg",
+    "dagster.yaml",
+    "prefect.yaml",
+    "mlflow",
+    "DVC",
+    "pipeline.py",
+    "Dockerfile"
+  ],
+  "file_extensions": [
+    ".py", ".sql", ".yaml", ".yml", ".json",
+    ".csv", ".parquet", ".avro", ".orc",
+    ".ipynb", ".r", ".jl",
+    ".hql", ".presto"
+  ],
+  "directory_patterns": [
+    "models", "sources", "seeds", "snapshots", "macros",
+    "pipelines", "dags", "operators", "sensors",
+    "warehouses", "staging", "marts", "raw",
+    "transformations", "ingestion", "extraction",
+    "notebooks", "analysis", "features"
+  ],
+  "structure_patterns": {
+    "dbt": {
+      "signals": [
+        {"type": "file", "pattern": "dbt_project.yml", "weight": 0.40},
+        {"type": "directory", "pattern": "models", "weight": 0.20},
+        {"type": "directory", "pattern": "seeds", "weight": 0.15},
+        {"type": "directory", "pattern": "macros", "weight": 0.15},
+        {"type": "file", "pattern": "*.sql", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40
+    },
+    "airflow": {
+      "signals": [
+        {"type": "directory", "pattern": "dags", "weight": 0.35},
+        {"type": "file", "pattern": "airflow.cfg", "weight": 0.30},
+        {"type": "directory", "pattern": "plugins", "weight": 0.15},
+        {"type": "directory", "pattern": "operators", "weight": 0.20}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "ml-pipeline": {
+      "signals": [
+        {"type": "directory", "pattern": "features", "weight": 0.20},
+        {"type": "directory", "pattern": "models", "weight": 0.20},
+        {"type": "directory", "pattern": "pipelines", "weight": 0.20},
+        {"type": "file", "pattern": "*.ipynb", "weight": 0.15},
+        {"type": "directory", "pattern": "experiments", "weight": 0.15},
+        {"type": "file", "pattern": "MLproject", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35
+    }
+  }
+}

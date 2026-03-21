@@ -295,7 +295,7 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(main, ["--version"])
         assert result.exit_code == 0
-        assert "0.4.0" in result.output
+        assert "0.5.0" in result.output
 
     def test_init_command(self, tmp_project: Path) -> None:
         runner = CliRunner()
@@ -1704,7 +1704,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.4.0",
+            "0.5.0",
         )
         assert result["project"]["language"] == "TypeScript"
 
@@ -1723,7 +1723,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.4.0",
+            "0.5.0",
         )
         assert result["project"]["language"] == "Rust"
 
@@ -1742,7 +1742,7 @@ class TestIndexGeneratorLanguages:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.4.0",
+            "0.5.0",
         )
         assert result["project"]["language"] == "Go"
 
@@ -1815,18 +1815,26 @@ class TestExporterBase:
 
 class TestDepsInferCategory:
     def test_infer_types(self) -> None:
-        from loom_context.scanners.deps import _infer_category
+        from loom_context.knowledge import get_registry
 
-        assert _infer_category("@types/react") == "type-definitions"
-        assert _infer_category("eslint-plugin-react") == "linting"
-        assert _infer_category("prettier") == "formatting"
-        assert _infer_category("jest") == "testing"
-        assert _infer_category("babel-plugin-x") == "plugin"
-        assert _infer_category("webpack") == "build-tool"
-        assert _infer_category("@react-navigation/native") == "navigation"
-        assert _infer_category("expo-camera") == "expo-module"
-        assert _infer_category("react-native-svg") == "react-native-module"
-        assert _infer_category("lodash") == "other"
+        registry = get_registry()
+        infer = registry.infer_package_category
+
+        assert infer("@types/react") == "type-definitions"
+        assert infer("eslint-plugin-react") == "linting"
+        assert infer("babel-plugin-x") == "plugin"
+        assert infer("@react-navigation/native") == "navigation"
+        assert infer("expo-camera") == "expo-module"
+        assert infer("react-native-map") == "react-native-module"
+        assert infer("some-unknown-pkg") == "other"
+
+        # Known packages return their category via categorize_package
+        cat, _ = registry.categorize_package("prettier")
+        assert cat == "formatting"
+        cat, _ = registry.categorize_package("jest")
+        assert cat == "testing"
+        cat, _ = registry.categorize_package("webpack")
+        assert cat == "build-tool"
 
 
 class TestStructureEdgeCases:
@@ -2730,7 +2738,7 @@ class TestIndexRuntime:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.4.0",
+            "0.5.0",
         )
         assert "react@19" in r["project"]["runtime"]
 
@@ -2745,7 +2753,7 @@ class TestIndexRuntime:
                 "code": {"total_code_files": 0, "file_naming": {}},
                 "docs": {"doc_count": 0, "agents_md": None},
             },
-            "0.4.0",
+            "0.5.0",
         )
         assert r["project"]["runtime"] == "Go"
 
@@ -3059,7 +3067,7 @@ class TestBundleCommand:
         assert result is not None
         _, manifest = result
         assert manifest.task == "architecture boundaries"
-        assert manifest.loom_version == "0.4.0"
+        assert manifest.loom_version == "0.5.0"
         assert manifest.selection_strategy == "heuristic"
         assert len(manifest.included_sections) > 0
 

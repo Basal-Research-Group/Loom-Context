@@ -8,6 +8,58 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-03-20
+
+### Added — Knowledge Registry: El Cerebro de Loom
+- `knowledge/` module: centralized knowledge base with 13 JSON data files
+- `KnowledgeRegistry`: singleton API with lazy loading, caching, 25+ typed queries
+- `SignalScorer`: multi-signal architecture detection with weighted scoring and confidence levels
+- `languages.json`: 22 programming languages across 3 tiers with extensions, markers, naming, code patterns, and frameworks
+- `ecosystems.json`: 332 packages across 8 ecosystems (npm, pip, gem, cargo, hex, go, maven, nuget) + 18 inference rules
+- `architectures.json`: 15 architecture patterns with scoring (adds DDD, event-driven, CQRS, microservices, serverless, monolith-modular)
+- `directories.json`: 188 semantic directory annotations (was 129)
+- `markers.json`: data-driven project type detection (replaces hardcoded marker lists)
+- `security.json`: 45 dir exclusions + 33 secret patterns (extended per-language: Rust, Elixir, Ruby, Go)
+- `infrastructure.json`: 13 services + 45 package mappings (adds Memcached, ClickHouse, Neo4j)
+- `roles.json`: 47 architectural suffixes + 8 prefixes (adds Ruby, Go, Rust, DDD roles)
+- `design_patterns.json`: 22 GoF + modern design patterns with per-language detection signals
+- `domains/`: code.json, research.json, data.json domain definitions
+- Local knowledge overrides via `.loom/knowledge/` (deep merge, not tracked in git)
+- 7 new dependency parsers: Gemfile, Cargo.toml, go.mod, mix.exs, pom.xml, build.gradle(.kts), *.csproj
+- 60 new tests for knowledge module + 24 new tests for dependency parsers (365 total, was 305)
+
+### Changed
+- All 11 scanners/auditors/generators migrated from hardcoded constants to KnowledgeRegistry
+- Architecture detection uses weighted signals instead of exact directory-set matching (legacy compat preserved)
+- `_detect_project_type` fully data-driven via `markers.json` (zero hardcoded markers in Python)
+- `InfraScanner` fully migrated to registry (ServiceDefs from JSON, platform-aware commands)
+- CODE_EXTENSIONS consolidated from 4 duplicated definitions to single source of truth (49 extensions)
+- STOP_WORDS consolidated from 2 duplicated definitions to single source (141 words EN+ES)
+- DependencyScanner supports 9 package formats (was 3)
+
+### Removed
+- 17 hardcoded knowledge databases scattered across 8 Python files (~650 entries)
+- All inline ServiceDef instances in infra.py
+- `_infer_category()` function (replaced by registry inference rules)
+
+---
+
+## [0.4.0] - 2026-03-19
+
+### Added — Adoption: Measurable Savings & Zero Friction
+- Token counting and savings metrics in CLI output
+- Incremental scan caching (hash-based invalidation)
+- Zero-friction agent integration setup wizard
+- `loom setup` with presets (minimal, full, claude)
+- Cross-platform demo script
+- Database context generation (Prisma schema + migrations)
+
+### Changed
+- Improved performance with scan result caching
+- README and quickstart rewritten for v0.4.0
+
+---
+
 ## [0.3.0] - 2026-03-18
 
 ### Added — Analysis & Observability (v0.3.0)

@@ -7,10 +7,11 @@ import re
 from pathlib import Path
 from typing import Any
 
+from loom_context.knowledge import get_registry
 from loom_context.models import Violation
 from loom_context.security.filter import FileFilter
 
-CODE_EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go"}
+CODE_EXTENSIONS = get_registry().get_all_extensions()
 
 
 class NamingAuditor:

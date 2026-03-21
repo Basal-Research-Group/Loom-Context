@@ -7,6 +7,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from loom_context.knowledge import get_registry as _get_registry
+
 
 @dataclass
 class LayerMetrics:
@@ -34,7 +36,7 @@ class ProjectMetrics:
         return asdict(self)
 
 
-CODE_EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go", ".java", ".kt", ".swift"}
+CODE_EXTENSIONS = _get_registry().get_all_extensions()
 
 
 class MetricsCollector:

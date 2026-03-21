@@ -1,0 +1,65 @@
+# Database
+
+## Provider
+{{ provider }}
+
+## Schema Summary
+
+| Metric | Value |
+|--------|-------|
+| Models | {{ model_count }} |
+| Enums | {{ enum_count }} |
+| Relations | {{ relation_count }} |
+{% if extensions %}| Extensions | {{ extensions | join(', ') }} |
+{% endif %}
+
+## Models ({{ model_count }})
+
+| Model | Table | Fields | Relations | Indices | Tenant | Timestamps |
+|-------|-------|:------:|:---------:|:-------:|:------:|:----------:|
+{% for m in models %}
+| `{{ m.name }}` | `{{ m.table_name }}` | {{ m.fields | length }} | {{ m.relations | length }} | {{ m.indices | length }} | {{ '✓' if m.has_tenant_id else '—' }} | {{ '✓' if m.has_created_at and m.has_updated_at else '—' }} |
+{% endfor %}
+
+{% if enums %}
+## Enums ({{ enum_count }})
+
+{% for e in enums %}
+- **{{ e.name }}**: {{ e.values | join(', ') }}
+{% endfor %}
+{% endif %}
+
+{% if migrations %}
+## Migrations ({{ migrations | length }})
+
+| # | Name | SQL Lines | Tables | Functions | Triggers | Policies |
+|---|------|:---------:|:------:|:---------:|:--------:|:--------:|
+{% for m in migrations %}
+| {{ loop.index }} | `{{ m.name }}` | {{ m.sql_lines }} | {{ m.tables_created | length }} | {{ m.functions_created | length }} | {{ m.triggers_created | length }} | {{ m.policies_created | length }} |
+{% endfor %}
+
+**Total SQL:** {{ total_sql_lines }} lines
+{% endif %}
+
+{% if total_functions > 0 or total_triggers > 0 or total_policies > 0 %}
+## PostgreSQL Objects
+
+| Object Type | Count |
+|-------------|:-----:|
+{% if total_functions > 0 %}| Functions | {{ total_functions }} |
+{% endif %}{% if total_triggers > 0 %}| Triggers | {{ total_triggers }} |
+{% endif %}{% if total_policies > 0 %}| RLS Policies | {{ total_policies }} |
+{% endif %}{% if total_indices > 0 %}| Custom Indices | {{ total_indices }} |
+{% endif %}
+{% endif %}
+
+{% if domains %}
+## Domains
+
+{% for domain_name, domain in domains.items() %}
+### {{ domain_name }} ({{ domain.tables | length }} tables)
+{{ domain.description }}
+Tables: {{ domain.tables | join(', ') }}
+
+{% endfor %}
+{% endif %}

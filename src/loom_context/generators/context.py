@@ -56,6 +56,11 @@ class ContextGenerator:
         self._generate_plans_summary(scan_result)
         generated.append("plans-summary.md")
 
+        # database.md (if database config exists in loom.json)
+        if self._has_database_config():
+            self._generate_database()
+            generated.append("database.md")
+
         return generated
 
     def _write_json(self, filename: str, data: Any) -> None:
@@ -79,6 +84,52 @@ class ContextGenerator:
                 return data
         except (json.JSONDecodeError, OSError):
             return {}
+
+    def _has_database_config(self) -> bool:
+        """Check if loom.json has a database section."""
+        loom_json = self._read_loom_json()
+        return bool(loom_json.get("database", {}).get("schema_path"))
+
+    def _generate_database(self) -> None:
+        """Generate database.md from Prisma schema and migrations."""
+        from loom_context.scanners.database import DatabaseScanner
+        from loom_context.scanners.migrations import MigrationScanner
+
+        loom_json = self._read_loom_json()
+        db_config = loom_json.get("database", {})
+
+        # Resolve root from context_dir (context_dir = root/.context)
+        root = self.context_dir.parent
+
+        # Scan schema
+        db_scanner = DatabaseScanner(root)
+        db_result = db_scanner.scan(db_config.get("schema_path"))
+
+        # Scan migrations
+        mig_scanner = MigrationScanner(root)
+        mig_result = mig_scanner.scan(db_config.get("migrations_path"))
+
+        # Get domains from loom.json
+        domains = db_config.get("domains", {})
+
+        template = self.env.get_template("database.md.j2")
+        content = template.render(
+            provider=db_result.provider,
+            model_count=db_result.model_count,
+            enum_count=db_result.enum_count,
+            relation_count=db_result.relation_count,
+            extensions=db_result.extensions,
+            models=db_result.models,
+            enums=db_result.enums,
+            migrations=mig_result.migrations,
+            total_sql_lines=mig_result.total_sql_lines,
+            total_functions=mig_result.total_functions,
+            total_triggers=mig_result.total_triggers,
+            total_policies=mig_result.total_policies,
+            total_indices=mig_result.total_indices,
+            domains=domains,
+        )
+        self._write_md("database.md", content)
 
     def _generate_architecture(self, scan_result: dict[str, Any]) -> None:
         template = self.env.get_template("architecture.md.j2")
@@ -133,6 +184,7 @@ class ContextGenerator:
     def _generate_stack(self, scan_result: dict[str, Any]) -> None:
         deps = scan_result.get("deps", {})
         stack_data = {
+            "ecosystem": deps.get("ecosystem", "unknown"),
             "package_manager": deps.get("package_manager", "unknown"),
             "dependency_files": deps.get("dependency_files", []),
             "stack_summary": deps.get("stack_summary", {}),

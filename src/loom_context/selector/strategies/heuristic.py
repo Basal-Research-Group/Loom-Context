@@ -6,57 +6,10 @@ import re
 from pathlib import Path
 from typing import Any
 
+from loom_context.knowledge import get_registry
 from loom_context.selector.models import SelectionCandidate, SelectionReason
 
-# Stop words to filter out from queries
-STOP_WORDS = {
-    "the",
-    "a",
-    "an",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "being",
-    "have",
-    "has",
-    "had",
-    "do",
-    "does",
-    "did",
-    "will",
-    "would",
-    "could",
-    "should",
-    "may",
-    "might",
-    "shall",
-    "can",
-    "need",
-    "dare",
-    "ought",
-    "de",
-    "la",
-    "el",
-    "en",
-    "los",
-    "las",
-    "un",
-    "una",
-    "del",
-    "al",
-    "por",
-    "para",
-    "con",
-    "que",
-    "se",
-    "no",
-    "es",
-    "como",
-    "mas",
-}
+STOP_WORDS = get_registry().get_stop_words()
 
 
 class HeuristicStrategy:

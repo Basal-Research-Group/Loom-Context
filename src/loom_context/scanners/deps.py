@@ -3,163 +3,14 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
+from loom_context.knowledge import get_registry
 from loom_context.scanners.base import BaseScanner
 
-# Known package categorization database
-KNOWN_PACKAGES: dict[str, tuple[str, str]] = {
-    # UI Frameworks
-    "react": ("ui-framework", "React UI library"),
-    "react-dom": ("ui-framework", "React DOM renderer"),
-    "react-native": ("ui-framework", "React Native mobile framework"),
-    "vue": ("ui-framework", "Vue.js framework"),
-    "svelte": ("ui-framework", "Svelte framework"),
-    "angular": ("ui-framework", "Angular framework"),
-    "@angular/core": ("ui-framework", "Angular core"),
-    "next": ("ui-framework", "Next.js framework"),
-    "nuxt": ("ui-framework", "Nuxt.js framework"),
-    # Platform
-    "expo": ("platform", "Expo development platform"),
-    "electron": ("platform", "Electron desktop framework"),
-    # State Management
-    "zustand": ("state-management", "Lightweight state management"),
-    "redux": ("state-management", "Redux state container"),
-    "@reduxjs/toolkit": ("state-management", "Redux Toolkit"),
-    "mobx": ("state-management", "MobX reactive state"),
-    "recoil": ("state-management", "Recoil state management"),
-    "jotai": ("state-management", "Jotai atomic state"),
-    "immer": ("state-management", "Immutable state helper"),
-    "pinia": ("state-management", "Pinia state for Vue"),
-    # DI
-    "tsyringe": ("dependency-injection", "TypeScript DI container"),
-    "inversify": ("dependency-injection", "InversifyJS DI"),
-    "reflect-metadata": ("dependency-injection", "Metadata reflection API"),
-    # Database / ORM
-    "drizzle-orm": ("database", "Drizzle TypeScript ORM"),
-    "prisma": ("database", "Prisma ORM"),
-    "@prisma/client": ("database", "Prisma client"),
-    "typeorm": ("database", "TypeORM"),
-    "sequelize": ("database", "Sequelize ORM"),
-    "mongoose": ("database", "MongoDB ODM"),
-    "knex": ("database", "SQL query builder"),
-    "expo-sqlite": ("database", "SQLite for Expo"),
-    "better-sqlite3": ("database", "SQLite for Node"),
-    "pg": ("database", "PostgreSQL client"),
-    "mysql2": ("database", "MySQL client"),
-    "redis": ("database", "Redis client"),
-    "ioredis": ("database", "Redis client"),
-    # Validation
-    "zod": ("validation", "Schema validation"),
-    "yup": ("validation", "Schema validation"),
-    "joi": ("validation", "Schema validation"),
-    "class-validator": ("validation", "Class-based validation"),
-    "ajv": ("validation", "JSON Schema validator"),
-    # HTTP / API
-    "axios": ("http", "HTTP client"),
-    "node-fetch": ("http", "Fetch API for Node"),
-    "express": ("http-server", "Express web framework"),
-    "fastify": ("http-server", "Fastify web framework"),
-    "koa": ("http-server", "Koa web framework"),
-    "hono": ("http-server", "Hono web framework"),
-    # Navigation / Routing
-    "@react-navigation/native": ("navigation", "React Navigation"),
-    "@react-navigation/native-stack": ("navigation", "Stack navigator"),
-    "@react-navigation/bottom-tabs": ("navigation", "Tab navigator"),
-    "react-router": ("navigation", "React Router"),
-    "react-router-dom": ("navigation", "React Router DOM"),
-    # i18n
-    "i18next": ("i18n", "Internationalization framework"),
-    "react-i18next": ("i18n", "React i18n bindings"),
-    # TTS / Speech
-    "expo-speech": ("tts", "Expo text-to-speech"),
-    "react-native-tts": ("tts", "React Native TTS"),
-    # Animation
-    "lottie-react-native": ("animation", "Lottie animations"),
-    "react-native-reanimated": ("animation", "React Native animations"),
-    "framer-motion": ("animation", "Framer Motion"),
-    # Storage
-    "@react-native-async-storage/async-storage": ("storage", "Async storage"),
-    "expo-file-system": ("storage", "File system access"),
-    "expo-secure-store": ("storage", "Secure storage"),
-    # Testing
-    "jest": ("testing", "Jest test framework"),
-    "@jest/core": ("testing", "Jest core"),
-    "vitest": ("testing", "Vitest test framework"),
-    "mocha": ("testing", "Mocha test framework"),
-    "@testing-library/react": ("testing", "React Testing Library"),
-    "@testing-library/react-native": ("testing", "React Native Testing Library"),
-    "@playwright/test": ("testing", "Playwright E2E testing"),
-    "cypress": ("testing", "Cypress E2E testing"),
-    "supertest": ("testing", "HTTP assertion testing"),
-    # Linting / Formatting
-    "eslint": ("linting", "JavaScript/TypeScript linter"),
-    "prettier": ("formatting", "Code formatter"),
-    "biome": ("linting", "Biome linter/formatter"),
-    # Build / Bundling
-    "typescript": ("language", "TypeScript compiler"),
-    "webpack": ("bundler", "Webpack bundler"),
-    "vite": ("bundler", "Vite bundler"),
-    "esbuild": ("bundler", "esbuild bundler"),
-    "rollup": ("bundler", "Rollup bundler"),
-    "babel": ("transpiler", "Babel transpiler"),
-    "@babel/core": ("transpiler", "Babel core"),
-    # Git / CI
-    "husky": ("git-hooks", "Git hooks manager"),
-    "lint-staged": ("git-hooks", "Lint staged files"),
-    # Code Quality
-    "knip": ("code-quality", "Unused code detector"),
-    # SVG / Images
-    "react-native-svg": ("ui-library", "SVG support for React Native"),
-    "sharp": ("image-processing", "Image processing"),
-    # Compression
-    "jszip": ("compression", "ZIP file handling"),
-    # Auth
-    "jsonwebtoken": ("auth", "JWT handling"),
-    "passport": ("auth", "Authentication middleware"),
-    "bcrypt": ("auth", "Password hashing"),
-    # Logging
-    "winston": ("logging", "Winston logger"),
-    "pino": ("logging", "Pino logger"),
-    # Python packages
-    "django": ("web-framework", "Django web framework"),
-    "flask": ("web-framework", "Flask web framework"),
-    "fastapi": ("web-framework", "FastAPI framework"),
-    "sqlalchemy": ("database", "SQLAlchemy ORM"),
-    "alembic": ("database", "Database migrations"),
-    "pydantic": ("validation", "Pydantic data validation"),
-    "pytest": ("testing", "Pytest framework"),
-    "click": ("cli", "CLI framework"),
-    "rich": ("cli", "Rich terminal output"),
-    "celery": ("task-queue", "Distributed task queue"),
-    "requests": ("http", "HTTP client"),
-    "httpx": ("http", "Async HTTP client"),
-}
-
-
-def _infer_category(name: str) -> str:
-    """Infer category from package name patterns."""
-    lower = name.lower()
-    if lower.startswith("@types/"):
-        return "type-definitions"
-    if "eslint" in lower or "lint" in lower:
-        return "linting"
-    if "prettier" in lower or "format" in lower:
-        return "formatting"
-    if "test" in lower or "jest" in lower or "mocha" in lower:
-        return "testing"
-    if "plugin" in lower:
-        return "plugin"
-    if "webpack" in lower or "babel" in lower or "rollup" in lower:
-        return "build-tool"
-    if lower.startswith("@react-navigation"):
-        return "navigation"
-    if lower.startswith("expo-"):
-        return "expo-module"
-    if lower.startswith("react-native-"):
-        return "react-native-module"
-    return "other"
+_registry = get_registry()
 
 
 class DependencyScanner(BaseScanner):
@@ -168,35 +19,92 @@ class DependencyScanner(BaseScanner):
     def scan(self) -> dict[str, Any]:
         result: dict[str, Any] = {
             "package_manager": "unknown",
+            "ecosystem": "unknown",
             "dependency_files": [],
             "dependencies": [],
             "stack_summary": {},
         }
 
-        # Try package.json (JS/TS)
+        # JS/TS — package.json
         pkg_json = self.root / "package.json"
         if pkg_json.exists():
             self._scan_package_json(pkg_json, result)
 
-        # Try pyproject.toml (Python)
+        # Python — pyproject.toml
         pyproject = self.root / "pyproject.toml"
         if pyproject.exists():
             self._scan_pyproject_toml(pyproject, result)
 
-        # Try requirements.txt (Python)
+        # Python — requirements.txt
         req_txt = self.root / "requirements.txt"
         if req_txt.exists():
             self._scan_requirements_txt(req_txt, result)
+
+        # Ruby — Gemfile
+        gemfile = self.root / "Gemfile"
+        if gemfile.exists():
+            self._scan_gemfile(gemfile, result)
+
+        # Rust — Cargo.toml
+        cargo = self.root / "Cargo.toml"
+        if cargo.exists():
+            self._scan_cargo_toml(cargo, result)
+
+        # Go — go.mod
+        gomod = self.root / "go.mod"
+        if gomod.exists():
+            self._scan_go_mod(gomod, result)
+
+        # Elixir — mix.exs
+        mix_exs = self.root / "mix.exs"
+        if mix_exs.exists():
+            self._scan_mix_exs(mix_exs, result)
+
+        # Java — pom.xml
+        pom = self.root / "pom.xml"
+        if pom.exists():
+            self._scan_pom_xml(pom, result)
+
+        # Java/Kotlin — build.gradle / build.gradle.kts
+        for gradle_name in ["build.gradle", "build.gradle.kts"]:
+            gradle = self.root / gradle_name
+            if gradle.exists():
+                self._scan_gradle(gradle, result)
+                break
+
+        # C# — *.csproj
+        csproj_files = list(self.root.glob("*.csproj"))
+        if csproj_files:
+            self._scan_csproj(csproj_files[0], result)
+
+        # Resolve ecosystem from package manager
+        _pm_to_ecosystem = {
+            "npm": "npm", "yarn": "npm", "pnpm": "npm", "bun": "npm",
+            "pip": "pip", "poetry": "pip", "uv": "pip", "pipenv": "pip",
+            "bundler": "gem",
+            "cargo": "cargo",
+            "go": "go",
+            "hex": "hex",
+            "maven": "maven", "gradle": "maven",
+            "nuget": "nuget",
+        }
+        result["ecosystem"] = _pm_to_ecosystem.get(
+            result["package_manager"], "unknown"
+        )
 
         # Build stack summary
         summary: dict[str, list[str]] = {}
         for dep in result["dependencies"]:
             cat = dep["category"]
-            version_str = f"{dep['name']}@{dep['version']}" if dep["version"] else dep["name"]
+            version_str = (
+                f"{dep['name']}@{dep['version']}" if dep["version"] else dep["name"]
+            )
             summary.setdefault(cat, []).append(version_str)
         result["stack_summary"] = summary
 
         return result
+
+    # --- JS/TS ---
 
     def _scan_package_json(self, path: Path, result: dict[str, Any]) -> None:
         try:
@@ -223,6 +131,8 @@ class DependencyScanner(BaseScanner):
         for name, version in pkg.get("devDependencies", {}).items():
             result["dependencies"].append(self._categorize(name, version, dev=True))
 
+    # --- Python ---
+
     def _scan_pyproject_toml(self, path: Path, result: dict[str, Any]) -> None:
         try:
             content = path.read_text(encoding="utf-8")
@@ -238,11 +148,10 @@ class DependencyScanner(BaseScanner):
             else:
                 result["package_manager"] = "pip"
 
-        # Simple TOML parsing for dependencies (avoid tomli dependency)
-        # First: extract inline lists like: dependencies = ["click>=8.0", "rich"]
+        # Extract inline lists like: dependencies = ["click>=8.0", "rich"]
         self._parse_toml_inline_list(content, "dependencies", result, dev=False)
 
-        # Then: parse line-by-line for sections like [tool.poetry.dependencies]
+        # Parse line-by-line for sections like [tool.poetry.dependencies]
         in_deps = False
         for line in content.splitlines():
             stripped = line.strip()
@@ -253,32 +162,6 @@ class DependencyScanner(BaseScanner):
                 continue
             if in_deps and stripped and not stripped.startswith("#"):
                 self._parse_dep_line(stripped, result, dev=False)
-
-    def _parse_toml_inline_list(
-        self, content: str, key: str, result: dict[str, Any], dev: bool
-    ) -> None:
-        """Extract deps from TOML inline list: key = ["pkg>=ver", ...]."""
-        import re
-
-        pattern = rf"{key}\s*=\s*\[(.*?)\]"
-        for match in re.finditer(pattern, content, re.DOTALL):
-            items_str = match.group(1)
-            for item in re.findall(r'"([^"]+)"', items_str):
-                self._parse_dep_line(item, result, dev=dev)
-
-    def _parse_dep_line(self, line: str, result: dict[str, Any], dev: bool) -> None:
-        """Parse a single dependency string like 'click>=8.0'."""
-        line = line.strip().strip('"').strip("'").strip(",").strip('"').strip("'")
-        if not line or line.startswith("#") or line.startswith("["):
-            return
-        for sep in [">=", "==", "~=", "<=", "!=", "<", ">"]:
-            if sep in line:
-                name, version = line.split(sep, 1)
-                result["dependencies"].append(
-                    self._categorize(name.strip(), version.strip(), dev=dev)
-                )
-                return
-        result["dependencies"].append(self._categorize(line.strip(), "", dev=dev))
 
     def _scan_requirements_txt(self, path: Path, result: dict[str, Any]) -> None:
         try:
@@ -304,13 +187,286 @@ class DependencyScanner(BaseScanner):
             else:
                 result["dependencies"].append(self._categorize(line, "", dev=False))
 
+    # --- Ruby ---
+
+    def _scan_gemfile(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse Gemfile for gem dependencies."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append("Gemfile")
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "bundler"
+
+        # Match: gem 'name', '~> 1.0'  or  gem "name", ">= 2.0", "< 3.0"
+        # Also: gem 'name' (no version)
+        gem_pattern = re.compile(
+            r"""^\s*gem\s+['"]([^'"]+)['"]"""
+            r"""(?:\s*,\s*['"]([^'"]*)['"]\s*)?""",
+        )
+
+        in_test_group = False
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+
+            # Track group blocks for dev detection
+            if re.match(r"group\s+:(?:development|test)", stripped):
+                in_test_group = True
+            elif stripped == "end":
+                in_test_group = False
+
+            match = gem_pattern.match(stripped)
+            if match:
+                name = match.group(1)
+                version = match.group(2) or ""
+                # Clean version specifier
+                version = version.lstrip("~> ").lstrip(">= ").lstrip("= ")
+                result["dependencies"].append(
+                    self._categorize(name, version, dev=in_test_group)
+                )
+
+    # --- Rust ---
+
+    def _scan_cargo_toml(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse Cargo.toml for crate dependencies."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append("Cargo.toml")
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "cargo"
+
+        # Parse [dependencies] and [dev-dependencies] sections
+        section = ""
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+
+            if stripped.startswith("["):
+                section = stripped.strip("[]").strip()
+                continue
+
+            if section in ("dependencies", "dev-dependencies"):
+                dev = section == "dev-dependencies"
+                # name = "version" or name = { version = "x" }
+                m = re.match(r'(\w[\w-]*)\s*=\s*"([^"]*)"', stripped)
+                if m:
+                    result["dependencies"].append(
+                        self._categorize(m.group(1), m.group(2), dev=dev)
+                    )
+                    continue
+                # name = { version = "x", features = [...] }
+                m = re.match(r'(\w[\w-]*)\s*=\s*\{', stripped)
+                if m:
+                    name = m.group(1)
+                    ver_match = re.search(r'version\s*=\s*"([^"]*)"', stripped)
+                    version = ver_match.group(1) if ver_match else ""
+                    result["dependencies"].append(
+                        self._categorize(name, version, dev=dev)
+                    )
+
+    # --- Go ---
+
+    def _scan_go_mod(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse go.mod for module dependencies."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append("go.mod")
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "go"
+
+        in_require = False
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("//"):
+                continue
+
+            if stripped.startswith("require ("):
+                in_require = True
+                continue
+            if stripped == ")" and in_require:
+                in_require = False
+                continue
+
+            # Single-line: require github.com/gin-gonic/gin v1.9.0
+            if stripped.startswith("require ") and "(" not in stripped:
+                parts = stripped[8:].strip().split()
+                if len(parts) >= 2:
+                    mod_path, version = parts[0], parts[1]
+                    name = self._go_module_short_name(mod_path)
+                    result["dependencies"].append(
+                        self._categorize(name, version.lstrip("v"), dev=False)
+                    )
+                continue
+
+            # Inside require block
+            if in_require:
+                parts = stripped.split()
+                if len(parts) >= 2 and not parts[0].startswith("//"):
+                    mod_path, version = parts[0], parts[1]
+                    name = self._go_module_short_name(mod_path)
+                    result["dependencies"].append(
+                        self._categorize(name, version.lstrip("v"), dev=False)
+                    )
+
+    @staticmethod
+    def _go_module_short_name(mod_path: str) -> str:
+        """Extract short name from Go module path (last segment)."""
+        # github.com/gin-gonic/gin → gin
+        parts = mod_path.rstrip("/").split("/")
+        return parts[-1] if parts else mod_path
+
+    # --- Elixir ---
+
+    def _scan_mix_exs(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse mix.exs for Hex dependencies."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append("mix.exs")
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "hex"
+
+        # Match: {:phoenix, "~> 1.7"} or {:plug, ">= 0.0.0"}
+        dep_pattern = re.compile(
+            r"""\{:(\w+)\s*,\s*"([^"]*)"[^}]*\}"""
+        )
+        for match in dep_pattern.finditer(content):
+            name = match.group(1)
+            version = match.group(2).lstrip("~> ").lstrip(">= ")
+            # Check if it's a test-only dep
+            dev = "only: :test" in match.group(0) or "only: [:test" in match.group(0)
+            result["dependencies"].append(
+                self._categorize(name, version, dev=dev)
+            )
+
+    # --- Java (Maven) ---
+
+    def _scan_pom_xml(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse pom.xml for Maven dependencies (simple regex, no XML parser)."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append("pom.xml")
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "maven"
+
+        # Match <dependency> blocks with <artifactId> and optional <version>
+        dep_blocks = re.findall(
+            r"<dependency>(.*?)</dependency>", content, re.DOTALL
+        )
+        for block in dep_blocks:
+            artifact = re.search(r"<artifactId>(.*?)</artifactId>", block)
+            version = re.search(r"<version>(.*?)</version>", block)
+            scope = re.search(r"<scope>(.*?)</scope>", block)
+            if artifact:
+                name = artifact.group(1).strip()
+                ver = version.group(1).strip() if version else ""
+                dev = scope is not None and scope.group(1).strip() == "test"
+                result["dependencies"].append(
+                    self._categorize(name, ver, dev=dev)
+                )
+
+    # --- Java/Kotlin (Gradle) ---
+
+    def _scan_gradle(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse build.gradle for dependencies (simple regex)."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append(path.name)
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "gradle"
+
+        # Match: implementation 'group:artifact:version'
+        # Also: testImplementation "group:artifact:version"
+        dep_pattern = re.compile(
+            r"""(?:implementation|api|compileOnly|runtimeOnly"""
+            r"""|testImplementation|testRuntimeOnly"""
+            r"""|kapt|annotationProcessor)"""
+            r"""\s*[\(]?\s*['"]([^'"]+)['"]\s*[\)]?""",
+        )
+        for match in dep_pattern.finditer(content):
+            coord = match.group(1)
+            dev = "test" in match.group(0).lower()
+            parts = coord.split(":")
+            if len(parts) >= 2:
+                name = parts[1]  # artifactId
+                version = parts[2] if len(parts) >= 3 else ""
+                result["dependencies"].append(
+                    self._categorize(name, version, dev=dev)
+                )
+
+    # --- C# ---
+
+    def _scan_csproj(self, path: Path, result: dict[str, Any]) -> None:
+        """Parse .csproj for NuGet package references."""
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        result["dependency_files"].append(path.name)
+        if result["package_manager"] == "unknown":
+            result["package_manager"] = "nuget"
+
+        # Match: <PackageReference Include="Name" Version="1.0" />
+        pkg_pattern = re.compile(
+            r'<PackageReference\s+Include="([^"]+)"'
+            r'(?:\s+Version="([^"]*)")?',
+        )
+        for match in pkg_pattern.finditer(content):
+            name = match.group(1)
+            version = match.group(2) or ""
+            result["dependencies"].append(
+                self._categorize(name, version, dev=False)
+            )
+
+    # --- Shared helpers ---
+
+    def _parse_toml_inline_list(
+        self, content: str, key: str, result: dict[str, Any], dev: bool
+    ) -> None:
+        """Extract deps from TOML inline list: key = ["pkg>=ver", ...]."""
+        pattern = rf"{key}\s*=\s*\[(.*?)\]"
+        for match in re.finditer(pattern, content, re.DOTALL):
+            items_str = match.group(1)
+            for item in re.findall(r'"([^"]+)"', items_str):
+                self._parse_dep_line(item, result, dev=dev)
+
+    def _parse_dep_line(self, line: str, result: dict[str, Any], dev: bool) -> None:
+        """Parse a single dependency string like 'click>=8.0'."""
+        line = line.strip().strip('"').strip("'").strip(",").strip('"').strip("'")
+        if not line or line.startswith("#") or line.startswith("["):
+            return
+        for sep in [">=", "==", "~=", "<=", "!=", "<", ">"]:
+            if sep in line:
+                name, version = line.split(sep, 1)
+                result["dependencies"].append(
+                    self._categorize(name.strip(), version.strip(), dev=dev)
+                )
+                return
+        result["dependencies"].append(self._categorize(line.strip(), "", dev=dev))
+
     def _categorize(self, name: str, version: str, dev: bool) -> dict[str, Any]:
         """Categorize a dependency."""
-        if name in KNOWN_PACKAGES:
-            category, description = KNOWN_PACKAGES[name]
-        else:
-            category = _infer_category(name)
-            description = ""
+        category, description = _registry.categorize_package(name)
 
         return {
             "name": name,

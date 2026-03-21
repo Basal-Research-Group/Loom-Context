@@ -6,38 +6,24 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
+from loom_context.knowledge import get_registry
 from loom_context.scanners.base import BaseScanner
 
-# Doc type classification rules
+_registry = get_registry()
+
+# Doc classification rules from Knowledge Registry
 DOC_TYPE_RULES: list[tuple[str, str]] = [
-    ("AGENTS", "agent-guidelines"),
-    ("CONTRIBUTING", "contributing"),
-    ("CHANGELOG", "changelog"),
-    ("setup", "setup"),
-    ("install", "setup"),
-    ("getting-started", "setup"),
+    (r.pattern, r.doc_type) for r in _registry.get_doc_filename_rules()
 ]
 
 PATH_TYPE_RULES: list[tuple[str, str]] = [
-    ("architecture", "architecture"),
-    ("arch", "architecture"),
-    ("plan", "plan"),
-    ("roadmap", "plan"),
-    ("feature", "feature"),
-    ("spec", "specification"),
-    ("design", "design"),
-    ("api", "api"),
-    ("guide", "guide"),
-    ("tutorial", "guide"),
-    ("research", "research"),
-    ("ui", "ui"),
-    ("test", "testing"),
+    (r.pattern, r.doc_type) for r in _registry.get_doc_path_rules()
 ]
 
 # Status markers in docs
 STATUS_PATTERNS = [
-    re.compile(r"[-*]\s*\[x\]\s*(.+)", re.IGNORECASE),  # [x] Done item
-    re.compile(r"[-*]\s*\[\s*\]\s*(.+)", re.IGNORECASE),  # [ ] Pending item
+    re.compile(r"[-*]\s*\[x\]\s*(.+)", re.IGNORECASE),
+    re.compile(r"[-*]\s*\[\s*\]\s*(.+)", re.IGNORECASE),
     re.compile(r"\|\s*(.+?)\s*\|\s*(done|complete|completado|hecho|✅)\s*\|", re.IGNORECASE),
     re.compile(r"\|\s*(.+?)\s*\|\s*(pending|pendiente|todo|⏳)\s*\|", re.IGNORECASE),
     re.compile(r"\|\s*(.+?)\s*\|\s*(partial|parcial|in.?progress|🔄)\s*\|", re.IGNORECASE),

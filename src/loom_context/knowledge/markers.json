@@ -1,0 +1,55 @@
+{
+  "_comment": "Ordered project type detection markers. Checked top to bottom — first match wins.",
+  "priority_markers": [
+    {"marker": "main.tf", "project_type": "terraform", "group": "infrastructure"},
+    {"marker": "turbo.json", "project_type": "turborepo", "group": "monorepo"},
+    {"marker": "nx.json", "project_type": "nx-monorepo", "group": "monorepo"},
+    {"marker": "lerna.json", "project_type": "lerna-monorepo", "group": "monorepo"},
+
+    {"marker": "app.config.js", "project_type": "react-native-expo", "group": "mobile"},
+    {"marker": "app.config.ts", "project_type": "react-native-expo", "group": "mobile"},
+    {"marker": "expo-env.d.ts", "project_type": "react-native-expo", "group": "mobile"},
+    {"marker": "react-native.config.js", "project_type": "react-native", "group": "mobile"},
+
+    {"marker": "next.config.js", "project_type": "nextjs", "group": "web-framework"},
+    {"marker": "next.config.ts", "project_type": "nextjs", "group": "web-framework"},
+    {"marker": "next.config.mjs", "project_type": "nextjs", "group": "web-framework"},
+    {"marker": "nuxt.config.ts", "project_type": "nuxt", "group": "web-framework"},
+    {"marker": "angular.json", "project_type": "angular", "group": "web-framework"},
+    {"marker": "svelte.config.js", "project_type": "svelte", "group": "web-framework"},
+    {"marker": "astro.config.mjs", "project_type": "astro", "group": "web-framework"},
+
+    {"marker": "vite.config.ts", "project_type": "vite", "group": "build-tool"},
+    {"marker": "vite.config.js", "project_type": "vite", "group": "build-tool"},
+    {"marker": "webpack.config.js", "project_type": "webpack", "group": "build-tool"},
+
+    {"marker": "Cargo.toml", "project_type": "rust", "group": "language"},
+    {"marker": "go.mod", "project_type": "go", "group": "language"},
+    {"marker": "mix.exs", "project_type": "elixir", "group": "language"},
+    {"marker": "pom.xml", "project_type": "java-maven", "group": "language"},
+    {"marker": "build.gradle", "project_type": "java-gradle", "group": "language"},
+    {"marker": "build.gradle.kts", "project_type": "java-gradle", "group": "language"},
+    {"marker": "Gemfile", "project_type": "ruby", "group": "language"},
+    {"marker": "composer.json", "project_type": "php", "group": "language"},
+    {"marker": "Package.swift", "project_type": "swift", "group": "language"},
+    {"marker": "pubspec.yaml", "project_type": "dart", "group": "language"},
+
+    {"marker": "Dockerfile", "project_type": "docker", "group": "infrastructure"},
+    {"marker": "serverless.yml", "project_type": "serverless", "group": "infrastructure"},
+    {"marker": "serverless.ts", "project_type": "serverless", "group": "infrastructure"},
+    {"marker": "cdk.json", "project_type": "aws-cdk", "group": "infrastructure"},
+    {"marker": "pulumi.yaml", "project_type": "pulumi", "group": "infrastructure"}
+  ],
+  "package_json_deps": [
+    {"dep": "react-native", "project_type": "react-native"},
+    {"dep": "@nestjs/core", "project_type": "nestjs"},
+    {"dep": "react", "project_type": "react"},
+    {"dep": "@angular/core", "project_type": "angular"}
+  ],
+  "fallback_order": [
+    {"check": "package.json", "default_type": "nodejs"},
+    {"check": "app.json", "field": "expo", "type": "react-native-expo"},
+    {"check": "pyproject.toml", "default_type": "python"},
+    {"check": "setup.py", "default_type": "python"}
+  ]
+}

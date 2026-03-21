@@ -39,6 +39,10 @@ class LoomEngine:
 
     def __init__(self, root: str | Path) -> None:
         self.config = LoomConfig(Path(root))
+        # Set project root for local knowledge overrides
+        from loom_context.knowledge import get_registry
+
+        get_registry().set_project_root(self.config.root)
         self.file_filter = FileFilter(self.config.root)
         self._last_scan_cached = False
 
@@ -94,6 +98,7 @@ class LoomEngine:
                 dependency_files=deps_raw.get("dependency_files", []),
                 dependencies=[Dependency(**d) for d in deps_raw["dependencies"]],
                 stack_summary=deps_raw["stack_summary"],
+                ecosystem=deps_raw.get("ecosystem", "unknown"),
             ),
             code=CodeAnalysis(**code_raw),
             docs=DocsInventory(
@@ -242,6 +247,7 @@ class LoomEngine:
                     Dependency(**d) for d in data.get("deps", {}).get("dependencies", [])
                 ],
                 stack_summary=data.get("deps", {}).get("stack_summary", {}),
+                ecosystem=data.get("deps", {}).get("ecosystem", "unknown"),
             ),
             code=CodeAnalysis(**data.get("code", {})),
             docs=DocsInventory(
