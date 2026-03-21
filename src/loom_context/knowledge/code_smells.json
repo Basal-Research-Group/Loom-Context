@@ -1,0 +1,259 @@
+{
+  "_comment": "Code smells and anti-patterns detectable via static analysis (no AI needed).",
+  "categories": {
+    "size": "Size and complexity issues",
+    "naming": "Naming convention violations",
+    "structure": "Structural anti-patterns",
+    "dependency": "Dependency issues",
+    "security": "Security anti-patterns",
+    "testing": "Testing quality issues",
+    "config": "Configuration smells"
+  },
+  "smells": {
+    "god-class": {
+      "name": "God Class",
+      "category": "size",
+      "severity": "warning",
+      "description": "A single file with too many responsibilities",
+      "detection": {
+        "type": "file_size",
+        "threshold_lines": 500,
+        "threshold_methods": 20
+      },
+      "suggestion": "Split into smaller classes with single responsibility"
+    },
+    "god-method": {
+      "name": "God Method",
+      "category": "size",
+      "severity": "warning",
+      "description": "A single method/function that is too long",
+      "detection": {
+        "type": "method_size",
+        "threshold_lines": 50
+      },
+      "suggestion": "Extract smaller methods with descriptive names"
+    },
+    "deep-nesting": {
+      "name": "Deep Nesting",
+      "category": "size",
+      "severity": "warning",
+      "description": "Code nested more than 4 levels deep",
+      "detection": {
+        "type": "indentation_depth",
+        "threshold": 4,
+        "patterns": {
+          "python": "^(\\s{16,})\\S",
+          "ruby": "^(\\s{8,})\\S",
+          "javascript": "^(\\s{16,})\\S",
+          "java": "^(\\s{16,})\\S"
+        }
+      },
+      "suggestion": "Use early returns, extract methods, or use guard clauses"
+    },
+    "long-parameter-list": {
+      "name": "Long Parameter List",
+      "category": "size",
+      "severity": "info",
+      "description": "Function with too many parameters",
+      "detection": {
+        "type": "parameter_count",
+        "threshold": 5,
+        "patterns": {
+          "python": "def\\s+\\w+\\(([^)]{100,})\\)",
+          "ruby": "def\\s+\\w+\\(([^)]{80,})\\)",
+          "javascript": "function\\s+\\w+\\(([^)]{100,})\\)",
+          "java": "\\w+\\s+\\w+\\(([^)]{120,})\\)",
+          "go": "func\\s+(?:\\([^)]+\\)\\s+)?\\w+\\(([^)]{100,})\\)"
+        }
+      },
+      "suggestion": "Use a parameter object or builder pattern"
+    },
+    "file-class-mismatch": {
+      "name": "File-Class Name Mismatch",
+      "category": "naming",
+      "severity": "warning",
+      "description": "File name does not match the primary class/module defined in it",
+      "detection": {
+        "type": "name_comparison",
+        "languages": ["java", "csharp", "kotlin", "typescript"]
+      },
+      "suggestion": "Rename file to match the primary class"
+    },
+    "inconsistent-naming": {
+      "name": "Inconsistent Naming Style",
+      "category": "naming",
+      "severity": "warning",
+      "description": "Files within the same role use different naming styles",
+      "detection": {
+        "type": "naming_consistency",
+        "min_confidence_drop": 0.3
+      },
+      "suggestion": "Standardize naming within each architectural role"
+    },
+    "circular-import": {
+      "name": "Circular Import",
+      "category": "dependency",
+      "severity": "error",
+      "description": "Two or more modules import each other creating a cycle",
+      "detection": {
+        "type": "import_cycle",
+        "patterns": {
+          "python": "^(?:from|import)\\s+([\\w.]+)",
+          "typescript": "(?:import|from)\\s+['\"]([^'\"]+)['\"]",
+          "ruby": "require(?:_relative)?\\s+['\"]([^'\"]+)['\"]",
+          "go": "\"([^\"]+)\""
+        }
+      },
+      "suggestion": "Break the cycle using dependency inversion or an interface"
+    },
+    "layer-violation": {
+      "name": "Layer Boundary Violation",
+      "category": "structure",
+      "severity": "error",
+      "description": "Import crosses architectural layer boundary",
+      "detection": {
+        "type": "boundary_check",
+        "uses": "architectures.json boundary_rules"
+      },
+      "suggestion": "Use a port/interface from the correct layer instead"
+    },
+    "orphan-file": {
+      "name": "Orphan File",
+      "category": "structure",
+      "severity": "info",
+      "description": "File that is not imported by any other file in the project",
+      "detection": {
+        "type": "import_graph",
+        "exclude": ["__init__", "conftest", "setup", "main", "index", "app"]
+      },
+      "suggestion": "Remove if unused, or ensure it's properly imported"
+    },
+    "empty-catch": {
+      "name": "Empty Exception Handler",
+      "category": "security",
+      "severity": "warning",
+      "description": "Exception caught but silently ignored",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "python": "except\\s*(?:\\w+)?\\s*:\\s*\\n\\s*pass",
+          "java": "catch\\s*\\([^)]+\\)\\s*\\{\\s*\\}",
+          "javascript": "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}",
+          "ruby": "rescue\\s*(?:=>\\s*\\w+)?\\s*\\n\\s*(?:end|#)",
+          "go": "if\\s+err\\s*!=\\s*nil\\s*\\{\\s*\\}"
+        }
+      },
+      "suggestion": "Log the error or handle it appropriately"
+    },
+    "hardcoded-secret": {
+      "name": "Hardcoded Secret",
+      "category": "security",
+      "severity": "error",
+      "description": "Credentials or tokens hardcoded in source code",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "_all": [
+            "(?:password|passwd|pwd|secret|token|api_key|apikey|api[-_]?secret)\\s*=\\s*['\"][^'\"]{8,}['\"]",
+            "(?:AWS_SECRET|PRIVATE_KEY|DATABASE_URL)\\s*=\\s*['\"][^'\"]+['\"]",
+            "Bearer\\s+[a-zA-Z0-9_\\-\\.]{20,}"
+          ]
+        }
+      },
+      "suggestion": "Move secrets to environment variables or a secret manager"
+    },
+    "sql-injection-risk": {
+      "name": "SQL Injection Risk",
+      "category": "security",
+      "severity": "error",
+      "description": "String interpolation in SQL queries",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "python": "(?:execute|cursor\\.execute)\\s*\\(\\s*f['\"]|(?:execute|cursor\\.execute)\\s*\\(.*%\\s*['\"]",
+          "ruby": "\\.where\\(\\s*['\"].*#\\{",
+          "javascript": "query\\s*\\(\\s*`[^`]*\\$\\{",
+          "java": "(?:executeQuery|execute)\\s*\\(\\s*\"[^\"]*\"\\s*\\+",
+          "go": "(?:Query|Exec)\\s*\\([^)]*\\+[^)]*\\)"
+        }
+      },
+      "suggestion": "Use parameterized queries or prepared statements"
+    },
+    "no-lockfile": {
+      "name": "Missing Lockfile",
+      "category": "config",
+      "severity": "warning",
+      "description": "Package manifest exists but lockfile is missing",
+      "detection": {
+        "type": "file_pair",
+        "pairs": [
+          {"manifest": "package.json", "locks": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb"]},
+          {"manifest": "Gemfile", "locks": ["Gemfile.lock"]},
+          {"manifest": "Cargo.toml", "locks": ["Cargo.lock"]},
+          {"manifest": "go.mod", "locks": ["go.sum"]},
+          {"manifest": "mix.exs", "locks": ["mix.lock"]},
+          {"manifest": "pyproject.toml", "locks": ["poetry.lock", "uv.lock", "requirements.txt"]}
+        ]
+      },
+      "suggestion": "Generate lockfile to ensure reproducible builds"
+    },
+    "no-gitignore": {
+      "name": "Missing .gitignore",
+      "category": "config",
+      "severity": "warning",
+      "description": "Project has no .gitignore file",
+      "detection": {
+        "type": "file_exists",
+        "file": ".gitignore",
+        "expected": true
+      },
+      "suggestion": "Add a .gitignore appropriate for your language/framework"
+    },
+    "test-without-assertion": {
+      "name": "Test Without Assertion",
+      "category": "testing",
+      "severity": "info",
+      "description": "Test function that has no assert, expect, or should statement",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "python": "def\\s+test_\\w+[^:]+:[^}]*?(?=def\\s|\\Z)",
+          "javascript": "(?:it|test)\\s*\\([^,]+,\\s*(?:async\\s*)?\\(\\)\\s*=>\\s*\\{[^}]*\\}\\)",
+          "ruby": "(?:it|specify)\\s+['\"][^'\"]+['\"]\\s+do[\\s\\S]*?end"
+        },
+        "must_contain": ["assert", "expect", "should", "raises", "throw"]
+      },
+      "suggestion": "Add assertions to verify expected behavior"
+    },
+    "todo-fixme": {
+      "name": "TODO/FIXME Comments",
+      "category": "structure",
+      "severity": "info",
+      "description": "Code contains TODO or FIXME markers that may indicate incomplete work",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "_all": ["(?:#|//|/\\*)\\s*(?:TODO|FIXME|HACK|XXX|BUG)\\b"]
+        }
+      },
+      "suggestion": "Track in issue tracker instead of code comments"
+    },
+    "console-in-production": {
+      "name": "Console/Print in Production Code",
+      "category": "structure",
+      "severity": "info",
+      "description": "Debug output left in production code",
+      "detection": {
+        "type": "code_pattern",
+        "patterns": {
+          "python": "(?:^|\\s)print\\(",
+          "javascript": "console\\.(?:log|debug|info|warn|error)\\(",
+          "ruby": "(?:^|\\s)(?:puts|p\\s|pp\\s)\\s",
+          "go": "fmt\\.Print"
+        },
+        "exclude_dirs": ["tests", "test", "spec", "__tests__", "scripts"]
+      },
+      "suggestion": "Use a proper logging framework instead"
+    }
+  }
+}

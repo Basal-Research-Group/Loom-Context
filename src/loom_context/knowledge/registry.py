@@ -490,6 +490,22 @@ class KnowledgeRegistry:
         patterns = self.get_design_patterns()
         return patterns.get(name)
 
+    # --- Code Smells ---
+
+    def get_code_smells(self) -> dict[str, Any]:
+        """Get all code smell definitions."""
+        data = self._load_json("code_smells.json")
+        return dict(data.get("smells", {}))
+
+    def get_code_smell(self, name: str) -> Optional[dict[str, Any]]:
+        """Get a specific code smell definition."""
+        return self.get_code_smells().get(name)
+
+    def get_code_smell_categories(self) -> dict[str, str]:
+        """Get code smell categories."""
+        data = self._load_json("code_smells.json")
+        return dict(data.get("categories", {}))
+
     # --- Stop Words ---
 
     def get_stop_words(self) -> set[str]:
