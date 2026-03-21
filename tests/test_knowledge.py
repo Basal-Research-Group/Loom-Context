@@ -605,6 +605,84 @@ class TestKnowledgeDataIntegrity:
         assert len(data.get("dir_exclusions", [])) >= 20
         assert len(data.get("secret_patterns", [])) >= 20
 
+    def test_all_regex_patterns_compile(self) -> None:
+        """All regex in language patterns must be valid."""
+        import re
+
+        r = KnowledgeRegistry()
+        data = r._load_json("languages.json")
+        for lang_id, lang_data in data.items():
+            for field in [
+                "import_pattern", "class_pattern",
+                "function_pattern", "constant_pattern",
+            ]:
+                pattern = lang_data.get(field, "")
+                if pattern:
+                    try:
+                        re.compile(pattern)
+                    except re.error as e:
+                        raise AssertionError(  # noqa: B904
+                            f"{lang_id}/{field} invalid regex: {e}"
+                        )
+
+    def test_all_design_pattern_regex_compile(self) -> None:
+        """All regex in design pattern signals must be valid."""
+        import re
+
+        r = KnowledgeRegistry()
+        data = r._load_json("design_patterns.json")
+        for pid, pdata in data.get("patterns", {}).items():
+            for sig in pdata.get("signals", []):
+                if sig.get("type") == "code_pattern":
+                    pattern = sig.get("pattern", "")
+                    try:
+                        re.compile(pattern)
+                    except re.error as e:
+                        raise AssertionError(  # noqa: B904
+                            f"design_patterns/{pid}: {e}"
+                        )
+
+    def test_language_patterns_match_real_code(self) -> None:
+        """Core language patterns must match typical code constructs."""
+        import re
+
+        r = KnowledgeRegistry()
+        data = r._load_json("languages.json")
+
+        cases = [
+            ("python", "class_pattern", "class UserService:", "UserService"),
+            ("python", "function_pattern", "def handle(self):", "handle"),
+            ("python", "function_pattern", "async def fetch(url):", "fetch"),
+            ("ruby", "class_pattern", "class UsersController < App", "UsersController"),
+            ("ruby", "class_pattern", "module Auth", "Auth"),
+            ("ruby", "function_pattern", "def perform(id)", "perform"),
+            ("java", "class_pattern", "public interface UserRepo {", "UserRepo"),
+            ("java", "class_pattern", "public enum Status {", "Status"),
+            ("java", "function_pattern", "public void handle(String id) {", "handle"),
+            ("go", "class_pattern", "type Repo interface {", "Repo"),
+            ("go", "class_pattern", "type User struct {", "User"),
+            ("go", "function_pattern", "func Handle(w http.ResponseWriter) {", "Handle"),
+            ("rust", "class_pattern", "pub struct Service {", "Service"),
+            ("rust", "class_pattern", "pub enum Status {", "Status"),
+            ("rust", "class_pattern", "pub trait Repository {", "Repository"),
+            ("rust", "function_pattern", "pub fn handle(&self) {", "handle"),
+            ("typescript", "class_pattern", "export interface IService {", "IService"),
+            ("typescript", "class_pattern", "export class AuthService {", "AuthService"),
+            ("kotlin", "class_pattern", "data class UserDTO(val n: String)", "UserDTO"),
+            ("kotlin", "class_pattern", "enum class Status {", "Status"),
+            ("csharp", "class_pattern", "public interface IUserService {", "IUserService"),
+            ("csharp", "class_pattern", "public record UserDTO(string N);", "UserDTO"),
+            ("elixir", "class_pattern", "defmodule MyApp.Auth do", "MyApp.Auth"),
+        ]
+
+        for lang, field, code, expected in cases:
+            pat = data.get(lang, {}).get(field, "")
+            assert pat, f"{lang}/{field} missing"
+            matches = re.findall(pat, code)
+            assert expected in matches, (
+                f"{lang}/{field}: '{expected}' not in {matches} for '{code}'"
+            )
+
     def test_infra_package_mapping_resolves(self) -> None:
         r = KnowledgeRegistry()
         data = r._load_json("infrastructure.json")

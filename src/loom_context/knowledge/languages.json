@@ -1,15 +1,45 @@
 {
   "python": {
     "name": "Python",
-    "extensions": [".py", ".pyi", ".pyw"],
-    "markers": ["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile"],
+    "extensions": [
+      ".py",
+      ".pyi",
+      ".pyw"
+    ],
+    "markers": [
+      "pyproject.toml",
+      "setup.py",
+      "setup.cfg",
+      "requirements.txt",
+      "Pipfile"
+    ],
     "project_type": "python",
     "package_managers": [
-      {"file": "pyproject.toml", "lock": "poetry.lock", "tool": "poetry"},
-      {"file": "pyproject.toml", "lock": "uv.lock", "tool": "uv"},
-      {"file": "pyproject.toml", "lock": null, "tool": "pip"},
-      {"file": "requirements.txt", "lock": null, "tool": "pip"},
-      {"file": "Pipfile", "lock": "Pipfile.lock", "tool": "pipenv"}
+      {
+        "file": "pyproject.toml",
+        "lock": "poetry.lock",
+        "tool": "poetry"
+      },
+      {
+        "file": "pyproject.toml",
+        "lock": "uv.lock",
+        "tool": "uv"
+      },
+      {
+        "file": "pyproject.toml",
+        "lock": null,
+        "tool": "pip"
+      },
+      {
+        "file": "requirements.txt",
+        "lock": null,
+        "tool": "pip"
+      },
+      {
+        "file": "Pipfile",
+        "lock": "Pipfile.lock",
+        "tool": "pipenv"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -23,35 +53,81 @@
     "import_pattern": "^(?:from|import)\\s+([\\w.]+)",
     "class_pattern": "class\\s+(\\w+)",
     "function_pattern": "def\\s+(\\w+)",
-    "constant_pattern": "^([A-Z][A-Z_0-9]+)\\s*=",
+    "constant_pattern": "^([A-Z][A-Z_0-9]+)\\s*(?::[\\w\\[\\], ]+\\s*)?=",
     "frameworks": {
       "django": {
-        "markers": ["manage.py", "django", "settings.py"],
-        "src_roots": [".", "apps"],
-        "dir_exclusions": ["staticfiles", "media"]
+        "markers": [
+          "manage.py",
+          "django",
+          "settings.py"
+        ],
+        "src_roots": [
+          ".",
+          "apps"
+        ],
+        "dir_exclusions": [
+          "staticfiles",
+          "media"
+        ]
       },
       "flask": {
-        "markers": ["flask"],
-        "src_roots": [".", "app"],
-        "dir_exclusions": ["instance"]
+        "markers": [
+          "flask"
+        ],
+        "src_roots": [
+          ".",
+          "app"
+        ],
+        "dir_exclusions": [
+          "instance"
+        ]
       },
       "fastapi": {
-        "markers": ["fastapi"],
-        "src_roots": [".", "app"],
+        "markers": [
+          "fastapi"
+        ],
+        "src_roots": [
+          ".",
+          "app"
+        ],
         "dir_exclusions": []
       }
     }
   },
   "typescript": {
     "name": "TypeScript",
-    "extensions": [".ts", ".tsx", ".mts", ".cts"],
-    "markers": ["tsconfig.json", "tsconfig.build.json"],
+    "extensions": [
+      ".ts",
+      ".tsx",
+      ".mts",
+      ".cts"
+    ],
+    "markers": [
+      "tsconfig.json",
+      "tsconfig.build.json"
+    ],
     "project_type": "typescript",
     "package_managers": [
-      {"file": "package.json", "lock": "package-lock.json", "tool": "npm"},
-      {"file": "package.json", "lock": "yarn.lock", "tool": "yarn"},
-      {"file": "package.json", "lock": "pnpm-lock.yaml", "tool": "pnpm"},
-      {"file": "package.json", "lock": "bun.lockb", "tool": "bun"}
+      {
+        "file": "package.json",
+        "lock": "package-lock.json",
+        "tool": "npm"
+      },
+      {
+        "file": "package.json",
+        "lock": "yarn.lock",
+        "tool": "yarn"
+      },
+      {
+        "file": "package.json",
+        "lock": "pnpm-lock.yaml",
+        "tool": "pnpm"
+      },
+      {
+        "file": "package.json",
+        "lock": "bun.lockb",
+        "tool": "bun"
+      }
     ],
     "naming": {
       "files": "camelCase",
@@ -64,37 +140,85 @@
     },
     "comment_style": "//",
     "import_pattern": "^import\\s+(?:\\{[^}]+\\}|\\w+|\\*)\\s+from\\s+['\"]([^'\"]+)['\"]",
-    "class_pattern": "(?:export\\s+)?class\\s+(\\w+)",
+    "class_pattern": "(?:export\\s+)?(?:abstract\\s+)?(?:class|interface|type)\\s+(\\w+)",
     "function_pattern": "(?:export\\s+)?(?:async\\s+)?function\\s+(\\w+)",
     "constant_pattern": "(?:export\\s+)?const\\s+([A-Z][A-Z_0-9]+)\\s*=",
     "frameworks": {
       "nextjs": {
-        "markers": ["next.config.js", "next.config.mjs", "next.config.ts"],
-        "src_roots": ["src", "app", "pages"],
-        "dir_exclusions": [".next", "out"]
+        "markers": [
+          "next.config.js",
+          "next.config.mjs",
+          "next.config.ts"
+        ],
+        "src_roots": [
+          "src",
+          "app",
+          "pages"
+        ],
+        "dir_exclusions": [
+          ".next",
+          "out"
+        ]
       },
       "angular": {
-        "markers": ["angular.json", "angular.cli.json"],
-        "src_roots": ["src"],
-        "dir_exclusions": [".angular", "dist"]
+        "markers": [
+          "angular.json",
+          "angular.cli.json"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          ".angular",
+          "dist"
+        ]
       },
       "nestjs": {
-        "markers": ["nest-cli.json"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["dist"]
+        "markers": [
+          "nest-cli.json"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "dist"
+        ]
       }
     }
   },
   "javascript": {
     "name": "JavaScript",
-    "extensions": [".js", ".jsx", ".mjs", ".cjs"],
-    "markers": ["package.json"],
+    "extensions": [
+      ".js",
+      ".jsx",
+      ".mjs",
+      ".cjs"
+    ],
+    "markers": [
+      "package.json"
+    ],
     "project_type": "javascript",
     "package_managers": [
-      {"file": "package.json", "lock": "package-lock.json", "tool": "npm"},
-      {"file": "package.json", "lock": "yarn.lock", "tool": "yarn"},
-      {"file": "package.json", "lock": "pnpm-lock.yaml", "tool": "pnpm"},
-      {"file": "package.json", "lock": "bun.lockb", "tool": "bun"}
+      {
+        "file": "package.json",
+        "lock": "package-lock.json",
+        "tool": "npm"
+      },
+      {
+        "file": "package.json",
+        "lock": "yarn.lock",
+        "tool": "yarn"
+      },
+      {
+        "file": "package.json",
+        "lock": "pnpm-lock.yaml",
+        "tool": "pnpm"
+      },
+      {
+        "file": "package.json",
+        "lock": "bun.lockb",
+        "tool": "bun"
+      }
     ],
     "naming": {
       "files": "camelCase",
@@ -110,29 +234,63 @@
     "constant_pattern": "(?:export\\s+)?const\\s+([A-Z][A-Z_0-9]+)\\s*=",
     "frameworks": {
       "react": {
-        "markers": ["react", "react-dom"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["build"]
+        "markers": [
+          "react",
+          "react-dom"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "build"
+        ]
       },
       "express": {
-        "markers": ["express"],
-        "src_roots": [".", "src", "routes"],
+        "markers": [
+          "express"
+        ],
+        "src_roots": [
+          ".",
+          "src",
+          "routes"
+        ],
         "dir_exclusions": []
       },
       "vue": {
-        "markers": ["vue", "vue.config.js", "vite.config.js"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["dist"]
+        "markers": [
+          "vue",
+          "vue.config.js",
+          "vite.config.js"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "dist"
+        ]
       }
     }
   },
   "ruby": {
     "name": "Ruby",
-    "extensions": [".rb", ".rake", ".gemspec", ".ru"],
-    "markers": ["Gemfile", "Rakefile", ".ruby-version"],
+    "extensions": [
+      ".rb",
+      ".rake",
+      ".gemspec",
+      ".ru"
+    ],
+    "markers": [
+      "Gemfile",
+      "Rakefile",
+      ".ruby-version"
+    ],
     "project_type": "ruby",
     "package_managers": [
-      {"file": "Gemfile", "lock": "Gemfile.lock", "tool": "bundler"}
+      {
+        "file": "Gemfile",
+        "lock": "Gemfile.lock",
+        "tool": "bundler"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -144,34 +302,67 @@
     },
     "comment_style": "#",
     "import_pattern": "^require(?:_relative)?\\s+['\"]([^'\"]+)['\"]",
-    "class_pattern": "class\\s+(\\w+(?:::\\w+)*)",
+    "class_pattern": "(?:class|module)\\s+(\\w+(?:::\\w+)*)",
     "function_pattern": "def\\s+(\\w+[!?]?)",
     "constant_pattern": "^\\s*([A-Z][A-Z_0-9]+)\\s*=",
     "frameworks": {
       "rails": {
-        "markers": ["config/routes.rb", "app/controllers", "bin/rails"],
-        "src_roots": ["app", "lib"],
-        "dir_exclusions": [".bundle", "tmp", "log", "storage", "vendor/bundle"]
+        "markers": [
+          "config/routes.rb",
+          "app/controllers",
+          "bin/rails"
+        ],
+        "src_roots": [
+          "app",
+          "lib"
+        ],
+        "dir_exclusions": [
+          ".bundle",
+          "tmp",
+          "log",
+          "storage",
+          "vendor/bundle"
+        ]
       },
       "sinatra": {
-        "markers": ["sinatra"],
-        "src_roots": [".", "lib"],
+        "markers": [
+          "sinatra"
+        ],
+        "src_roots": [
+          ".",
+          "lib"
+        ],
         "dir_exclusions": []
       },
       "hanami": {
-        "markers": ["hanami"],
-        "src_roots": ["app", "lib", "slices"],
+        "markers": [
+          "hanami"
+        ],
+        "src_roots": [
+          "app",
+          "lib",
+          "slices"
+        ],
         "dir_exclusions": []
       }
     }
   },
   "go": {
     "name": "Go",
-    "extensions": [".go"],
-    "markers": ["go.mod", "go.sum"],
+    "extensions": [
+      ".go"
+    ],
+    "markers": [
+      "go.mod",
+      "go.sum"
+    ],
     "project_type": "go",
     "package_managers": [
-      {"file": "go.mod", "lock": "go.sum", "tool": "go modules"}
+      {
+        "file": "go.mod",
+        "lock": "go.sum",
+        "tool": "go modules"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -182,34 +373,61 @@
     },
     "comment_style": "//",
     "import_pattern": "^\\s*(?:import\\s+)?[\"]([ \\w./-]+)[\"]\n",
-    "class_pattern": "type\\s+(\\w+)\\s+struct",
+    "class_pattern": "type\\s+(\\w+)\\s+(?:struct|interface)",
     "function_pattern": "func\\s+(?:\\([^)]+\\)\\s+)?(\\w+)",
     "constant_pattern": "^\\s*([A-Z]\\w+)\\s*(?:=|\\w+\\s*=)",
     "frameworks": {
       "gin": {
-        "markers": ["gin-gonic/gin"],
-        "src_roots": ["."],
-        "dir_exclusions": ["vendor"]
+        "markers": [
+          "gin-gonic/gin"
+        ],
+        "src_roots": [
+          "."
+        ],
+        "dir_exclusions": [
+          "vendor"
+        ]
       },
       "echo": {
-        "markers": ["labstack/echo"],
-        "src_roots": ["."],
-        "dir_exclusions": ["vendor"]
+        "markers": [
+          "labstack/echo"
+        ],
+        "src_roots": [
+          "."
+        ],
+        "dir_exclusions": [
+          "vendor"
+        ]
       },
       "fiber": {
-        "markers": ["gofiber/fiber"],
-        "src_roots": ["."],
-        "dir_exclusions": ["vendor"]
+        "markers": [
+          "gofiber/fiber"
+        ],
+        "src_roots": [
+          "."
+        ],
+        "dir_exclusions": [
+          "vendor"
+        ]
       }
     }
   },
   "rust": {
     "name": "Rust",
-    "extensions": [".rs"],
-    "markers": ["Cargo.toml", "Cargo.lock"],
+    "extensions": [
+      ".rs"
+    ],
+    "markers": [
+      "Cargo.toml",
+      "Cargo.lock"
+    ],
     "project_type": "rust",
     "package_managers": [
-      {"file": "Cargo.toml", "lock": "Cargo.lock", "tool": "cargo"}
+      {
+        "file": "Cargo.toml",
+        "lock": "Cargo.lock",
+        "tool": "cargo"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -223,36 +441,73 @@
     },
     "comment_style": "//",
     "import_pattern": "^use\\s+([\\w:]+)",
-    "class_pattern": "(?:pub\\s+)?struct\\s+(\\w+)",
+    "class_pattern": "(?:pub\\s+)?(?:struct|enum|trait)\\s+(\\w+)",
     "function_pattern": "(?:pub\\s+)?(?:async\\s+)?fn\\s+(\\w+)",
     "constant_pattern": "(?:pub\\s+)?const\\s+([A-Z][A-Z_0-9]+)\\s*:",
     "frameworks": {
       "actix-web": {
-        "markers": ["actix-web"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["target"]
+        "markers": [
+          "actix-web"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "target"
+        ]
       },
       "axum": {
-        "markers": ["axum"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["target"]
+        "markers": [
+          "axum"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "target"
+        ]
       },
       "rocket": {
-        "markers": ["rocket"],
-        "src_roots": ["src"],
-        "dir_exclusions": ["target"]
+        "markers": [
+          "rocket"
+        ],
+        "src_roots": [
+          "src"
+        ],
+        "dir_exclusions": [
+          "target"
+        ]
       }
     }
   },
   "java": {
     "name": "Java",
-    "extensions": [".java"],
-    "markers": ["pom.xml", "build.gradle", "build.gradle.kts", ".java-version"],
+    "extensions": [
+      ".java"
+    ],
+    "markers": [
+      "pom.xml",
+      "build.gradle",
+      "build.gradle.kts",
+      ".java-version"
+    ],
     "project_type": "java",
     "package_managers": [
-      {"file": "pom.xml", "lock": null, "tool": "maven"},
-      {"file": "build.gradle", "lock": "gradle.lockfile", "tool": "gradle"},
-      {"file": "build.gradle.kts", "lock": "gradle.lockfile", "tool": "gradle"}
+      {
+        "file": "pom.xml",
+        "lock": null,
+        "tool": "maven"
+      },
+      {
+        "file": "build.gradle",
+        "lock": "gradle.lockfile",
+        "tool": "gradle"
+      },
+      {
+        "file": "build.gradle.kts",
+        "lock": "gradle.lockfile",
+        "tool": "gradle"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -264,35 +519,75 @@
     },
     "comment_style": "//",
     "import_pattern": "^import\\s+(?:static\\s+)?([\\w.]+)",
-    "class_pattern": "(?:public\\s+)?(?:abstract\\s+)?class\\s+(\\w+)",
-    "function_pattern": "(?:public|private|protected)?\\s+(?:static\\s+)?\\w+\\s+(\\w+)\\s*\\(",
+    "class_pattern": "(?:public\\s+)?(?:abstract\\s+)?(?:class|interface|enum)\\s+(\\w+)",
+    "function_pattern": "(?:public|private|protected)\\s+(?:static\\s+)?(?:<[^>]+>\\s+)?(?:abstract\\s+)?[\\w<>\\[\\],\\s]+\\s+(\\w+)\\s*\\(",
     "constant_pattern": "(?:public\\s+)?static\\s+final\\s+\\w+\\s+([A-Z][A-Z_0-9]+)\\s*=",
     "frameworks": {
       "spring-boot": {
-        "markers": ["src/main/java", "application.properties", "application.yml"],
-        "src_roots": ["src/main/java"],
-        "dir_exclusions": ["target", "build", ".gradle"]
+        "markers": [
+          "src/main/java",
+          "application.properties",
+          "application.yml"
+        ],
+        "src_roots": [
+          "src/main/java"
+        ],
+        "dir_exclusions": [
+          "target",
+          "build",
+          ".gradle"
+        ]
       },
       "quarkus": {
-        "markers": ["quarkus"],
-        "src_roots": ["src/main/java"],
-        "dir_exclusions": ["target", "build"]
+        "markers": [
+          "quarkus"
+        ],
+        "src_roots": [
+          "src/main/java"
+        ],
+        "dir_exclusions": [
+          "target",
+          "build"
+        ]
       },
       "micronaut": {
-        "markers": ["micronaut"],
-        "src_roots": ["src/main/java"],
-        "dir_exclusions": ["target", "build"]
+        "markers": [
+          "micronaut"
+        ],
+        "src_roots": [
+          "src/main/java"
+        ],
+        "dir_exclusions": [
+          "target",
+          "build"
+        ]
       }
     }
   },
   "csharp": {
     "name": "C#",
-    "extensions": [".cs", ".csx"],
-    "markers": ["*.csproj", "*.sln", "global.json", "Directory.Build.props"],
+    "extensions": [
+      ".cs",
+      ".csx"
+    ],
+    "markers": [
+      "*.csproj",
+      "*.sln",
+      "global.json",
+      "Directory.Build.props"
+    ],
     "project_type": "csharp",
     "package_managers": [
-      {"file": "*.csproj", "lock": "packages.lock.json", "tool": "nuget"},
-      {"file": "Directory.Packages.props", "lock": null, "tool": "nuget"}
+      {
+        "file": "*.csproj",
+        "lock": "packages.lock.json",
+        "tool": "nuget"
+      },
+      {
+        "file": "Directory.Packages.props",
+        "lock": null,
+        "tool": "nuget"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -305,17 +600,29 @@
     },
     "comment_style": "//",
     "import_pattern": "^using\\s+([\\w.]+)",
-    "class_pattern": "(?:public|internal|private)?\\s*(?:static|abstract|sealed)?\\s*class\\s+(\\w+)",
+    "class_pattern": "(?:public|internal|private)?\\s*(?:static|abstract|sealed|partial)?\\s*(?:class|interface|enum|struct|record)\\s+(\\w+)",
     "function_pattern": "(?:public|private|protected|internal)\\s+(?:static\\s+)?(?:async\\s+)?\\w+\\s+(\\w+)\\s*\\(",
     "constant_pattern": "(?:public|private)\\s+const\\s+\\w+\\s+(\\w+)"
   },
   "php": {
     "name": "PHP",
-    "extensions": [".php", ".phtml"],
-    "markers": ["composer.json", "composer.lock", "artisan", "index.php"],
+    "extensions": [
+      ".php",
+      ".phtml"
+    ],
+    "markers": [
+      "composer.json",
+      "composer.lock",
+      "artisan",
+      "index.php"
+    ],
     "project_type": "php",
     "package_managers": [
-      {"file": "composer.json", "lock": "composer.lock", "tool": "composer"}
+      {
+        "file": "composer.json",
+        "lock": "composer.lock",
+        "tool": "composer"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -327,18 +634,32 @@
     },
     "comment_style": "//",
     "import_pattern": "^(?:use|require|include)\\s+([\\w\\\\]+)",
-    "class_pattern": "(?:abstract\\s+)?class\\s+(\\w+)",
+    "class_pattern": "(?:abstract\\s+)?(?:class|interface|trait|enum)\\s+(\\w+)",
     "function_pattern": "(?:public|private|protected)?\\s*(?:static\\s+)?function\\s+(\\w+)",
     "constant_pattern": "(?:const|define\\()\\s*['\"]?(\\w+)"
   },
   "swift": {
     "name": "Swift",
-    "extensions": [".swift"],
-    "markers": ["Package.swift", "*.xcodeproj", "*.xcworkspace"],
+    "extensions": [
+      ".swift"
+    ],
+    "markers": [
+      "Package.swift",
+      "*.xcodeproj",
+      "*.xcworkspace"
+    ],
     "project_type": "swift",
     "package_managers": [
-      {"file": "Package.swift", "lock": "Package.resolved", "tool": "swift-pm"},
-      {"file": "Podfile", "lock": "Podfile.lock", "tool": "cocoapods"}
+      {
+        "file": "Package.swift",
+        "lock": "Package.resolved",
+        "tool": "swift-pm"
+      },
+      {
+        "file": "Podfile",
+        "lock": "Podfile.lock",
+        "tool": "cocoapods"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -357,12 +678,27 @@
   },
   "kotlin": {
     "name": "Kotlin",
-    "extensions": [".kt", ".kts"],
-    "markers": ["build.gradle.kts", "build.gradle", "settings.gradle.kts"],
+    "extensions": [
+      ".kt",
+      ".kts"
+    ],
+    "markers": [
+      "build.gradle.kts",
+      "build.gradle",
+      "settings.gradle.kts"
+    ],
     "project_type": "kotlin",
     "package_managers": [
-      {"file": "build.gradle.kts", "lock": "gradle.lockfile", "tool": "gradle"},
-      {"file": "build.gradle", "lock": "gradle.lockfile", "tool": "gradle"}
+      {
+        "file": "build.gradle.kts",
+        "lock": "gradle.lockfile",
+        "tool": "gradle"
+      },
+      {
+        "file": "build.gradle",
+        "lock": "gradle.lockfile",
+        "tool": "gradle"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -374,18 +710,32 @@
     },
     "comment_style": "//",
     "import_pattern": "^import\\s+([\\w.]+)",
-    "class_pattern": "(?:data\\s+)?(?:class|object|interface)\\s+(\\w+)",
+    "class_pattern": "(?:data\\s+)?(?:enum\\s+)?(?:class|object|interface|sealed\\s+class)\\s+(\\w+)",
     "function_pattern": "fun\\s+(\\w+)",
     "constant_pattern": "(?:val|const\\s+val)\\s+(\\w+)"
   },
   "scala": {
     "name": "Scala",
-    "extensions": [".scala", ".sc"],
-    "markers": ["build.sbt", "project/build.properties"],
+    "extensions": [
+      ".scala",
+      ".sc"
+    ],
+    "markers": [
+      "build.sbt",
+      "project/build.properties"
+    ],
     "project_type": "scala",
     "package_managers": [
-      {"file": "build.sbt", "lock": null, "tool": "sbt"},
-      {"file": "pom.xml", "lock": null, "tool": "maven"}
+      {
+        "file": "build.sbt",
+        "lock": null,
+        "tool": "sbt"
+      },
+      {
+        "file": "pom.xml",
+        "lock": null,
+        "tool": "maven"
+      }
     ],
     "naming": {
       "files": "PascalCase",
@@ -403,11 +753,21 @@
   },
   "elixir": {
     "name": "Elixir",
-    "extensions": [".ex", ".exs"],
-    "markers": ["mix.exs", "mix.lock"],
+    "extensions": [
+      ".ex",
+      ".exs"
+    ],
+    "markers": [
+      "mix.exs",
+      "mix.lock"
+    ],
     "project_type": "elixir",
     "package_managers": [
-      {"file": "mix.exs", "lock": "mix.lock", "tool": "mix"}
+      {
+        "file": "mix.exs",
+        "lock": "mix.lock",
+        "tool": "mix"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -419,17 +779,26 @@
     },
     "comment_style": "#",
     "import_pattern": "(?:import|alias|use|require)\\s+([\\w.]+)",
-    "class_pattern": "defmodule\\s+([\\w.]+)",
+    "class_pattern": "(?:defmodule|defprotocol)\\s+([\\w.]+)",
     "function_pattern": "(?:def|defp)\\s+(\\w+)",
     "constant_pattern": "@(\\w+)\\s+"
   },
   "dart": {
     "name": "Dart",
-    "extensions": [".dart"],
-    "markers": ["pubspec.yaml", "pubspec.lock"],
+    "extensions": [
+      ".dart"
+    ],
+    "markers": [
+      "pubspec.yaml",
+      "pubspec.lock"
+    ],
     "project_type": "dart",
     "package_managers": [
-      {"file": "pubspec.yaml", "lock": "pubspec.lock", "tool": "pub"}
+      {
+        "file": "pubspec.yaml",
+        "lock": "pubspec.lock",
+        "tool": "pub"
+      }
     ],
     "naming": {
       "files": "snake_case",
@@ -447,8 +816,14 @@
   },
   "lua": {
     "name": "Lua",
-    "extensions": [".lua"],
-    "markers": [".luarocks", "rockspec", ".luacheckrc"],
+    "extensions": [
+      ".lua"
+    ],
+    "markers": [
+      ".luarocks",
+      "rockspec",
+      ".luacheckrc"
+    ],
     "project_type": "lua",
     "comment_style": "--",
     "import_pattern": "(?:require|dofile)\\s*\\(?['\"]([^'\"]+)",
@@ -458,8 +833,13 @@
   },
   "zig": {
     "name": "Zig",
-    "extensions": [".zig"],
-    "markers": ["build.zig", "build.zig.zon"],
+    "extensions": [
+      ".zig"
+    ],
+    "markers": [
+      "build.zig",
+      "build.zig.zon"
+    ],
     "project_type": "zig",
     "comment_style": "//",
     "import_pattern": "@import\\(\"([^\"]+)\"\\)",
@@ -469,8 +849,16 @@
   },
   "haskell": {
     "name": "Haskell",
-    "extensions": [".hs", ".lhs"],
-    "markers": ["stack.yaml", "cabal.project", "*.cabal", "package.yaml"],
+    "extensions": [
+      ".hs",
+      ".lhs"
+    ],
+    "markers": [
+      "stack.yaml",
+      "cabal.project",
+      "*.cabal",
+      "package.yaml"
+    ],
     "project_type": "haskell",
     "comment_style": "--",
     "import_pattern": "^import\\s+(?:qualified\\s+)?([\\w.]+)",
@@ -480,8 +868,15 @@
   },
   "ocaml": {
     "name": "OCaml",
-    "extensions": [".ml", ".mli"],
-    "markers": ["dune-project", "*.opam", "dune"],
+    "extensions": [
+      ".ml",
+      ".mli"
+    ],
+    "markers": [
+      "dune-project",
+      "*.opam",
+      "dune"
+    ],
     "project_type": "ocaml",
     "comment_style": "(*",
     "import_pattern": "^open\\s+(\\w+)",
@@ -491,8 +886,17 @@
   },
   "r": {
     "name": "R",
-    "extensions": [".r", ".R", ".Rmd", ".Rnw"],
-    "markers": ["DESCRIPTION", "NAMESPACE", ".Rproj"],
+    "extensions": [
+      ".r",
+      ".R",
+      ".Rmd",
+      ".Rnw"
+    ],
+    "markers": [
+      "DESCRIPTION",
+      "NAMESPACE",
+      ".Rproj"
+    ],
     "project_type": "r",
     "comment_style": "#",
     "import_pattern": "(?:library|require)\\s*\\(([^)]+)\\)",
@@ -502,8 +906,13 @@
   },
   "julia": {
     "name": "Julia",
-    "extensions": [".jl"],
-    "markers": ["Project.toml", "Manifest.toml"],
+    "extensions": [
+      ".jl"
+    ],
+    "markers": [
+      "Project.toml",
+      "Manifest.toml"
+    ],
     "project_type": "julia",
     "comment_style": "#",
     "import_pattern": "(?:using|import)\\s+([\\w.]+)",
@@ -513,8 +922,16 @@
   },
   "c": {
     "name": "C",
-    "extensions": [".c", ".h"],
-    "markers": ["Makefile", "CMakeLists.txt", "configure.ac", "meson.build"],
+    "extensions": [
+      ".c",
+      ".h"
+    ],
+    "markers": [
+      "Makefile",
+      "CMakeLists.txt",
+      "configure.ac",
+      "meson.build"
+    ],
     "project_type": "c",
     "comment_style": "//",
     "import_pattern": "^#include\\s+[<\"]([^>\"]+)",
@@ -524,8 +941,22 @@
   },
   "cpp": {
     "name": "C++",
-    "extensions": [".cpp", ".cxx", ".cc", ".hpp", ".hxx", ".hh", ".h"],
-    "markers": ["CMakeLists.txt", "Makefile", "meson.build", "conanfile.txt", "vcpkg.json"],
+    "extensions": [
+      ".cpp",
+      ".cxx",
+      ".cc",
+      ".hpp",
+      ".hxx",
+      ".hh",
+      ".h"
+    ],
+    "markers": [
+      "CMakeLists.txt",
+      "Makefile",
+      "meson.build",
+      "conanfile.txt",
+      "vcpkg.json"
+    ],
     "project_type": "cpp",
     "comment_style": "//",
     "import_pattern": "^#include\\s+[<\"]([^>\"]+)",
