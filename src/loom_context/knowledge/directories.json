@@ -127,7 +127,6 @@
     "modules": "Application modules",
     "background": "Background task processing",
     "normalized": "Normalized data structures",
-
     "mailers": "Email delivery (Rails/web frameworks)",
     "jobs": "Background job classes",
     "channels": "WebSocket/ActionCable channels",
@@ -145,12 +144,10 @@
     "observers": "Observer pattern implementations",
     "workers": "Background worker processes",
     "tasks": "Task definitions (Celery, Rake, etc.)",
-
     "cmd": "Command entry points (Go convention)",
     "internal": "Internal packages, not importable externally (Go)",
     "pkg": "Public reusable packages (Go)",
     "vendor": "Vendored dependencies",
-
     "benches": "Benchmark tests (Rust)",
     "examples": "Example code/usage",
     "src/bin": "Binary entry points (Rust)",
@@ -158,12 +155,10 @@
     "build": "Build output",
     "dist": "Distribution output",
     "out": "Compiled output",
-
     "src/main/java": "Java main source root",
     "src/main/resources": "Java resources (configs, templates)",
     "src/test/java": "Java test source root",
     "src/test/resources": "Java test resources",
-
     "notebooks": "Jupyter/computational notebooks",
     "experiments": "Experiment configurations and results",
     "references": "Reference materials (papers, bibliography)",
@@ -171,14 +166,12 @@
     "raw": "Raw/unprocessed data",
     "processed": "Processed/cleaned data",
     "analysis": "Data analysis scripts/outputs",
-
     "pipelines": "Data/ML pipelines",
     "warehouses": "Data warehouse definitions",
     "dbt": "dbt models and transformations",
     "airflow": "Airflow DAGs and operators",
     "dagster": "Dagster pipelines",
     "staging": "Staging area/environment",
-
     "protos": "Protocol Buffer definitions",
     "proto": "Protocol Buffer definitions",
     "gateway": "API gateway",
@@ -186,16 +179,29 @@
     "resolvers": "GraphQL resolvers",
     "mutations": "GraphQL mutations or DB mutations",
     "subscriptions": "GraphQL/event subscriptions",
-
     "factories": "Factory pattern implementations",
     "builders": "Builder pattern implementations",
     "validators": "Input/data validators",
     "converters": "Data type converters",
     "initializers": "Application initializers/setup",
-
     "certs": "TLS/SSL certificates directory",
     "keys": "Encryption/signing keys directory",
     "secrets": "Secret management",
-    "vault": "HashiCorp Vault or secret storage"
+    "vault": "HashiCorp Vault or secret storage",
+    "stories": "Storybook stories",
+    "storybook": "Storybook configuration",
+    ".storybook": "Storybook configuration",
+    "primitives": "UI primitive components (unstyled, accessible)",
+    "patterns": "UI pattern compositions (header, sidebar, etc.)",
+    "translations": "Translation files (i18n)",
+    "lang": "Language/locale files",
+    "branding": "Brand assets and guidelines",
+    "design-tokens": "Design token definitions",
+    "foundations": "Design foundations (colors, typography, spacing)",
+    "atoms": "Atomic design: atoms (smallest components)",
+    "molecules": "Atomic design: molecules (component groups)",
+    "organisms": "Atomic design: organisms (complex components)",
+    "templates": "Page templates / Jinja2 templates",
+    "pages": "Page-level components or views"
   }
 }

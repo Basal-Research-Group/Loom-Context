@@ -376,6 +376,47 @@
       },
       "legacy_dir_sets": []
     },
+    "design-system": {
+      "name": "Design System",
+      "signals": [
+        {"type": "directory", "pattern": "tokens", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "components", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "stories", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "foundations", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "primitives", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": ".storybook", "weight": 0.10, "depth": "top"},
+        {"type": "directory", "pattern": "theme", "weight": 0.05, "depth": "any"},
+        {"type": "file_suffix", "pattern": ".stories", "weight": 0.10},
+        {"type": "package", "patterns": ["storybook", "@storybook/react", "style-dictionary"], "ecosystem": "npm", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.35,
+      "boundary_rules": {
+        "tokens": {"forbidden_imports": ["components", "patterns"]},
+        "primitives": {"forbidden_imports": ["patterns"]}
+      },
+      "legacy_dir_sets": []
+    },
+    "atomic-design": {
+      "name": "Atomic Design",
+      "signals": [
+        {"type": "directory", "pattern": "atoms", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "molecules", "weight": 0.25, "depth": "any"},
+        {"type": "directory", "pattern": "organisms", "weight": 0.20, "depth": "any"},
+        {"type": "directory", "pattern": "templates", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "pages", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "components", "weight": 0.05, "depth": "any"},
+        {"type": "file_suffix", "pattern": "Atom", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "atoms": {"forbidden_imports": ["molecules", "organisms", "templates", "pages"]},
+        "molecules": {"forbidden_imports": ["organisms", "templates", "pages"]},
+        "organisms": {"forbidden_imports": ["templates", "pages"]}
+      },
+      "legacy_dir_sets": [
+        ["atoms", "molecules", "organisms"]
+      ]
+    },
     "plugin": {
       "name": "Plugin Architecture",
       "signals": [
