@@ -84,6 +84,7 @@ testpaths = ["tests"]
 target-version = "py39"
 line-length = 100
 src = ["src", "tests"]
+extend-exclude = ["*.j2", "*.jinja2"]
 
 [tool.ruff.lint]
 select = [

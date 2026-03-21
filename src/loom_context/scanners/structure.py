@@ -32,8 +32,14 @@ class StructureScanner(BaseScanner):
         directory_tree = self._build_annotated_tree(src_root, max_depth=4)
         boundaries = self._get_boundary_rules(architecture)
 
-        # Detect language from project type
+        # Detect language from project type (try exact, then base name)
         lang_info = _registry.get_language_for_project_type(project_type)
+        if not lang_info and "-" in project_type:
+            lang_info = _registry.get_language_for_project_type(
+                project_type.split("-")[0]
+            )
+        if not lang_info:
+            lang_info = _registry.get_language(project_type)
         language = lang_info.name if lang_info else ""
 
         # Monorepo detection

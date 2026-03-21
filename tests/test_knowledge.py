@@ -873,3 +873,182 @@ class TestCsprojParser:
         assert "Newtonsoft.Json" in names
         assert "xunit" in names
         assert result["package_manager"] == "nuget"
+
+
+class TestIntegrationMultiLanguage:
+    """Full loom init on simulated projects in different languages."""
+
+    def _run_init(self, root: Path) -> dict:
+        from loom_context.engine import LoomEngine
+
+        engine = LoomEngine(root)
+        return engine.init()
+
+    def test_ruby_rails_project(self, tmp_path: Path) -> None:
+        """Simulate a Ruby on Rails DDD project."""
+        # Gemfile
+        (tmp_path / "Gemfile").write_text(
+            "source 'https://rubygems.org'\n"
+            "gem 'rails', '~> 7.0'\n"
+            "gem 'pg'\n"
+            "gem 'sidekiq'\n"
+        )
+        (tmp_path / "Rakefile").write_text("require_relative 'config/application'\n")
+        # Rails structure
+        for d in [
+            "app/models", "app/controllers", "app/views",
+            "app/domains/auth/entities", "app/services",
+            "config", "db/migrate", "spec",
+        ]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "app/models/user.rb").write_text(
+            "class User < ApplicationRecord\nend\n"
+        )
+        (tmp_path / "app/controllers/users_controller.rb").write_text(
+            "class UsersController < ApplicationController\n  def index\n  end\nend\n"
+        )
+        (tmp_path / "config/routes.rb").write_text("Rails.application.routes.draw do\nend\n")
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.project_type == "ruby"
+        assert scan.structure.language == "Ruby"
+        assert scan.deps.ecosystem == "gem"
+        assert scan.deps.package_manager == "bundler"
+        names = [d.name for d in scan.deps.dependencies]
+        assert "rails" in names
+        assert "pg" in names
+
+    def test_go_project(self, tmp_path: Path) -> None:
+        """Simulate a Go project."""
+        (tmp_path / "go.mod").write_text(
+            "module github.com/myorg/myapp\n\ngo 1.21\n\n"
+            "require (\n"
+            "\tgithub.com/gin-gonic/gin v1.9.1\n"
+            "\tgithub.com/jackc/pgx/v5 v5.5.0\n"
+            ")\n"
+        )
+        for d in ["cmd/server", "internal/handlers", "internal/models", "pkg/utils"]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "cmd/server/main.go").write_text(
+            "package main\n\nfunc main() {\n}\n"
+        )
+        (tmp_path / "internal/handlers/user.go").write_text(
+            "package handlers\n\ntype UserHandler struct{}\n\n"
+            "func (h *UserHandler) GetUser() {}\n"
+        )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.project_type == "go"
+        assert scan.structure.language == "Go"
+        assert scan.deps.ecosystem == "go"
+        names = [d.name for d in scan.deps.dependencies]
+        assert "gin" in names
+
+    def test_rust_project(self, tmp_path: Path) -> None:
+        """Simulate a Rust project."""
+        (tmp_path / "Cargo.toml").write_text(
+            '[package]\nname = "myapp"\nversion = "0.1.0"\n\n'
+            "[dependencies]\n"
+            'axum = "0.7"\n'
+            'tokio = { version = "1.0", features = ["full"] }\n'
+            'serde = "1.0"\n'
+        )
+        (tmp_path / "src").mkdir()
+        (tmp_path / "src/main.rs").write_text(
+            "pub struct AppState {}\n\n"
+            "pub trait Repository {\n    fn find(&self) -> Option<()>;\n}\n\n"
+            "pub async fn handler() {}\n"
+        )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.project_type == "rust"
+        assert scan.structure.language == "Rust"
+        assert scan.deps.ecosystem == "cargo"
+        names = [d.name for d in scan.deps.dependencies]
+        assert "axum" in names
+        assert "tokio" in names
+
+    def test_java_maven_project(self, tmp_path: Path) -> None:
+        """Simulate a Java Maven project."""
+        (tmp_path / "pom.xml").write_text(
+            '<?xml version="1.0"?>\n<project>\n'
+            "  <dependencies>\n"
+            "    <dependency>\n"
+            "      <groupId>org.springframework.boot</groupId>\n"
+            "      <artifactId>spring-boot</artifactId>\n"
+            "      <version>3.2.0</version>\n"
+            "    </dependency>\n"
+            "  </dependencies>\n"
+            "</project>\n"
+        )
+        for d in ["src/main/java/com/myapp/controllers", "src/main/java/com/myapp/services"]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "src/main/java/com/myapp/controllers/UserController.java").write_text(
+            "public class UserController {\n"
+            "    public void getUser(String id) {}\n"
+            "}\n"
+        )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.project_type == "java-maven"
+        assert scan.structure.language == "Java"
+        assert scan.deps.ecosystem == "maven"
+        names = [d.name for d in scan.deps.dependencies]
+        assert "spring-boot" in names
+
+    def test_elixir_project(self, tmp_path: Path) -> None:
+        """Simulate an Elixir Phoenix project."""
+        (tmp_path / "mix.exs").write_text(
+            "defmodule MyApp.MixProject do\n"
+            "  defp deps do\n"
+            "    [\n"
+            '      {:phoenix, "~> 1.7"},\n'
+            '      {:ecto, "~> 3.10"},\n'
+            "    ]\n"
+            "  end\n"
+            "end\n"
+        )
+        for d in ["lib/my_app", "lib/my_app_web/controllers"]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "lib/my_app/accounts.ex").write_text(
+            "defmodule MyApp.Accounts do\n  def get_user(id), do: nil\nend\n"
+        )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.project_type == "elixir"
+        assert scan.structure.language == "Elixir"
+        assert scan.deps.ecosystem == "hex"
+        names = [d.name for d in scan.deps.dependencies]
+        assert "phoenix" in names
+
+    def test_csharp_project(self, tmp_path: Path) -> None:
+        """Simulate a C# project."""
+        (tmp_path / "MyApp.csproj").write_text(
+            "<Project>\n"
+            "  <ItemGroup>\n"
+            '    <PackageReference Include="Microsoft.AspNetCore" Version="8.0" />\n'
+            "  </ItemGroup>\n"
+            "</Project>\n"
+        )
+        (tmp_path / "Controllers").mkdir()
+        (tmp_path / "Controllers/UserController.cs").write_text(
+            "public class UserController {\n"
+            "    public IActionResult Get() { return Ok(); }\n"
+            "}\n"
+        )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.deps.ecosystem == "nuget"
+        assert scan.deps.package_manager == "nuget"
