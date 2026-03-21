@@ -45,11 +45,22 @@ def init(path: str) -> None:
     table.add_column("Value")
 
     table.add_row("Project Type", scan.structure.project_type)
-    table.add_row("Architecture", ", ".join(scan.structure.architecture))
+    if scan.structure.language:
+        table.add_row("Language", scan.structure.language)
+    # Architecture with confidence
+    arch_parts = []
+    for a in scan.structure.architecture:
+        conf = scan.structure.architecture_confidence.get(a, {})
+        if conf:
+            arch_parts.append(f"{a} ({conf.get('confidence', '')})")
+        else:
+            arch_parts.append(a)
+    table.add_row("Architecture", ", ".join(arch_parts))
     table.add_row("Files Scanned", str(scan.structure.total_files))
     table.add_row("Code Files", str(scan.code.total_code_files))
     table.add_row("Docs Found", str(scan.docs.doc_count))
     table.add_row("Dependencies", str(len(scan.deps.dependencies)))
+    table.add_row("Ecosystem", scan.deps.ecosystem)
     table.add_row("Package Manager", scan.deps.package_manager)
 
     console.print(table)

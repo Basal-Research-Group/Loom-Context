@@ -2,10 +2,19 @@
 
 ## Project Type
 {{ project_type }}
+{% if language %}
+
+## Language
+{{ language }}
+{% endif %}
 
 ## Architecture Patterns
 {% for pattern in architecture %}
+{% if arch_confidence and pattern in arch_confidence %}
+- **{{ pattern }}** ({{ arch_confidence[pattern].confidence }} confidence, score {{ arch_confidence[pattern].score }})
+{% else %}
 - **{{ pattern }}**
+{% endif %}
 {% endfor %}
 
 ## Source Root
@@ -71,6 +80,17 @@ views → controllers → models
 {% elif 'layered' in architecture %}
 ```
 controllers → services → repositories
+```
+{% elif 'ddd' in architecture %}
+```
+presentation → application → domain ← infrastructure
+```
+- **domain**: Entities, value objects, aggregates, domain events. Zero external dependencies.
+- **application**: Use cases, command/query handlers. References domain only.
+- **infrastructure**: Persistence, external services. Implements domain ports.
+{% elif 'pipeline' in architecture %}
+```
+input → processing → output
 ```
 {% else %}
 No standard architecture pattern detected. Define boundaries in `.context/loom.json`.

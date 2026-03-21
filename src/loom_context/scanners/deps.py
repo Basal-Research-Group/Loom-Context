@@ -161,6 +161,12 @@ class DependencyScanner(BaseScanner):
                 in_deps = "dependencies" in stripped and "=" not in stripped
                 continue
             if in_deps and stripped and not stripped.startswith("#"):
+                # Skip TOML key assignments like 'dev = [' or 'key = value'
+                if re.match(r"^\w+\s*=\s*[\[\"{]", stripped):
+                    continue
+                # Skip closing brackets
+                if stripped in ("]", "},"):
+                    continue
                 self._parse_dep_line(stripped, result, dev=False)
 
     def _scan_requirements_txt(self, path: Path, result: dict[str, Any]) -> None:

@@ -150,7 +150,9 @@ class ContextGenerator:
 
         content = template.render(
             project_type=structure.get("project_type", "unknown"),
+            language=structure.get("language", ""),
             architecture=structure.get("architecture", []),
+            arch_confidence=structure.get("architecture_confidence", {}),
             boundaries=boundaries,
             src_root=structure.get("src_root", "."),
             loom_layers=loom_layers,
