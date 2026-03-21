@@ -1052,3 +1052,78 @@ class TestIntegrationMultiLanguage:
 
         assert scan.deps.ecosystem == "nuget"
         assert scan.deps.package_manager == "nuget"
+
+    def test_go_standard_layout_detected(self, tmp_path: Path) -> None:
+        """Go project with cmd/internal/pkg should detect go-standard arch."""
+        (tmp_path / "go.mod").write_text("module example.com/app\n\ngo 1.21\n")
+        for d in ["cmd/server", "internal/domain", "internal/handlers", "pkg/utils"]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "cmd/server/main.go").write_text("package main\nfunc main() {}\n")
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert "go-standard" in scan.structure.architecture
+        assert "flat" not in scan.structure.architecture
+
+    def test_rails_ddd_detected(self, tmp_path: Path) -> None:
+        """Rails project with app/domains/ should detect DDD or MVC, not flat."""
+        (tmp_path / "Gemfile").write_text("gem 'rails'\n")
+        for d in [
+            "app/models", "app/controllers", "app/views",
+            "app/domains/auth/entities",
+            "app/domains/billing/value_objects",
+            "config", "db",
+        ]:
+            (tmp_path / d).mkdir(parents=True)
+        (tmp_path / "config/routes.rb").write_text("Rails.application.routes.draw {}\n")
+        (tmp_path / "app/models/user.rb").write_text("class User\nend\n")
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert "flat" not in scan.structure.architecture
+        # Should detect rails-convention and/or mvc and/or ddd
+        arch_names = scan.structure.architecture
+        has_structure = any(
+            a in arch_names
+            for a in ["rails-convention", "mvc", "ddd", "layered"]
+        )
+        assert has_structure, f"Expected structured arch, got {arch_names}"
+
+    def test_cargo_workspace_monorepo(self, tmp_path: Path) -> None:
+        """Rust workspace should be detected as monorepo."""
+        (tmp_path / "Cargo.toml").write_text(
+            '[workspace]\nmembers = [\n  "api",\n  "core",\n  "cli",\n]\n'
+        )
+        for d in ["api", "core", "cli"]:
+            (tmp_path / d).mkdir()
+            (tmp_path / d / "Cargo.toml").write_text(
+                f'[package]\nname = "{d}"\nversion = "0.1.0"\n'
+            )
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.is_monorepo
+        ws = scan.structure.workspaces
+        assert "api" in ws
+        assert "core" in ws
+
+    def test_maven_multimodule_monorepo(self, tmp_path: Path) -> None:
+        """Maven multi-module should be detected as monorepo."""
+        (tmp_path / "pom.xml").write_text(
+            "<project><modules>\n"
+            "  <module>api</module>\n"
+            "  <module>core</module>\n"
+            "</modules></project>\n"
+        )
+        for d in ["api", "core"]:
+            (tmp_path / d).mkdir()
+            (tmp_path / d / "pom.xml").write_text("<project></project>")
+
+        result = self._run_init(tmp_path)
+        scan = result["scan_result"]
+
+        assert scan.structure.is_monorepo
+        assert "api" in scan.structure.workspaces

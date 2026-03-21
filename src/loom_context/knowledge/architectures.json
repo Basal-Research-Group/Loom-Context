@@ -334,6 +334,48 @@
       "boundary_rules": {},
       "legacy_dir_sets": []
     },
+    "go-standard": {
+      "name": "Go Standard Layout",
+      "signals": [
+        {"type": "directory", "pattern": "cmd", "weight": 0.25, "depth": "top"},
+        {"type": "directory", "pattern": "internal", "weight": 0.25, "depth": "top"},
+        {"type": "directory", "pattern": "pkg", "weight": 0.20, "depth": "top"},
+        {"type": "directory", "pattern": "api", "weight": 0.10, "depth": "top"},
+        {"type": "directory", "pattern": "configs", "weight": 0.05, "depth": "top"},
+        {"type": "directory", "pattern": "scripts", "weight": 0.05, "depth": "top"},
+        {"type": "file_content", "pattern": "go\\.mod", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "internal": {"forbidden_imports": []},
+        "pkg": {"forbidden_imports": ["internal"]}
+      },
+      "legacy_dir_sets": [
+        ["cmd", "internal"],
+        ["cmd", "internal", "pkg"]
+      ]
+    },
+    "rails-convention": {
+      "name": "Rails Convention",
+      "signals": [
+        {"type": "directory", "pattern": "app", "weight": 0.15, "depth": "top"},
+        {"type": "directory", "pattern": "models", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "controllers", "weight": 0.15, "depth": "any"},
+        {"type": "directory", "pattern": "views", "weight": 0.10, "depth": "any"},
+        {"type": "directory", "pattern": "config", "weight": 0.10, "depth": "top"},
+        {"type": "directory", "pattern": "db", "weight": 0.10, "depth": "top"},
+        {"type": "directory", "pattern": "mailers", "weight": 0.05, "depth": "any"},
+        {"type": "directory", "pattern": "jobs", "weight": 0.05, "depth": "any"},
+        {"type": "file_content", "pattern": "routes\\.rb", "weight": 0.10},
+        {"type": "file_suffix", "pattern": "_controller", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.40,
+      "boundary_rules": {
+        "models": {"forbidden_imports": ["controllers", "views"]},
+        "controllers": {"forbidden_imports": ["views"]}
+      },
+      "legacy_dir_sets": []
+    },
     "plugin": {
       "name": "Plugin Architecture",
       "signals": [

@@ -105,7 +105,24 @@ class StructureScanner(BaseScanner):
         return "unknown"
 
     def _find_src_root(self) -> Path:
-        """Find the main source directory."""
+        """Find the main source directory, respecting framework conventions."""
+        # Go projects use root as src (cmd/, internal/, pkg/ are top-level)
+        if (self.root / "go.mod").exists():
+            return self.root
+
+        # Framework-specific roots from registry
+        ptype = self._detect_project_type()
+        lang_info = _registry.get_language_for_project_type(ptype)
+        if not lang_info and "-" in ptype:
+            lang_info = _registry.get_language_for_project_type(ptype.split("-")[0])
+        if lang_info:
+            for fw in lang_info.frameworks.values():
+                for sr in fw.src_roots:
+                    candidate = self.root / sr
+                    if candidate.is_dir() and sr != ".":
+                        return candidate
+
+        # Generic src roots
         for name in ["src", "lib", "app", "source"]:
             candidate = self.root / name
             if candidate.is_dir():
@@ -132,25 +149,46 @@ class StructureScanner(BaseScanner):
 
         return dirs
 
+    def _collect_all_dirs(self, root: Path, max_depth: int = 4) -> set[str]:
+        """Recursively collect all directory names up to max_depth."""
+        dirs: set[str] = set()
+        self._collect_dirs_recursive(root, dirs, 0, max_depth)
+        return dirs
+
+    def _collect_dirs_recursive(
+        self, path: Path, dirs: set[str], depth: int, max_depth: int
+    ) -> None:
+        """Recursive helper for directory collection."""
+        if depth >= max_depth or not path.is_dir():
+            return
+        try:
+            for entry in path.iterdir():
+                if entry.is_dir():
+                    name = entry.name
+                    if name.startswith(".") or name in {
+                        "node_modules", "__pycache__", ".git", "vendor",
+                        "target", "_build", "deps", "dist", "build",
+                    }:
+                        continue
+                    dirs.add(name)
+                    self._collect_dirs_recursive(entry, dirs, depth + 1, max_depth)
+        except PermissionError:
+            pass
+
     def _detect_architecture(
         self, top_dirs: set[str]
     ) -> tuple[list[str], dict[str, Any]]:
-        """Detect architecture patterns using signal scoring."""
+        """Detect architecture patterns using signal scoring with deep scanning."""
         scorer = get_scorer()
         patterns = _registry.get_architecture_patterns()
 
-        # Collect all nested directories for deep scanning
-        all_dirs = set(top_dirs)
+        # Deep recursive scan — collect ALL directory names up to 4 levels
         src_root = self._find_src_root()
-        for d in top_dirs:
-            dir_path = src_root / d if src_root != self.root else self.root / d
-            if dir_path.is_dir():
-                try:
-                    for entry in dir_path.iterdir():
-                        if entry.is_dir() and not entry.name.startswith("."):
-                            all_dirs.add(entry.name)
-                except PermissionError:
-                    pass
+        all_dirs = self._collect_all_dirs(src_root, max_depth=4)
+        # Also scan from project root for non-src structures (Go cmd/, Rails app/)
+        if src_root != self.root:
+            all_dirs.update(self._collect_all_dirs(self.root, max_depth=3))
+        all_dirs.update(top_dirs)
 
         # Collect file suffixes from a sample of files
         file_suffixes: set[str] = set()
@@ -264,10 +302,10 @@ class StructureScanner(BaseScanner):
         return boundaries
 
     def _detect_monorepo(self) -> tuple[bool, list[str]]:
-        """Detect monorepo structure and list workspaces."""
+        """Detect monorepo structure across all ecosystems."""
         workspaces: list[str] = []
 
-        # Check package.json workspaces
+        # JS/TS: package.json workspaces
         pkg_json = self.root / "package.json"
         if pkg_json.exists():
             try:
@@ -275,35 +313,15 @@ class StructureScanner(BaseScanner):
                     pkg = json.load(f)
                 ws = pkg.get("workspaces", [])
                 if isinstance(ws, list) and ws:
-                    # Resolve glob patterns
                     for pattern in ws:
-                        clean = pattern.rstrip("/*").rstrip("*")
-                        ws_dir = self.root / clean
-                        if ws_dir.is_dir():
-                            for entry in sorted(ws_dir.iterdir()):
-                                if entry.is_dir() and not entry.name.startswith("."):
-                                    workspaces.append(str(entry.relative_to(self.root)))
+                        self._resolve_workspace_glob(pattern, workspaces)
                 elif isinstance(ws, dict) and ws.get("packages"):
                     for pattern in ws["packages"]:
-                        clean = pattern.rstrip("/*").rstrip("*")
-                        ws_dir = self.root / clean
-                        if ws_dir.is_dir():
-                            for entry in sorted(ws_dir.iterdir()):
-                                if entry.is_dir() and not entry.name.startswith("."):
-                                    workspaces.append(str(entry.relative_to(self.root)))
+                        self._resolve_workspace_glob(pattern, workspaces)
             except (json.JSONDecodeError, OSError):
                 pass
 
-        # Check common monorepo dirs
-        if not workspaces:
-            for mono_dir in ["packages", "apps", "libs", "modules"]:
-                candidate = self.root / mono_dir
-                if candidate.is_dir():
-                    for entry in sorted(candidate.iterdir()):
-                        if entry.is_dir() and not entry.name.startswith("."):
-                            workspaces.append(str(entry.relative_to(self.root)))
-
-        # Check pnpm-workspace.yaml
+        # JS/TS: pnpm-workspace.yaml
         pnpm_ws = self.root / "pnpm-workspace.yaml"
         if not workspaces and pnpm_ws.exists():
             try:
@@ -311,12 +329,145 @@ class StructureScanner(BaseScanner):
                 for line in content.splitlines():
                     line = line.strip().lstrip("- ").strip("'\"").rstrip("/*")
                     if line and not line.startswith("#") and not line.startswith("packages"):
-                        ws_dir = self.root / line
-                        if ws_dir.is_dir():
-                            for entry in sorted(ws_dir.iterdir()):
-                                if entry.is_dir() and not entry.name.startswith("."):
-                                    workspaces.append(str(entry.relative_to(self.root)))
+                        self._resolve_workspace_glob(line, workspaces)
             except OSError:
                 pass
 
+        # Rust: Cargo.toml [workspace] members
+        cargo = self.root / "Cargo.toml"
+        if not workspaces and cargo.exists():
+            try:
+                content = cargo.read_text(encoding="utf-8")
+                in_workspace = False
+                in_members = False
+                for line in content.splitlines():
+                    stripped = line.strip()
+                    if stripped == "[workspace]":
+                        in_workspace = True
+                        continue
+                    if in_workspace and stripped.startswith("members"):
+                        in_members = True
+                        continue
+                    if stripped.startswith("[") and stripped != "[workspace]":
+                        in_workspace = False
+                        in_members = False
+                        continue
+                    if in_members:
+                        if stripped == "]":
+                            in_members = False
+                            continue
+                        member = stripped.strip('",').strip()
+                        if member:
+                            self._resolve_workspace_glob(member, workspaces)
+            except OSError:
+                pass
+
+        go_work = self.root / "go.work"
+        if not workspaces and go_work.exists():
+            try:
+                content = go_work.read_text(encoding="utf-8")
+                in_use = False
+                for line in content.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("use ("):
+                        in_use = True
+                        continue
+                    if stripped == ")" and in_use:
+                        in_use = False
+                        continue
+                    if in_use and stripped and not stripped.startswith("//"):
+                        ws_path = stripped.strip()
+                        if (self.root / ws_path).is_dir():
+                            workspaces.append(ws_path)
+                    elif stripped.startswith("use ") and "(" not in stripped:
+                        ws_path = stripped[4:].strip()
+                        if (self.root / ws_path).is_dir():
+                            workspaces.append(ws_path)
+            except OSError:
+                pass
+
+        # Java: Maven multi-module (pom.xml <modules>)
+        pom = self.root / "pom.xml"
+        if not workspaces and pom.exists():
+            try:
+                import re
+
+                content = pom.read_text(encoding="utf-8")
+                modules_block = re.search(
+                    r"<modules>(.*?)</modules>", content, re.DOTALL
+                )
+                if modules_block:
+                    for m in re.findall(r"<module>(.*?)</module>", modules_block.group(1)):
+                        mod_path = m.strip()
+                        if (self.root / mod_path).is_dir():
+                            workspaces.append(mod_path)
+            except OSError:
+                pass
+
+        # Java: Gradle multi-project (settings.gradle)
+        for gradle_settings in ["settings.gradle", "settings.gradle.kts"]:
+            settings = self.root / gradle_settings
+            if not workspaces and settings.exists():
+                try:
+                    import re
+
+                    content = settings.read_text(encoding="utf-8")
+                    for m in re.findall(r"include\s*['\"]:([\w-]+)['\"]", content):
+                        if (self.root / m).is_dir():
+                            workspaces.append(m)
+                except OSError:
+                    pass
+
+        # Elixir: umbrella apps (apps/ with mix.exs in each)
+        apps_dir = self.root / "apps"
+        if not workspaces and apps_dir.is_dir():
+            mix_root = self.root / "mix.exs"
+            if mix_root.exists():
+                for entry in sorted(apps_dir.iterdir()):
+                    if entry.is_dir() and (entry / "mix.exs").exists():
+                        workspaces.append(str(entry.relative_to(self.root)))
+
+        # Python: multiple pyproject.toml in subdirectories
+        if not workspaces and (self.root / "pyproject.toml").exists():
+            for sub in sorted(self.root.iterdir()):
+                if (
+                    sub.is_dir()
+                    and not sub.name.startswith(".")
+                    and (
+                        (sub / "pyproject.toml").exists()
+                        or (sub / "setup.py").exists()
+                    )
+                ):
+                    workspaces.append(sub.name)
+
+        # Generic: common monorepo directories
+        if not workspaces:
+            for mono_dir in ["packages", "apps", "libs", "modules", "services"]:
+                candidate = self.root / mono_dir
+                if candidate.is_dir():
+                    for entry in sorted(candidate.iterdir()):
+                        if entry.is_dir() and not entry.name.startswith("."):
+                            workspaces.append(str(entry.relative_to(self.root)))
+
         return bool(workspaces), workspaces
+
+    def _resolve_workspace_glob(self, pattern: str, workspaces: list[str]) -> None:
+        """Resolve a workspace glob pattern to actual directories."""
+        clean = pattern.rstrip("/*").rstrip("*")
+        ws_dir = self.root / clean
+        if ws_dir.is_dir():
+            # Check if it's a direct workspace (has package.json, Cargo.toml, etc.)
+            has_manifest = any(
+                (ws_dir / f).exists()
+                for f in [
+                    "package.json", "Cargo.toml", "go.mod", "mix.exs",
+                    "pyproject.toml", "pom.xml", "build.gradle",
+                ]
+            )
+            if has_manifest:
+                workspaces.append(clean)
+            else:
+                # It's a directory containing workspaces
+                for entry in sorted(ws_dir.iterdir()):
+                    if entry.is_dir() and not entry.name.startswith("."):
+                        workspaces.append(str(entry.relative_to(self.root)))
