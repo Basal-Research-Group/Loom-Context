@@ -150,6 +150,7 @@ class LoomEngine:
     def audit(self) -> list[Violation]:
         """Run all auditors and return violations."""
         from loom_context.auditors.naming import NamingAuditor
+        from loom_context.auditors.smells import SmellAuditor
         from loom_context.auditors.structure import StructureAuditor
 
         file_filter = FileFilter(self.config.root)
@@ -162,7 +163,10 @@ class LoomEngine:
         structure.load_rules()
         structure_v = structure.audit()
 
-        return naming_v + structure_v
+        smells = SmellAuditor(self.config.root, file_filter)
+        smells_v = smells.audit()
+
+        return naming_v + structure_v + smells_v
 
     def enrich(self) -> dict[str, Any]:
         """Deterministic enrichment: audit + refine rules + persist."""

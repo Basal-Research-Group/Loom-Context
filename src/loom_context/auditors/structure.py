@@ -11,12 +11,26 @@ from loom_context.knowledge import get_registry
 from loom_context.models import Violation
 from loom_context.security.filter import FileFilter
 
-# Import patterns for different languages
+_registry = get_registry()
+
+# Import patterns: hardcoded for TS/JS (complex syntax) + registry for all others
 TS_IMPORT = re.compile(r"""(?:import|from)\s+['"](@?[^'"]+)['"]""")
 TS_REQUIRE = re.compile(r"""require\(['"]([^'"]+)['"]\)""")
-PY_IMPORT = re.compile(r"^(?:from|import)\s+([\w.]+)", re.MULTILINE)
 
-CODE_EXTENSIONS = get_registry().get_all_extensions()
+# Build import patterns from registry for non-TS/JS languages
+_IMPORT_PATTERNS: dict[str, re.Pattern[str]] = {}
+_languages_data = _registry._load_json("languages.json")
+for _lid, _ldata in _languages_data.items():
+    _pat = _ldata.get("import_pattern", "")
+    if _pat:
+        for _ext in _ldata.get("extensions", []):
+            if _ext not in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}:
+                import contextlib
+
+                with contextlib.suppress(re.error):
+                    _IMPORT_PATTERNS[_ext] = re.compile(_pat, re.MULTILINE)
+
+CODE_EXTENSIONS = _registry.get_all_extensions()
 
 
 class StructureAuditor:
@@ -94,7 +108,7 @@ class StructureAuditor:
         return None
 
     def _extract_imports(self, filepath: Path) -> list[tuple[str, int]]:
-        """Extract import paths with line numbers."""
+        """Extract import paths with line numbers (all languages via registry)."""
         imports: list[tuple[str, int]] = []
 
         try:
@@ -102,15 +116,18 @@ class StructureAuditor:
         except OSError:
             return imports
 
+        ext = filepath.suffix
         lines = content.split("\n")
-        for i, line in enumerate(lines[:200], 1):  # Only check first 200 lines
-            if filepath.suffix in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}:
+        for i, line in enumerate(lines[:200], 1):
+            # TS/JS: use dedicated patterns (complex syntax)
+            if ext in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}:
                 for match in TS_IMPORT.finditer(line):
                     imports.append((match.group(1), i))
                 for match in TS_REQUIRE.finditer(line):
                     imports.append((match.group(1), i))
-            elif filepath.suffix == ".py":
-                for match in PY_IMPORT.finditer(line):
+            # All other languages: use import_pattern from registry
+            elif ext in _IMPORT_PATTERNS:
+                for match in _IMPORT_PATTERNS[ext].finditer(line):
                     imports.append((match.group(1), i))
 
         return imports
