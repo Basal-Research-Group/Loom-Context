@@ -8,10 +8,10 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.5.0] - 2026-03-20
+## [0.5.0] - 2026-03-22
 
 ### Added — Knowledge Registry: El Cerebro de Loom
-- `knowledge/` module: centralized knowledge base with 13 JSON data files
+- `knowledge/` module: centralized knowledge base with 16 JSON data files
 - `KnowledgeRegistry`: singleton API with lazy loading, caching, 25+ typed queries
 - `SignalScorer`: multi-signal architecture detection with weighted scoring and confidence levels
 - `languages.json`: 22 programming languages across 3 tiers with extensions, markers, naming, code patterns, and frameworks
@@ -26,7 +26,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `domains/`: code.json, research.json, data.json domain definitions
 - Local knowledge overrides via `.loom/knowledge/` (deep merge, not tracked in git)
 - 7 new dependency parsers: Gemfile, Cargo.toml, go.mod, mix.exs, pom.xml, build.gradle(.kts), *.csproj
-- 60 new tests for knowledge module + 24 new tests for dependency parsers (365 total, was 305)
+- `design_patterns.json`: 47 design patterns (GoF complete + enterprise + resilience)
+- `code_smells.json`: 17 code smell detectors (god class, secrets, SQL injection, etc.)
+- `prompt_templates.json`: context-aware prompt rules for 12 architectures + 6 ecosystems
+- `domains/brand.json`: brand & product domain definition
+- `loom ask`: task prompts with injected context (implement, review, fix, refactor modes)
+- `loom projects`: global project registry (~/.loom/registry.json)
+- `.prompts/` auto-generated: 5 copy-paste-ready prompts per project
+- `SmellAuditor`: god class, hardcoded secrets, empty catch, SQL injection, deep nesting, TODO/FIXME, console in production, missing lockfile, long parameters
+- Multi-ecosystem monorepo: Cargo workspaces, Go workspaces, Maven multi-module, Gradle, Elixir umbrella
+- Deep recursive scanning (4 levels) replaces 1-level shallow scan
+- Architecture patterns: go-standard, rails-convention, design-system, atomic-design, onion, vertical-slice, plugin, space-based (+8 total)
+- 105 new tests (386 total, was 281)
 
 ### Changed
 - All 11 scanners/auditors/generators migrated from hardcoded constants to KnowledgeRegistry

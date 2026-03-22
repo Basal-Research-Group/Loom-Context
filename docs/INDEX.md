@@ -57,7 +57,7 @@ loom init .
 | v0.1.0 | Publicado | 6 comandos, 25 tests | — |
 | v0.3.0 | Publicado | 17 comandos, 281 tests, 95% cobertura | [delivery](plans/archive/v0.2.0/delivery.md) |
 | v0.4.0 | Publicado | Cache, token counting, zero-friction agents | [delivery](plans/v0.4.0/delivery.md) |
-| v0.5.0 | Listo para release | Knowledge Registry, 22 lenguajes, 15 archs, 373 tests | [release notes](plans/v0.5.0/release-notes.md) |
+| v0.5.0 | Publicado | Knowledge Registry, 24 commands, 386 tests, 85 patterns | [release notes](plans/v0.5.0/release-notes.md) |
 | v0.6.0-v1.0 | Planificado | IA, dominios multiples, gobernanza | [roadmap](plans/roadmap-v0.5-v1.0.md) |
 
 ### Estrategias transversales

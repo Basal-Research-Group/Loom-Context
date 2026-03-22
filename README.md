@@ -169,7 +169,7 @@ loom export . --agent claude --install       # install CLAUDE.md at project root
 
 ---
 
-## 21 Commands
+## 24 Commands
 
 ### Scan & Generate
 
@@ -239,6 +239,22 @@ loom knowledge patterns        # 23 architecture + 47 design patterns
 loom knowledge packages        # 421 packages across 8 ecosystems
 ```
 
+### Task Prompts
+
+```bash
+loom ask "implement auth" .                    # Generate context-aware prompt
+loom ask "fix login bug" . --mode fix --stdout # Pipe to clipboard
+loom ask "review PR" . --mode review -o pr.md  # Save to file
+```
+
+### Global Project Registry
+
+```bash
+loom projects                  # List all projects using Loom on this machine
+loom projects --add "My API"   # Add description to current project
+loom projects --json           # JSON output
+```
+
 ---
 
 ## What Loom Generates
@@ -254,6 +270,13 @@ loom knowledge packages        # 421 packages across 8 ecosystems
   plans-summary.md             ← active vs completed plan tracking
   exports/                     ← agent-specific formats
   bundles/                     ← task-specific context + manifests
+
+.prompts/                      ← copy-paste-ready prompts with project context
+  onboarding.md                ← understand the project
+  implement-feature.md         ← implement with architecture rules
+  review-code.md               ← code review checklist
+  fix-bug.md                   ← debug with data flow
+  refactor.md                  ← safe refactoring plan
 
 .loom/                         ← live state, local per user
   inconsistencies.json         ← last audit findings
@@ -466,7 +489,7 @@ Tested on 3 projects:
 | Guide | What it covers |
 |-------|---------------|
 | [Quick Start](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/quickstart.md) | Install, first scan, daily workflow |
-| [CLI Reference](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/cli-reference.md) | All 21 commands with examples |
+| [CLI Reference](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/cli-reference.md) | All 24 commands with examples |
 | [Context Output](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/context-output.md) | .context/ and .loom/ structure |
 | [Security](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/security.md) | 3-layer filtering model |
 | [Best Practices](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/best-practices.md) | Individual, team, and AI patterns |

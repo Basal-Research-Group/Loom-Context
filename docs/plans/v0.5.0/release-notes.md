@@ -2,8 +2,8 @@
 type: release
 version: "0.5.0"
 title: "Knowledge Registry: El Cerebro de Loom"
-date: 2026-03-20
-status: ready-for-release
+date: 2026-03-22
+status: released
 ---
 
 # v0.5.0 Release Notes — Knowledge Registry
@@ -11,9 +11,10 @@ status: ready-for-release
 ## TL;DR
 
 Loom pasa de tener conocimiento hardcodeado disperso en 8 archivos Python a
-un **Knowledge Registry centralizado** basado en JSON. Soporta 22 lenguajes,
-332 paquetes en 8 ecosistemas, 15 patrones de arquitectura con scoring
-multicapa, y permite extensiones locales sin tocar el codigo fuente.
+un **Knowledge Registry centralizado** basado en JSON. 24 commands, 386 tests,
+22 lenguajes, 421 paquetes en 8 ecosistemas, 23 patrones de arquitectura,
+47 design patterns, 17 code smells. Auto-genera prompts contextuales,
+detecta monorepos en 8 ecosistemas, y permite extensiones locales.
 
 ---
 
@@ -177,7 +178,7 @@ Archivos protegidos (nunca overrideables): `security.json`, `infrastructure.json
 
 | Metrica | v0.4.0 | v0.5.0 | Delta |
 |---------|--------|--------|-------|
-| Tests | 281 | 373 | +92 |
+| Tests | 281 | 386 | +105 |
 | Lenguajes | ~4 | 22 | +18 |
 | Extensiones | 13 (x4 dup) | 49 (0 dup) | +36 |
 | Paquetes conocidos | 138 | 332 | +194 |
@@ -280,7 +281,7 @@ docs/INDEX.md
 
 | Check | Estado |
 |-------|--------|
-| pytest (373 tests) | Pass |
+| pytest (386 tests) | Pass |
 | ruff check (knowledge/, tests/) | Pass |
 | ruff format (knowledge/, tests/) | Pass |
 | bandit (0 issues, 7447 LOC) | Pass |

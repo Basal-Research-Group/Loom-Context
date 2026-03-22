@@ -4,7 +4,7 @@
 
 Loom-Context is a Python CLI tool that scans software projects and generates
 a `.context/` folder with architectural metadata for AI agents.
-Deterministic core — no AI required. 17 commands, 365 tests, Apache-2.0.
+Deterministic core — no AI required. 24 commands, 386 tests, Apache-2.0.
 
 ## Architecture
 
@@ -105,7 +105,7 @@ Local overrides are **deep-merged** with built-in data:
 
 ## Testing
 
-- Run: `pytest` (365+ tests, 95% coverage)
+- Run: `pytest` (386+ tests, 95% coverage)
 - Fixture `tmp_project` in `conftest.py` provides a complete mock project
 - Quality: `make qa` runs lint + format + types + security + tests
 
