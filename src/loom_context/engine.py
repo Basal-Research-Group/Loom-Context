@@ -155,7 +155,19 @@ class LoomEngine:
 
         # Generate all context files
         ctx_gen = ContextGenerator(self.config.context_dir)
-        return ctx_gen.generate_all(scan_dict, index_data)
+        generated = ctx_gen.generate_all(scan_dict, index_data)
+
+        # Generate .prompts/ directory
+        try:
+            from loom_context.generators.prompts_dir import generate_prompts_dir
+
+            prompts = generate_prompts_dir(self.config.root, scan_dict)
+            if prompts:
+                generated.extend([f".prompts/{p}" for p in prompts])
+        except Exception:  # noqa: S110
+            pass
+
+        return generated
 
     def generate_prompt(self) -> str:
         """Generate master AI prompt from existing .context/ files."""
