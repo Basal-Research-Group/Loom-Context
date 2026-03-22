@@ -30,6 +30,8 @@ With Loom:     2.6KB bundle →  agent reads what matters →  precision, consis
 
 No cloud. No LLM. No heavy deps. Deterministic analysis in <2 seconds. 91% fewer tokens.
 
+**v0.5.0**: 22 languages · 421 known packages · 23 architecture patterns · 47 design patterns · 9 dependency parsers
+
 ---
 
 ## Prerequisites
@@ -126,7 +128,7 @@ pip install loom-context
 
 ```bash
 loom --version
-# loom, version 0.4.0
+# loom, version 0.5.0
 ```
 
 > If `loom` is not found: with pipx, run `pipx ensurepath` and restart terminal.
@@ -167,7 +169,7 @@ loom export . --agent claude --install       # install CLAUDE.md at project root
 
 ---
 
-## 20 Commands
+## 21 Commands
 
 ### Scan & Generate
 
@@ -226,6 +228,15 @@ loom log "note" -p .           # Session memory
 loom plan .                    # Summarize docs/plans
 loom report .                  # Usage analytics
 loom watch . --interval 60     # Continuous re-scan
+```
+
+### Knowledge Registry
+
+```bash
+loom knowledge list            # What Loom knows (langs, patterns, packages)
+loom knowledge langs           # All 22 supported languages
+loom knowledge patterns        # 23 architecture + 47 design patterns
+loom knowledge packages        # 421 packages across 8 ecosystems
 ```
 
 ---
@@ -353,7 +364,7 @@ Default port: **3306**. Config env: `MYSQL_URL=mysql://user:pass@localhost:3306/
 
 </details>
 
-Supports: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, RabbitMQ, Kafka, Meilisearch, MinIO.
+Supports: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, RabbitMQ, Kafka, Meilisearch, MinIO, Memcached, ClickHouse, Neo4j, SQLite.
 
 ---
 
@@ -361,13 +372,16 @@ Supports: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, RabbitMQ, Kafka, Mei
 
 | Area | Detection |
 |------|-----------|
-| Architecture | Clean Architecture, Hexagonal, MVC, MVVM, Pipeline, Feature-based, NestJS, Layered |
-| Project Type | React Native/Expo, Next.js, NestJS, Angular, Vue, Python, Rust, Go, Terraform, Turborepo, Nx, and more |
-| Naming | PascalCase, camelCase, kebab-case, snake_case, I-prefix, use-prefix, suffixes |
-| Stack | 130+ known packages categorized (ui, state, db, testing, DI, etc.) |
+| Languages | Python, TypeScript, JavaScript, Ruby, Go, Rust, Java, C#, PHP, Swift, Kotlin, Scala, Elixir, Dart, and 8 more |
+| Architecture | 23 patterns with confidence scoring: Clean, Hexagonal, MVC, DDD, CQRS, Event-Driven, Microservices, Serverless, Design System, Atomic Design, Go Standard, Rails Convention, and more |
+| Design Patterns | 47 patterns: GoF complete (Singleton, Factory, Observer, Strategy...) + enterprise (Circuit Breaker, Saga, CQRS, Event Sourcing...) |
+| Code Smells | God class, hardcoded secrets, empty catch, SQL injection risk, missing lockfile |
+| Stack | 421 packages across 8 ecosystems (npm, pip, gem, cargo, hex, go, maven, nuget) |
+| Monorepo | pnpm, yarn, npm workspaces, Cargo workspaces, Go workspaces, Maven multi-module, Gradle multi-project, Elixir umbrella |
+| Naming | PascalCase, camelCase, kebab-case, snake_case, 47 role suffixes, 8 prefixes |
 | Docs | Markdown with frontmatter, plan status tracking (active vs completed) |
 | Rules | Layer boundaries, naming conventions, import aliases |
-| Infrastructure | 18 services with port check, install hints, Docker commands |
+| Infrastructure | 13 services with port check, install hints, Docker commands |
 
 ---
 
@@ -452,12 +466,12 @@ Tested on 3 projects:
 | Guide | What it covers |
 |-------|---------------|
 | [Quick Start](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/quickstart.md) | Install, first scan, daily workflow |
-| [CLI Reference](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/cli-reference.md) | All 20 commands with examples |
+| [CLI Reference](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/cli-reference.md) | All 21 commands with examples |
 | [Context Output](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/context-output.md) | .context/ and .loom/ structure |
 | [Security](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/security.md) | 3-layer filtering model |
 | [Best Practices](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/best-practices.md) | Individual, team, and AI patterns |
 | [Philosophy](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/guides/philosophy.md) | The brain analogy + scientific references |
-| [Roadmap](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/plans/roadmap-v0.2-v0.4.md) | Version plan with delivery docs |
+| [Roadmap](https://github.com/Basal-Research-Group/Loom-Context/blob/main/docs/plans/roadmap-v0.5-v1.0.md) | Version plan v0.5-v1.0 |
 
 ---
 
@@ -469,7 +483,7 @@ cd Loom-Context
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-pytest                         # 305 tests, ~8s
+pytest                         # 386 tests, ~15s
 ruff check src/ tests/         # lint
 ruff format --check src/ tests/  # format
 ```
