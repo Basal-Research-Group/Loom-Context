@@ -12,6 +12,12 @@ from loom_context import __version__
 _LOOM_HOME = Path.home() / ".loom"
 _REGISTRY_FILE = _LOOM_HOME / "registry.json"
 
+# SECURITY: registry.json is LOCAL-ONLY machine state.
+# - Never include in .context/ output
+# - Never send to agents or external services
+# - Never commit to any git repository
+# - Project names/paths are private to the user's machine
+
 
 def _load_registry() -> dict[str, Any]:
     """Load the global registry."""
