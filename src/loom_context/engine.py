@@ -119,6 +119,21 @@ class LoomEngine:
         except Exception:  # noqa: S110 — cache is best-effort
             pass
 
+        # Register project in global registry (~/.loom/registry.json)
+        try:
+            from loom_context.store.registry import register_project
+
+            register_project(
+                root=self.config.root,
+                project_type=result.structure.project_type,
+                language=result.structure.language,
+                architecture=result.structure.architecture,
+                ecosystem=result.deps.ecosystem,
+                is_monorepo=result.structure.is_monorepo,
+            )
+        except Exception:  # noqa: S110 — registry is best-effort
+            pass
+
         return result
 
     def generate_context(
