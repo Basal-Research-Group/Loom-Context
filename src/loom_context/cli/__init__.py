@@ -74,6 +74,7 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
 # Register all commands
 from loom_context.cli.commands import (  # noqa: E402
+    ask,
     audit,
     bundle,
     db,
@@ -98,6 +99,7 @@ from loom_context.cli.commands import (  # noqa: E402
     watch,
 )
 
+main.add_command(ask.ask)  # type: ignore[has-type]
 main.add_command(init.init)  # type: ignore[has-type]
 main.add_command(scan.scan)  # type: ignore[has-type]
 main.add_command(prompt.prompt)  # type: ignore[has-type]
