@@ -1,0 +1,67 @@
+{
+  "name": "brand",
+  "display_name": "Brand & Product",
+  "description": "Brand identity, design systems, product guidelines, and multi-language documentation",
+  "markers": [
+    "tokens/",
+    "brand/",
+    "guidelines/",
+    ".storybook/",
+    "style-dictionary.config.json",
+    "figma.config.json",
+    "brand.config.json"
+  ],
+  "file_extensions": [
+    ".json", ".yaml", ".yml", ".md", ".mdx",
+    ".svg", ".png", ".css", ".scss",
+    ".tokens.json", ".figma"
+  ],
+  "directory_patterns": [
+    "tokens", "foundations", "brand", "guidelines",
+    "assets", "icons", "logos", "typography",
+    "components", "primitives", "patterns",
+    "stories", "docs", "i18n", "locales"
+  ],
+  "structure_patterns": {
+    "brand-system": {
+      "signals": [
+        {"type": "directory", "pattern": "tokens", "weight": 0.20},
+        {"type": "directory", "pattern": "brand", "weight": 0.20},
+        {"type": "directory", "pattern": "guidelines", "weight": 0.15},
+        {"type": "directory", "pattern": "assets", "weight": 0.15},
+        {"type": "file", "pattern": "*.tokens.json", "weight": 0.15},
+        {"type": "directory", "pattern": "logos", "weight": 0.10},
+        {"type": "directory", "pattern": "typography", "weight": 0.05}
+      ],
+      "confidence_threshold": 0.35
+    },
+    "multi-language-docs": {
+      "signals": [
+        {"type": "directory", "pattern": "en", "weight": 0.20},
+        {"type": "directory", "pattern": "es", "weight": 0.20},
+        {"type": "directory", "pattern": "i18n", "weight": 0.20},
+        {"type": "directory", "pattern": "locales", "weight": 0.15},
+        {"type": "directory", "pattern": "translations", "weight": 0.15},
+        {"type": "file", "pattern": "*.en.md", "weight": 0.10}
+      ],
+      "confidence_threshold": 0.30
+    }
+  },
+  "governance_rules": {
+    "i18n_sync": {
+      "description": "Documentation must be kept in sync across all supported languages",
+      "detection": "Compare modification timestamps of equivalent files across locale dirs",
+      "action": "Flag stale translations as warnings"
+    },
+    "token_consistency": {
+      "description": "Design tokens must be the single source of truth for brand values",
+      "detection": "Check if CSS/SCSS files hardcode values that exist in tokens",
+      "action": "Flag hardcoded brand values as warnings"
+    },
+    "asset_naming": {
+      "description": "Brand assets must follow naming conventions",
+      "detection": "Check naming consistency in icons/, logos/, assets/",
+      "action": "Flag naming violations"
+    }
+  }
+}

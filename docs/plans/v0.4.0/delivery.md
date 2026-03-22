@@ -173,7 +173,7 @@ Tarea    Archivos exclusivos              Conflicto
 - [x] Tarea 5: compresion ultra-compact (2026-03-19)
 - [x] Tarea 6: demo y docs de adopcion (2026-03-19)
 - [x] Tests nuevos: 305 total (95%+ cobertura)
-- [x] Probado en 3 proyectos reales (Loom, Akana, Monorepo)
+- [x] Probado en 3 proyectos reales (Loom, Project A, Monorepo)
 - [x] Demo script en docs/demo.sh
 
 ---
@@ -186,7 +186,7 @@ Ninguna.
 
 ## Mejoras de feedback real (3 proyectos dogfooding, 2026-03-19)
 
-Fuente: `.loom/reports/dogfooding-2026-03-19.md` — Loom-Context, Akana (683 files), core_monorepo_enn (1419 files).
+Fuente: `.loom/reports/dogfooding-2026-03-19.md` — Loom-Context, Project A (683 files), monorepo project (1419 files).
 
 ### P1 — Incluir en v0.4.0
 
@@ -197,17 +197,17 @@ Fuente: `.loom/reports/dogfooding-2026-03-19.md` — Loom-Context, Akana (683 fi
 | F3 | Naming scanner: single-word filenames no son "camelCase" | self | `scanners/code.py` |
 | F4 | `loom bundle` mejor error message sin task description | self, monorepo | `cli/commands/bundle.py` |
 | F5 | `loom export -o` aceptar paths relativos | monorepo | `cli/commands/export.py` |
-| F6 | `plans-summary.md` separar planes activos vs cerrados | akana, monorepo | `generators/plans.py` |
+| F6 | `plans-summary.md` separar planes activos vs cerrados | project-a, monorepo | `generators/plans.py` |
 
 ### P2 — Candidato v0.4.0 o v0.5.0
 
 | # | Mejora | Fuente |
 |---|--------|--------|
-| F7 | Violation classification: `intentional`/`accidental`/`temporary` | akana |
-| F8 | Violations con campos `cluster` y `owner` | akana |
-| F9 | `loom plan --generate` consumir deep-audit y delta reports | akana |
-| F10 | Multi-agent loop tracking (Loom→Codex→Claude→Loom) | akana |
-| F11 | Decisions enriquecidas: `cluster`, `files`, `validation` | akana |
+| F7 | Violation classification: `intentional`/`accidental`/`temporary` | project-a |
+| F8 | Violations con campos `cluster` y `owner` | project-a |
+| F9 | `loom plan --generate` consumir deep-audit y delta reports | project-a |
+| F10 | Multi-agent loop tracking (Loom→Codex→Claude→Loom) | project-a |
+| F11 | Decisions enriquecidas: `cluster`, `files`, `validation` | project-a |
 | F12 | `loom setup --dry-run` preview sin instalar | self |
 | F13 | `loom restore` recuperar desde backups | self |
 | F14 | Report templates en `.loom/reports/README.md` auto-generado | monorepo |
@@ -216,11 +216,11 @@ Fuente: `.loom/reports/dogfooding-2026-03-19.md` — Loom-Context, Akana (683 fi
 
 | # | Mejora | Fuente |
 |---|--------|--------|
-| F15 | Deep audit: race conditions, memory leaks, accessibility | akana (20 findings) |
-| F16 | Duplicate-capability detection | akana |
-| F17 | Naming drift detection | akana |
-| F18 | Warning classification: `architecture` vs `test-infra` vs `runtime` | akana |
-| F19 | `next-actions.md` auto-generado con top 10 inconsistencias | akana |
+| F15 | Deep audit: race conditions, memory leaks, accessibility | project-a (20 findings) |
+| F16 | Duplicate-capability detection | project-a |
+| F17 | Naming drift detection | project-a |
+| F18 | Warning classification: `architecture` vs `test-infra` vs `runtime` | project-a |
+| F19 | `next-actions.md` auto-generado con top 10 inconsistencias | project-a |
 
 ---
 
@@ -234,4 +234,4 @@ Fuente: `.loom/reports/dogfooding-2026-03-19.md` — Loom-Context, Akana (683 fi
 | Segundo scan (cache hit) | <0.1s |
 | Ultra-compact size | <1KB para proyectos medianos |
 | README → primer bundle | <3 comandos |
-| Proyectos probados | 3 (Loom, Akana, Monorepo) ✓ |
+| Proyectos probados | 3 (Loom, Project A, Monorepo) ✓ |
