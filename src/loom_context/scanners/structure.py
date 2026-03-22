@@ -199,10 +199,35 @@ class StructureScanner(BaseScanner):
                 if stem.endswith(suffix):
                     file_suffixes.add(suffix)
 
+        # Quick dependency scan for package-based signals
+        packages: dict[str, set[str]] = {}
+        for dep_file, ecosystem in [
+            ("package.json", "npm"),
+            ("Gemfile", "gem"),
+            ("Cargo.toml", "cargo"),
+            ("go.mod", "go"),
+            ("mix.exs", "hex"),
+            ("pyproject.toml", "pip"),
+            ("pom.xml", "maven"),
+        ]:
+            dep_path = self.root / dep_file
+            if dep_path.exists():
+                try:
+                    content = dep_path.read_text(encoding="utf-8", errors="ignore")
+                    # Extract package names (simple: any word that's a known package)
+                    eco_data = _registry._load_json("ecosystems.json")
+                    known = eco_data.get("ecosystems", {}).get(ecosystem, {}).get("packages", {})
+                    for pkg_name in known:
+                        if pkg_name in content:
+                            packages.setdefault(ecosystem, set()).add(pkg_name)
+                except OSError:
+                    pass
+
         evidence = ScoringEvidence(
             directories=top_dirs,
             all_directories=all_dirs,
             file_suffixes=file_suffixes,
+            packages=packages,
         )
 
         matches = scorer.score_all(patterns, evidence)

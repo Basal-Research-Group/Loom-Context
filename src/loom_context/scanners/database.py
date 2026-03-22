@@ -184,7 +184,11 @@ class DatabaseScanner:
                 "String", "Int", "Float", "Boolean", "DateTime", "Json",
                 "BigInt", "Decimal", "Bytes",
             }
-            is_relation = clean_type[0].isupper() and clean_type not in scalar_types if clean_type else False
+            is_relation = (
+                clean_type[0].isupper() and clean_type not in scalar_types
+                if clean_type
+                else False
+            )
 
             # Parse decorators
             rest = " ".join(parts[2:]) if len(parts) > 2 else ""

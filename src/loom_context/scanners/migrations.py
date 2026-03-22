@@ -123,42 +123,56 @@ class MigrationScanner:
 
         return None
 
-    def _parse_migration(self, content: str, name: str, timestamp: str, lines: int) -> MigrationInfo:
+    def _parse_migration(
+        self, content: str, name: str, timestamp: str, lines: int
+    ) -> MigrationInfo:
         """Parse a single migration SQL file."""
         info = MigrationInfo(name=name, timestamp=timestamp, sql_lines=lines)
+        _if_not = r"(?:IF NOT EXISTS\s+)?"
+        _name = r'"?(\w+)"?'
 
-        # CREATE TABLE
-        for m in re.finditer(r'CREATE TABLE\s+(?:IF NOT EXISTS\s+)?"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"CREATE TABLE\s+{_if_not}{_name}", content, re.IGNORECASE
+        ):
             info.tables_created.append(m.group(1))
 
-        # CREATE INDEX
-        for m in re.finditer(r'CREATE INDEX\s+(?:IF NOT EXISTS\s+)?"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"CREATE INDEX\s+{_if_not}{_name}", content, re.IGNORECASE
+        ):
             info.indices_created.append(m.group(1))
 
-        # CREATE UNIQUE INDEX
-        for m in re.finditer(r'CREATE UNIQUE INDEX\s+(?:IF NOT EXISTS\s+)?"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"CREATE UNIQUE INDEX\s+{_if_not}{_name}", content, re.IGNORECASE
+        ):
             info.indices_created.append(m.group(1))
 
-        # CREATE FUNCTION / CREATE OR REPLACE FUNCTION
-        for m in re.finditer(r'CREATE\s+(?:OR REPLACE\s+)?FUNCTION\s+"?(\w+)"?', content, re.IGNORECASE):
+        _or_replace = r"(?:OR REPLACE\s+)?"
+        for m in re.finditer(
+            rf"CREATE\s+{_or_replace}FUNCTION\s+{_name}", content, re.IGNORECASE
+        ):
             info.functions_created.append(m.group(1))
 
-        # CREATE TRIGGER
-        for m in re.finditer(r'CREATE\s+TRIGGER\s+"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"CREATE\s+TRIGGER\s+{_name}", content, re.IGNORECASE
+        ):
             info.triggers_created.append(m.group(1))
 
-        # CREATE POLICY
-        for m in re.finditer(r'CREATE\s+POLICY\s+"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"CREATE\s+POLICY\s+{_name}", content, re.IGNORECASE
+        ):
             info.policies_created.append(m.group(1))
 
-        # ALTER TABLE
-        for m in re.finditer(r'ALTER TABLE\s+"?(\w+)"?', content, re.IGNORECASE):
+        for m in re.finditer(
+            rf"ALTER TABLE\s+{_name}", content, re.IGNORECASE
+        ):
             table = m.group(1)
             if table not in info.tables_altered:
                 info.tables_altered.append(table)
 
-        # ENABLE ROW LEVEL SECURITY
-        for m in re.finditer(r'ALTER TABLE\s+"?(\w+)"?\s+ENABLE ROW LEVEL SECURITY', content, re.IGNORECASE):
+        _rls = r"ENABLE ROW LEVEL SECURITY"
+        for m in re.finditer(
+            rf"ALTER TABLE\s+{_name}\s+{_rls}", content, re.IGNORECASE
+        ):
             info.rls_enabled.append(m.group(1))
 
         return info
