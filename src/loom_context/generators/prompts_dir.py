@@ -1,4 +1,4 @@
-"""Prompts directory generator: creates .prompts/ with context-aware AI prompts."""
+"""Prompts directory generator: creates .prompts/ with ready-to-use AI prompts."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ _registry = get_registry()
 
 
 def generate_prompts_dir(root: Path, scan_result: dict[str, Any]) -> list[str]:
-    """Generate .prompts/ directory with context-aware prompts."""
+    """Generate .prompts/ with copy-paste-ready prompts."""
     prompts_dir = root / ".prompts"
     prompts_dir.mkdir(exist_ok=True)
     generated: list[str] = []
@@ -27,139 +27,234 @@ def generate_prompts_dir(root: Path, scan_result: dict[str, Any]) -> list[str]:
     pkg_mgr = deps.get("package_manager", "")
     is_monorepo = structure.get("is_monorepo", False)
     workspaces = structure.get("workspaces", [])
+    summary = deps.get("stack_summary", {})
 
-    # 01 — Onboarding
-    _write(prompts_dir / "01-onboarding.md", _gen_onboarding(
-        project_name, project_type, language, architectures,
-        ecosystem, pkg_mgr, is_monorepo, workspaces, deps,
-    ))
-    generated.append("01-onboarding.md")
+    # Build context block (reused across prompts)
+    ctx = _build_context(
+        project_name, language, project_type, architectures,
+        ecosystem, pkg_mgr, is_monorepo, workspaces, summary,
+    )
 
-    # 02 — Before coding
-    _write(prompts_dir / "02-before-coding.md", _gen_rules(
-        architectures, ecosystem, pkg_mgr, is_monorepo,
-    ))
-    generated.append("02-before-coding.md")
+    # Build rules block
+    rules = _build_rules(architectures, ecosystem, pkg_mgr, is_monorepo)
 
-    # 03 — Workspace guide (monorepo only)
-    if is_monorepo and workspaces:
-        _write(prompts_dir / "03-workspace-guide.md", _gen_workspace_guide(
-            workspaces, pkg_mgr,
-        ))
-        generated.append("03-workspace-guide.md")
+    # Generate prompts
+    _write(prompts_dir / "onboarding.md", _prompt_onboarding(ctx, rules))
+    generated.append("onboarding.md")
+
+    _write(prompts_dir / "implement-feature.md", _prompt_implement(ctx, rules))
+    generated.append("implement-feature.md")
+
+    _write(prompts_dir / "review-code.md", _prompt_review(ctx, rules))
+    generated.append("review-code.md")
+
+    _write(prompts_dir / "fix-bug.md", _prompt_fix_bug(ctx, rules))
+    generated.append("fix-bug.md")
+
+    _write(prompts_dir / "refactor.md", _prompt_refactor(ctx, rules))
+    generated.append("refactor.md")
 
     return generated
 
 
 def _write(path: Path, content: str) -> None:
-    """Write content to file."""
     path.write_text(content, encoding="utf-8")
 
 
-def _gen_onboarding(
-    name: str, ptype: str, language: str, archs: list[str],
+def _build_context(
+    name: str, language: str, ptype: str, archs: list[str],
     ecosystem: str, pkg_mgr: str, is_mono: bool,
-    workspaces: list[str], deps: dict[str, Any],
+    workspaces: list[str], summary: dict[str, Any],
 ) -> str:
-    """Generate project onboarding prompt."""
-    lines = [f"# Project: {name}\n"]
-
+    """Build the project context block for injection into prompts."""
+    lines = []
+    lines.append(f"Project: {name}")
     if language:
-        lines.append(f"**Language:** {language}")
-    lines.append(f"**Type:** {ptype}")
+        lines.append(f"Language: {language}")
+    lines.append(f"Type: {ptype}")
     if archs and archs != ["flat"]:
-        lines.append(f"**Architecture:** {', '.join(archs)}")
+        lines.append(f"Architecture: {', '.join(archs)}")
     if ecosystem != "unknown":
-        lines.append(f"**Ecosystem:** {ecosystem} ({pkg_mgr})")
-    lines.append("")
-
+        lines.append(f"Ecosystem: {ecosystem} ({pkg_mgr})")
     if is_mono:
-        lines.append(f"## Monorepo ({len(workspaces)} workspaces)\n")
+        lines.append(f"Monorepo: {len(workspaces)} workspaces")
         for ws in workspaces:
-            lines.append(f"- `{ws}`")
-        lines.append("")
-
-    # Stack summary
-    summary = deps.get("stack_summary", {})
+            lines.append(f"  - {ws}")
     if summary:
-        lines.append("## Technology Stack\n")
+        lines.append("Stack:")
         for cat, pkgs in sorted(summary.items()):
             pkg_list = ", ".join(p.split("@")[0] for p in pkgs[:5])
-            if len(pkgs) > 5:
-                pkg_list += f", +{len(pkgs) - 5} more"
-            lines.append(f"- **{cat}:** {pkg_list}")
-        lines.append("")
-
+            lines.append(f"  {cat}: {pkg_list}")
     return "\n".join(lines)
 
 
-def _gen_rules(
+def _build_rules(
     archs: list[str], ecosystem: str, pkg_mgr: str, is_mono: bool,
 ) -> str:
-    """Generate coding rules prompt from architecture and ecosystem."""
-    lines = ["# Rules Before Coding\n"]
+    """Build the rules block from architecture + ecosystem."""
+    lines: list[str] = []
 
-    # Architecture rules
     for arch in archs:
         tmpl = _registry.get_prompt_rules_for_architecture(arch)
-        rules = tmpl.get("rules", [])
-        warnings = tmpl.get("warnings", [])
-        if rules:
-            lines.append(f"## {arch}\n")
-            for r in rules:
-                lines.append(f"- {r}")
-            for w in warnings:
-                lines.append(f"- _{w}_")
-            lines.append("")
+        for r in tmpl.get("rules", []):
+            lines.append(f"- {r}")
+        for w in tmpl.get("warnings", []):
+            lines.append(f"- {w}")
 
-    # Ecosystem hints
     if ecosystem:
-        hints = _registry.get_prompt_hints_for_ecosystem(ecosystem)
-        if hints:
-            lines.append("## Ecosystem\n")
-            for h in hints:
-                h = h.replace("{package_manager}", pkg_mgr)
-                lines.append(f"- {h}")
-            lines.append("")
+        for h in _registry.get_prompt_hints_for_ecosystem(ecosystem):
+            lines.append(f"- {h.replace('{package_manager}', pkg_mgr)}")
 
-    # Monorepo rules
     if is_mono:
         mono = _registry.get_prompt_monorepo_rules()
-        if mono.get("rules"):
-            lines.append("## Monorepo\n")
-            for r in mono["rules"]:
-                lines.append(f"- {r}")
-            lines.append("")
+        for r in mono.get("rules", []):
+            lines.append(f"- {r}")
 
     return "\n".join(lines)
 
 
-def _gen_workspace_guide(workspaces: list[str], pkg_mgr: str) -> str:
-    """Generate workspace navigation guide."""
-    lines = ["# Workspace Guide\n"]
+# ---------------------------------------------------------------------------
+# Prompts
+# ---------------------------------------------------------------------------
 
-    lines.append("## Workspaces\n")
-    for ws in workspaces:
-        lines.append(f"- `{ws}`")
-    lines.append("")
 
-    lines.append("## Commands\n")
-    lines.append("```bash")
-    if pkg_mgr == "pnpm":
-        lines.append("pnpm --filter <workspace> dev    # run one")
-        lines.append("pnpm --filter <workspace> test   # test one")
-        lines.append("pnpm -r test                     # test all")
-        lines.append("pnpm -r build                    # build all")
-    elif pkg_mgr in ("yarn", "npm"):
-        lines.append(f"{pkg_mgr} workspace <name> dev")
-        lines.append(f"{pkg_mgr} workspace <name> test")
-    lines.append("```\n")
+def _prompt_onboarding(ctx: str, rules: str) -> str:
+    return f"""# Onboarding
 
-    lines.append("## Change Order (bottom-up)\n")
-    lines.append("1. Shared packages first (types, contracts)")
-    lines.append("2. Core/library packages")
-    lines.append("3. UI components")
-    lines.append("4. Apps last (consumers)")
-    lines.append("")
+## When
+First time working on this project. Copy the prompt below.
 
-    return "\n".join(lines)
+## Prompt
+
+```
+I'm starting to work on this project. Here is the context:
+
+{ctx}
+
+Rules:
+{rules}
+
+Read the project structure and give me:
+1. A summary of how the codebase is organized
+2. The main entry points
+3. How to run it locally
+4. The 3 most important files to understand first
+5. Anything that looks unusual or risky
+
+Don't modify anything. Just explain.
+```
+"""
+
+
+def _prompt_implement(ctx: str, rules: str) -> str:
+    return f"""# Implement Feature
+
+## When
+Before writing a new feature. Replace [FEATURE] with your task.
+
+## Prompt
+
+```
+Context:
+{ctx}
+
+Rules:
+{rules}
+
+Task: implement [FEATURE]
+
+Before writing code:
+1. List the files you will create or modify
+2. Explain how this fits the existing architecture
+3. Flag if any rule above would be violated
+4. Write the implementation
+
+After writing code:
+- Verify imports respect layer boundaries
+- Add tests
+- Update docs if the feature is user-facing
+```
+"""
+
+
+def _prompt_review(ctx: str, rules: str) -> str:
+    return f"""# Review Code
+
+## When
+Before merging a PR or after finishing a task. Replace [FILES] with the changed files.
+
+## Prompt
+
+```
+Context:
+{ctx}
+
+Rules:
+{rules}
+
+Review these changes: [FILES]
+
+Check:
+1. Do imports respect layer boundaries?
+2. Are naming conventions followed?
+3. Is there any hardcoded secret, magic number, or debug output?
+4. Are there tests for the new behavior?
+5. Does the change affect other workspaces? If so, are they tested?
+6. Any code smell (god class, deep nesting, long params)?
+
+For each issue: file, line, problem, fix.
+```
+"""
+
+
+def _prompt_fix_bug(ctx: str, rules: str) -> str:
+    return f"""# Fix Bug
+
+## When
+Debugging an issue. Replace [BUG] with the description.
+
+## Prompt
+
+```
+Context:
+{ctx}
+
+Rules:
+{rules}
+
+Bug: [BUG]
+
+1. Identify the most likely files involved
+2. Trace the data flow from input to where the bug manifests
+3. Propose a fix that respects the architecture rules above
+4. If the fix touches multiple workspaces, list all affected
+5. Write the fix with tests that prove the bug is resolved
+```
+"""
+
+
+def _prompt_refactor(ctx: str, rules: str) -> str:
+    return f"""# Refactor
+
+## When
+Improving code without changing behavior. Replace [AREA] with the target.
+
+## Prompt
+
+```
+Context:
+{ctx}
+
+Rules:
+{rules}
+
+Refactor: [AREA]
+
+1. Analyze the current state — what smells or issues exist?
+2. Propose the refactoring plan (before writing code)
+3. For each change, explain why it improves the codebase
+4. Ensure no behavior changes — tests must pass before and after
+5. If splitting a god class, preserve the public API
+6. If extracting a module, define its boundary and exports
+```
+"""
