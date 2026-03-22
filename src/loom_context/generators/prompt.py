@@ -122,7 +122,7 @@ class PromptGenerator:
             arch_warnings.extend(tmpl.get("warnings", []))
 
         if arch_rules:
-            sections.append("## Architecture Rules (NON-NEGOTIABLE)")
+            sections.append("## Architecture Rules")
             for rule in arch_rules:
                 sections.append(f"- {rule}")
             sections.append("")

@@ -2,7 +2,7 @@
   "_comment": "Context-aware prompt templates. Selected based on project type, architecture, and task.",
   "base": {
     "header": "You are working on {project_name}, a {language} project using {architecture} architecture.",
-    "rules_prefix": "These rules are NON-NEGOTIABLE:",
+    "rules_prefix": "Architecture rules (flag if you need to break one):",
     "context_prefix": "Here is the project context:"
   },
   "by_architecture": {
