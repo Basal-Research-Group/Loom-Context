@@ -81,6 +81,9 @@ class PromptGenerator:
                 except OSError:
                     pass
 
+        # Context-aware rules from Knowledge Registry
+        self._inject_prompt_templates(index, sections)
+
         # Footer
         sections.append("---")
         sections.append(
@@ -90,6 +93,67 @@ class PromptGenerator:
         )
 
         return "\n".join(sections)
+
+    def _inject_prompt_templates(
+        self, index: Optional[dict[str, Any]], sections: list[str]
+    ) -> None:
+        """Inject context-aware rules from prompt_templates.json."""
+        if not index:
+            return
+
+        try:
+            from loom_context.knowledge import get_registry
+
+            registry = get_registry()
+        except Exception:
+            return
+
+        project = index.get("project", {})
+        architectures = project.get("architecture", [])
+        ecosystem = project.get("ecosystem", "")
+        is_monorepo = project.get("is_monorepo", False)
+
+        # Architecture-specific rules
+        arch_rules: list[str] = []
+        arch_warnings: list[str] = []
+        for arch in architectures:
+            tmpl = registry.get_prompt_rules_for_architecture(arch)
+            arch_rules.extend(tmpl.get("rules", []))
+            arch_warnings.extend(tmpl.get("warnings", []))
+
+        if arch_rules:
+            sections.append("## Architecture Rules (NON-NEGOTIABLE)")
+            for rule in arch_rules:
+                sections.append(f"- {rule}")
+            sections.append("")
+
+        if arch_warnings:
+            sections.append("## Architecture Warnings")
+            for w in arch_warnings:
+                sections.append(f"- {w}")
+            sections.append("")
+
+        # Ecosystem hints
+        if ecosystem:
+            hints = registry.get_prompt_hints_for_ecosystem(ecosystem)
+            pkg_mgr = project.get("runtime", "")
+            hints = [
+                h.replace("{package_manager}", pkg_mgr) for h in hints
+            ]
+            if hints:
+                sections.append("## Ecosystem Hints")
+                for h in hints:
+                    sections.append(f"- {h}")
+                sections.append("")
+
+        # Monorepo rules
+        if is_monorepo:
+            mono = registry.get_prompt_monorepo_rules()
+            if mono.get("rules"):
+                sections.append("## Monorepo Rules")
+                for r in mono["rules"]:
+                    sections.append(f"- {r}")
+                sections.append("")
 
     def _read_md(self, filename: str) -> Optional[str]:
         path = self.context_dir / filename

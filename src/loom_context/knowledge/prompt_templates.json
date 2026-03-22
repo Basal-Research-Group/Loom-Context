@@ -1,0 +1,189 @@
+{
+  "_comment": "Context-aware prompt templates. Selected based on project type, architecture, and task.",
+  "base": {
+    "header": "You are working on {project_name}, a {language} project using {architecture} architecture.",
+    "rules_prefix": "These rules are NON-NEGOTIABLE:",
+    "context_prefix": "Here is the project context:"
+  },
+  "by_architecture": {
+    "clean-architecture": {
+      "rules": [
+        "Domain layer has ZERO external dependencies — no imports from infrastructure or presentation",
+        "All external access goes through ports (interfaces) defined in domain",
+        "Infrastructure implements domain ports — never the reverse",
+        "Use cases live in application layer, not in controllers"
+      ],
+      "warnings": [
+        "If you need a new external service, create a port interface first",
+        "Never put business logic in controllers or infrastructure"
+      ]
+    },
+    "hexagonal": {
+      "rules": [
+        "Domain is the center — adapters depend on domain, never the reverse",
+        "All I/O goes through adapter implementations of port interfaces",
+        "Ports define WHAT the domain needs, adapters define HOW"
+      ],
+      "warnings": [
+        "New external dependency = new adapter, never modify domain"
+      ]
+    },
+    "mvc": {
+      "rules": [
+        "Models contain business logic and data — no view or controller dependencies",
+        "Controllers coordinate models and views — thin controllers preferred",
+        "Views only render — no business logic in templates"
+      ],
+      "warnings": [
+        "Fat controllers are a code smell — extract to services or models"
+      ]
+    },
+    "ddd": {
+      "rules": [
+        "Aggregates are the consistency boundary — modify through aggregate root only",
+        "Value objects are immutable — create new instances, never mutate",
+        "Domain events capture what happened — name them in past tense",
+        "Bounded contexts are independent — communicate through events or anti-corruption layers"
+      ],
+      "warnings": [
+        "If an entity spans two bounded contexts, it belongs to neither — create a shared kernel or use events",
+        "Never let infrastructure concepts leak into domain (no ORM annotations in entities)"
+      ]
+    },
+    "event-driven": {
+      "rules": [
+        "Events are immutable facts — never modify a published event",
+        "Handlers must be idempotent — the same event processed twice produces the same result",
+        "Events are named in past tense (OrderPlaced, not PlaceOrder)"
+      ],
+      "warnings": [
+        "Avoid event chains longer than 3 steps — they become hard to debug"
+      ]
+    },
+    "cqrs": {
+      "rules": [
+        "Commands change state — queries read state — never mix",
+        "Command handlers return void or result — never return data",
+        "Read models are optimized for queries — denormalization is expected"
+      ],
+      "warnings": [
+        "If a query needs to trigger a side effect, it should be a command instead"
+      ]
+    },
+    "microservices": {
+      "rules": [
+        "Each service owns its data — no shared databases",
+        "Communication between services is async when possible",
+        "API contracts are versioned — never break backward compatibility"
+      ],
+      "warnings": [
+        "If two services always deploy together, they should be one service"
+      ]
+    },
+    "design-system": {
+      "rules": [
+        "Tokens are the single source of truth — never hardcode colors, spacing, or typography",
+        "Components must be accessible (WCAG 2.1 AA minimum)",
+        "Every component needs a story — if it doesn't have one, it doesn't exist"
+      ],
+      "warnings": [
+        "Primitives are unstyled — style through composition and tokens",
+        "Breaking changes in tokens affect ALL consumers"
+      ]
+    },
+    "go-standard": {
+      "rules": [
+        "cmd/ contains entry points only — no business logic",
+        "internal/ packages are NOT importable from outside this module",
+        "pkg/ contains reusable packages that other projects can import"
+      ],
+      "warnings": [
+        "Keep interfaces small — Go prefers single-method interfaces"
+      ]
+    },
+    "rails-convention": {
+      "rules": [
+        "Follow convention over configuration — Rails has a place for everything",
+        "Models handle validation and business logic — keep controllers thin",
+        "Use concerns for shared behavior across models"
+      ],
+      "warnings": [
+        "Avoid callbacks for complex workflows — use service objects instead"
+      ]
+    },
+    "pipeline": {
+      "rules": [
+        "Each stage is independent — input from previous, output to next",
+        "Stages must not import from each other directly",
+        "New capability = new stage, not bigger existing stage"
+      ],
+      "warnings": [
+        "If a stage needs data from a non-adjacent stage, your pipeline design needs review"
+      ]
+    },
+    "atomic-design": {
+      "rules": [
+        "Atoms are the smallest unit — they cannot import molecules or organisms",
+        "Molecules combine atoms — they cannot import organisms",
+        "Organisms are complex components — they can use molecules and atoms",
+        "Templates define page structure — they use organisms"
+      ],
+      "warnings": [
+        "If an atom needs props from its parent organism, the boundary is wrong"
+      ]
+    }
+  },
+  "by_ecosystem": {
+    "npm": {
+      "hints": [
+        "Check package.json scripts before creating new build commands",
+        "Use the existing package manager ({package_manager}) — don't switch mid-project"
+      ]
+    },
+    "gem": {
+      "hints": [
+        "Run bundle exec before Ruby commands",
+        "Check Gemfile for existing gems before adding new dependencies"
+      ]
+    },
+    "cargo": {
+      "hints": [
+        "Use cargo clippy for lint, cargo test for tests",
+        "Check Cargo.toml features before adding new dependencies"
+      ]
+    },
+    "pip": {
+      "hints": [
+        "Check pyproject.toml for project configuration",
+        "Use the existing test runner (pytest, unittest) — don't introduce another"
+      ]
+    },
+    "go": {
+      "hints": [
+        "Run go vet and go test ./... before committing",
+        "Keep error handling explicit — no panics in library code"
+      ]
+    },
+    "hex": {
+      "hints": [
+        "Use mix format before committing",
+        "Pattern match over conditionals when possible"
+      ]
+    }
+  },
+  "by_monorepo": {
+    "rules": [
+      "Changes in shared packages affect ALL workspaces — test broadly",
+      "Each workspace should be independently deployable",
+      "Keep shared dependencies in the root — workspace-specific in the workspace"
+    ],
+    "warnings": [
+      "Before adding a dependency to a workspace, check if it exists in root or another workspace"
+    ]
+  },
+  "by_smell": {
+    "god-class": "This project has files >500 lines. When modifying them, consider splitting into smaller modules.",
+    "hardcoded-secret": "Secrets were detected in code. ALWAYS use environment variables for credentials.",
+    "no-lockfile": "No lockfile found. Run the package manager's lock command before committing."
+  }
+}

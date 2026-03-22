@@ -490,6 +490,28 @@ class KnowledgeRegistry:
         patterns = self.get_design_patterns()
         return patterns.get(name)
 
+    # --- Prompt Templates ---
+
+    def get_prompt_templates(self) -> dict[str, Any]:
+        """Get all prompt template definitions."""
+        return self._load_json("prompt_templates.json")
+
+    def get_prompt_rules_for_architecture(self, arch: str) -> dict[str, Any]:
+        """Get prompt rules for a specific architecture pattern."""
+        data = self._load_json("prompt_templates.json")
+        return data.get("by_architecture", {}).get(arch, {})
+
+    def get_prompt_hints_for_ecosystem(self, ecosystem: str) -> list[str]:
+        """Get prompt hints for a specific ecosystem."""
+        data = self._load_json("prompt_templates.json")
+        eco = data.get("by_ecosystem", {}).get(ecosystem, {})
+        return eco.get("hints", [])
+
+    def get_prompt_monorepo_rules(self) -> dict[str, Any]:
+        """Get prompt rules for monorepo projects."""
+        data = self._load_json("prompt_templates.json")
+        return data.get("by_monorepo", {})
+
     # --- Code Smells ---
 
     def get_code_smells(self) -> dict[str, Any]:
