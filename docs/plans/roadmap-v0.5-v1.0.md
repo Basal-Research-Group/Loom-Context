@@ -17,7 +17,7 @@ v0.5       → Cerebro: Knowledge Registry centralizada, 20+ lenguajes, scoring 
 v0.6       → Deteccion: DomainDetector, domain-aware prompts, security rules [DONE]
 v0.7       → Adapters: DomainAdapter base, ContextRanker, engine dinamico [DONE]
 v0.8       → Trazas: ResolutionTrace, GovernanceAuditor, loom trace CLI [DONE]
-v0.9       → IA: OllamaRanker, HybridRanker, --ai local, benchmark
+v0.9       → IA: EmbeddingRanker, OllamaRanker, HybridRanker, RankerFactory [DONE]
 v1.0       → Estabilidad: API publica, plugins, backward compat, 500+ tests
 ```
 
