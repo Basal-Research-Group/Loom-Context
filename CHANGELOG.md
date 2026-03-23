@@ -8,6 +8,37 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-03-23
+
+### Added — Domain Detection: Loom Knows What It's Scanning
+- `DomainDetector`: automatic domain inference from file tree (markers, extensions, directory patterns)
+- 4 domain definitions: `code`, `research`, `brand`, `data` (in `knowledge/domains/*.json`)
+- `ScanResult.domain`, `.domain_confidence`, `.domain_details` fields
+- `DomainMatch` and `DomainDetectionResult` typed models
+- Domain displayed in `loom status` output
+- Domain persisted in `.context/index.json` (`project.domain`, `project.domain_confidence`, `project.domain_active`)
+- `.prompts/` now include `Domain:` line with detected domain
+- Domain-specific governance rules injected into prompts (brand: i18n sync, token consistency, asset naming)
+- Loom coordination rules in all generated prompts ("Do NOT bypass Loom rules")
+- Code domain boost: projects with package managers (package.json, pyproject.toml, etc.) get priority over ambiguous brand signals
+- Smart disambiguation: React Native apps with assets/ and icons/ correctly detected as `code`, not `mixed`
+
+### Changed
+- `engine.py`: runs `DomainDetector` during scan, populates ScanResult domain fields
+- `IndexGenerator`: persists domain to index.json for agent consumption
+- `prompts_dir.py`: injects domain + governance rules + Loom coordination rules
+- `status.py` + `cli/commands/status.py`: displays domain in status panel
+- `.loom/cache/hashes.json`: now includes domain in cached scan results
+
+### Architecture Decisions Documented
+- Loom = coordination layer (detect/select/compact/export/trace/audit)
+- Domain Adapter Protocol designed (v0.7.0)
+- TaskIntent, ResolutionTrace, AgentHandoff contracts specified
+- ContextRanker strategy pattern (Heuristic → Ollama → Embedding) designed
+- Loom Core vs Loom Assist separation defined
+- Migration strategy: shadow mode → gradual promotion → distillation
+- 10 immutable principles documented
+
 ## [0.5.0] - 2026-03-22
 
 ### Added — Knowledge Registry: El Cerebro de Loom

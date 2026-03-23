@@ -96,6 +96,9 @@ class ScanResult:
     code: CodeAnalysis
     docs: DocsInventory
     scanned_at: str
+    domain: str = "unknown"
+    domain_confidence: float = 0.0
+    domain_details: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dict for backward compatibility with generators."""

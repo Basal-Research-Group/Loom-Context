@@ -34,13 +34,12 @@ def status(path: str, as_json: bool) -> None:
         return
 
     arch = ", ".join(st.architecture) if st.architecture else "unknown"
-    console.print(
-        Panel(
-            f"  {LOOMY_SLEEPING if st.is_stale else LOOMY}  "
-            f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}",
-            title="Loom Status",
-        )
-    )
+    domain_display = st.domain if st.domain != "unknown" else ""
+    header = f"  {LOOMY_SLEEPING if st.is_stale else LOOMY}  "
+    header += f"[bold]{st.project_name}[/bold]  {st.project_type} · {arch}"
+    if domain_display:
+        header += f" · [cyan]{domain_display}[/cyan]"
+    console.print(Panel(header, title="Loom Status"))
 
     if st.last_scan:
         scan_display = st.last_scan[:19].replace("T", " ")
