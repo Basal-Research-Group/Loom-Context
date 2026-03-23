@@ -147,6 +147,47 @@ Loom auto-detects project domain by matching file tree against `knowledge/domain
 | Governance rules and violations | Credentials or secrets |
 | Quick rules and prompt templates | Internal IPs or infrastructure details |
 
+### SDLC Security — Supply Chain Protection
+
+**Dependency analysis:**
+- Never blindly trust `pip install` / `npm install` — audit dependencies
+- Use tools like Snyk, OSV-Scanner, or `pip-audit` before production
+- Loom's `security.json` detects 33 secret patterns in scanned files
+- `bandit` runs as part of QA (`make qa`) to catch security issues in Python code
+
+**Secret management:**
+- Use secret managers (Doppler, HashiCorp Vault) instead of `.env` files
+- `.env` files can be read by misconfigured AI tools or info-stealing malware
+- Loom's FileFilter excludes `.env`, credentials, and key files at scan time
+- Pre-commit hooks (Husky, pre-commit) should block secrets from entering git
+
+**Security priority matrix:**
+
+| Layer | Tool | Action |
+|---|---|---|
+| Network | LuLu / Little Snitch | Block unknown outbound connections |
+| Code | Snyk / bandit / Husky | Block commits with secrets or vulnerabilities |
+| Identity | SSH keys with passphrase | Never store unencrypted private keys |
+| AI/LLMs | Ollama / Llama local | Use local models for confidential data |
+| Dependencies | pip-audit / OSV-Scanner | Audit before deploy |
+
+### Terminal Hardening
+
+- Run AI tools (Copilot, Cursor, Ollama) **without admin privileges**
+- Isolate local models to specific directories
+- Use `zsh-autosuggestions` and shell plugins with caution — cloned repos
+  can contain malicious `.zshrc` or `.bashrc` that execute on shell init
+- Never paste API keys, secrets, or proprietary code into commercial AI chats
+- Verify binary signatures before installing new CLI tools
+
+### Zero Trust for Developers
+
+Even trusted tools must be verified:
+- **Verify binaries**: check digital signatures before installing CLI tools
+- **Monitor network**: periodically review which processes consume network
+- **Sandbox experiments**: test experimental AI tools inside Docker containers or VMs
+- **Loom follows this**: deterministic core, no network, no cloud, local-only execution
+
 ## Git Conventions
 
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
