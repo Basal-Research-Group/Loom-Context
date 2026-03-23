@@ -96,6 +96,7 @@ from loom_context.cli.commands import (  # noqa: E402
     scan,
     setup,
     status,
+    trace,
     watch,
 )
 
@@ -122,3 +123,4 @@ main.add_command(infra.infra)  # type: ignore[has-type]
 main.add_command(db.db)  # type: ignore[has-type]
 main.add_command(knowledge.knowledge)  # type: ignore[has-type]
 main.add_command(projects.projects)  # type: ignore[has-type]
+main.add_command(trace.trace)  # type: ignore[has-type]

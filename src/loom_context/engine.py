@@ -230,7 +230,27 @@ class LoomEngine:
         smells = SmellAuditor(self.config.root, file_filter)
         smells_v = smells.audit()
 
-        return naming_v + structure_v + smells_v
+        # Governance rules by domain
+        governance_v: list[Violation] = []
+        try:
+            from loom_context.auditors.governance import GovernanceAuditor
+
+            # Get domain from last scan or detect fresh
+            domain = "unknown"
+            if hasattr(self, "_last_adapter") and self._last_adapter:
+                domain = self._last_adapter.name
+            else:
+                from loom_context.knowledge.domain_detector import DomainDetector
+
+                detector = DomainDetector(self.config.root, file_filter)
+                domain = detector.detect().primary
+
+            gov = GovernanceAuditor(self.config.root, file_filter)
+            governance_v = gov.audit(domain)
+        except Exception:  # noqa: S110 — governance is best-effort
+            pass
+
+        return naming_v + structure_v + smells_v + governance_v
 
     def enrich(self) -> dict[str, Any]:
         """Deterministic enrichment: audit + refine rules + persist."""

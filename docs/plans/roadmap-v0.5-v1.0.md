@@ -15,8 +15,8 @@ created: 2026-03-20
 v0.1-v0.4  → Prueba de concepto: pipeline funcional, 4 lenguajes, 9 arquitecturas
 v0.5       → Cerebro: Knowledge Registry centralizada, 20+ lenguajes, scoring multicapa [DONE]
 v0.6       → Deteccion: DomainDetector, domain-aware prompts, governance rules [DONE]
-v0.7       → Adapters: DomainAdapter base, ContextRanker, engine dinamico [DONE]
-v0.8       → Trazas: ResolutionTrace, GovernanceAuditor, AgentHandoff tipado
+v0.8       → Adapters: DomainAdapter base, ContextRanker, engine dinamico [DONE]
+v0.8       → Trazas [DONE]: ResolutionTrace, GovernanceAuditor, AgentHandoff tipado
 v0.9       → IA: OllamaRanker, HybridRanker, --ai local, benchmark
 v1.0       → Estabilidad: API publica, plugins, backward compat, 500+ tests
 ```
@@ -253,7 +253,7 @@ Los 7 principios originales se mantienen. Se agregan 3 nuevos:
 
 ---
 
-## v0.7.0 — Dominios Multiples
+## v0.8.0 — Dominios Multiples
 
 > **Titulo**: "Mas alla del Codigo"
 > **Meta**: soporte para proyectos de investigacion, ciencia de datos y documentacion tecnica.
@@ -310,7 +310,7 @@ Los 7 principios originales se mantienen. Se agregan 3 nuevos:
 - [ ] Proyecto mixto (code + research) ejecuta ambos sets de scanners
 - [ ] `.context/` genera archivos segun dominio detectado
 
-### Criterios de salida v0.7.0
+### Criterios de salida v0.8.0
 
 - [ ] loom init en proyecto de tesis genera contexto util
 - [ ] loom init en proyecto dbt genera contexto util
@@ -380,8 +380,8 @@ jinja2>=3.1
 | Extra | Dependencias | Peso | Version |
 |-------|-------------|------|---------|
 | `[ai]` | sentence-transformers | ~2GB | v0.6.0 |
-| `[research]` | bibtexparser | ~1MB | v0.7.0 |
-| `[data]` | (stdlib) | 0 | v0.7.0 |
+| `[research]` | bibtexparser | ~1MB | v0.8.0 |
+| `[data]` | (stdlib) | 0 | v0.8.0 |
 
 ### Regla
 
@@ -410,8 +410,8 @@ src/loom_context/knowledge/
 │
 └── domains/                 # Dominios de contexto
     ├── code.json            # Default: patrones especificos de codigo
-    ├── research.json        # Investigacion (v0.7.0)
-    └── data.json            # Data science (v0.7.0)
+    ├── research.json        # Investigacion (v0.8.0)
+    └── data.json            # Data science (v0.8.0)
 ```
 
 ### Esquema de arquitectura con scoring (ejemplo)
@@ -489,7 +489,7 @@ v0.4.0 (HOY)                    v0.5.0                        v0.6.0
 │ 138 packages  │    │ Signal scorer         │    │ Templates generativos│
 └──────────────┘    └───────────────────────┘    └──────────────────────┘
                               │
-                    v0.7.0    │    v0.8.0              v1.0.0
+                    v0.8.0    │    v0.8.0              v1.0.0
               ┌──────────────┐│┌──────────────┐  ┌──────────────┐
               │ Multi-dominio│││ Multi-agente │  │ API estable  │
               │ Research     │││ Governance   │  │ 500+ tests   │
@@ -506,7 +506,7 @@ v0.4.0 (HOY)                    v0.5.0                        v0.6.0
 |---------|-------|----------|
 | v0.5.0 | Knowledge Registry | Siguiente release |
 | v0.6.0 | IA opcional | Despues de v0.5.0 validado |
-| v0.7.0 | Dominios multiples | Despues de primer proyecto research |
+| v0.8.0 | Dominios multiples | Despues de primer proyecto research |
 | v0.8.0 | Gobernanza | Despues de uso multi-agente real |
 | v1.0.0 | Estabilidad | Cuando API se congele |
 
@@ -520,6 +520,6 @@ El roadmap sera correcto si Loom termina haciendo esto:
 
 - **v0.5.0**: `loom init` en un proyecto Ruby on Rails DDD detecta lenguaje, framework, y arquitectura correctamente
 - **v0.6.0**: `loom bundle "auth" --ai local` produce un bundle 30% mas relevante que heuristic-only
-- **v0.7.0**: `loom init` en una tesis doctoral genera contexto util para un agente de IA
+- **v0.8.0**: `loom init` en una tesis doctoral genera contexto util para un agente de IA
 - **v0.8.0**: dos agentes trabajan en el mismo repo sin pisarse
 - **v1.0.0**: la API no rompe entre minor versions

@@ -8,6 +8,26 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-03-23
+
+### Added — Traces + Governance: Loom Remembers and Enforces
+- `ResolutionTrace` store: records task resolution outcomes (query, agent, files, outcome, confidence, causality)
+- `TraceStore`: append-only JSONL in `.loom/traces.jsonl` with read, record, and stats
+- `GovernanceAuditor`: enforces domain-specific rules from `knowledge/domains/*.json`
+- Brand governance: i18n sync, token consistency (detects hardcoded CSS colors), asset naming (detects non-kebab-case)
+- `loom trace` CLI command group: `list`, `record`, `stats` subcommands
+- `loom trace record` — record a resolution trace with agent, outcome, confidence, notes
+- `loom trace list` — view recent traces with color-coded outcomes
+- `loom trace stats` — summary statistics (outcomes, agents, avg confidence, total tokens)
+- `loom trace stats --json` — machine-readable stats output
+- `loom audit` now includes governance violations for brand-domain projects
+- 20 new tests for traces, governance, and CLI (439 total)
+
+### Changed
+- `engine.py`: audit() now runs GovernanceAuditor based on detected domain
+- Governance violations appear alongside naming/structure/smell violations
+- 25 commands total (was 24)
+
 ## [0.7.0] - 2026-03-23
 
 ### Added — Domain Adapters: Loom Adapts to What It Scans
