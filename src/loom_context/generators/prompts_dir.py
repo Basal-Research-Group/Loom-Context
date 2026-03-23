@@ -28,15 +28,18 @@ def generate_prompts_dir(root: Path, scan_result: dict[str, Any]) -> list[str]:
     is_monorepo = structure.get("is_monorepo", False)
     workspaces = structure.get("workspaces", [])
     summary = deps.get("stack_summary", {})
+    domain = scan_result.get("domain", "unknown")
+    domain_details = scan_result.get("domain_details", {})
 
     # Build context block (reused across prompts)
     ctx = _build_context(
         project_name, language, project_type, architectures,
         ecosystem, pkg_mgr, is_monorepo, workspaces, summary,
+        domain, domain_details,
     )
 
     # Build rules block
-    rules = _build_rules(architectures, ecosystem, pkg_mgr, is_monorepo)
+    rules = _build_rules(architectures, ecosystem, pkg_mgr, is_monorepo, domain)
 
     # Generate prompts
     _write(prompts_dir / "onboarding.md", _prompt_onboarding(ctx, rules))
@@ -65,6 +68,7 @@ def _build_context(
     name: str, language: str, ptype: str, archs: list[str],
     ecosystem: str, pkg_mgr: str, is_mono: bool,
     workspaces: list[str], summary: dict[str, Any],
+    domain: str = "unknown", domain_details: dict[str, Any] | None = None,
 ) -> str:
     """Build the project context block for injection into prompts."""
     lines = []
@@ -72,6 +76,9 @@ def _build_context(
     if language:
         lines.append(f"Language: {language}")
     lines.append(f"Type: {ptype}")
+    if domain != "unknown":
+        active = (domain_details or {}).get("active", [domain])
+        lines.append(f"Domain: {domain} ({', '.join(active)})")
     if archs and archs != ["flat"]:
         lines.append(f"Architecture: {', '.join(archs)}")
     if ecosystem != "unknown":
@@ -90,8 +97,9 @@ def _build_context(
 
 def _build_rules(
     archs: list[str], ecosystem: str, pkg_mgr: str, is_mono: bool,
+    domain: str = "unknown",
 ) -> str:
-    """Build the rules block from architecture + ecosystem."""
+    """Build the rules block from architecture + ecosystem + domain."""
     lines: list[str] = []
 
     for arch in archs:
@@ -109,6 +117,23 @@ def _build_rules(
         mono = _registry.get_prompt_monorepo_rules()
         for r in mono.get("rules", []):
             lines.append(f"- {r}")
+
+    # Domain-specific rules
+    if domain != "unknown":
+        domain_data = _registry.get_domain(domain)
+        if domain_data:
+            gov_rules = domain_data.get("governance_rules", {})
+            for rule_name, rule_def in gov_rules.items():
+                desc = rule_def if isinstance(rule_def, str) else rule_def.get("description", "")
+                if desc:
+                    lines.append(f"- [{domain}] {desc}")
+
+    # Loom coordination rules (always present)
+    lines.append("- This project uses Loom-Context for AI coordination")
+    lines.append("- Loom detects, selects, compacts, exports, traces, and audits")
+    lines.append("- Do NOT bypass Loom rules — they are the source of truth")
+    lines.append("- If you propose changes, respect domain boundaries and layer rules")
+    lines.append("- Register decisions with 'loom decide' for traceability")
 
     return "\n".join(lines)
 

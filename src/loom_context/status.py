@@ -22,6 +22,8 @@ class ProjectStatus:
     project_name: str = ""
     project_type: str = ""
     architecture: list[str] = field(default_factory=list)
+    domain: str = "unknown"
+    domain_confidence: float = 0.0
     last_scan: Optional[str] = None
     is_stale: bool = False
     stale_file_count: int = 0
@@ -56,6 +58,8 @@ class StatusCollector:
             project_name=index.get("project", {}).get("name", ""),
             project_type=index.get("project", {}).get("type", "unknown"),
             architecture=index.get("project", {}).get("architecture", []),
+            domain=index.get("project", {}).get("domain", "unknown"),
+            domain_confidence=index.get("project", {}).get("domain_confidence", 0.0),
             last_scan=index.get("generated_at"),
             quick_rules=index.get("quick_rules", []),
         )

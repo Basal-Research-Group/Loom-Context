@@ -2,9 +2,15 @@
 type: architecture
 languages: [python]
 patterns: [clean-pipeline, clean-architecture]
+status: mostly-complete
 ---
 
 # Plan de Hardening Arquitectonico
+
+> **NOTA (2026-03-23):** La mayoria de este plan se completo en v0.2.0-v0.5.0.
+> Las piezas pendientes (pipelines/ports, cache invalidation) se abordan
+> en el roadmap v0.7.0 (DomainAdapters) y v0.9.0 (embedding cache).
+> Ver `decisiones.md` en `.loom/projects/` para el plan vigente.
 
 > Objetivo: preparar Loom-Context para crecer hacia bundles, handoff, retrieval local y export a agentes sin degradar mantenibilidad, testeabilidad ni claridad del dominio.
 

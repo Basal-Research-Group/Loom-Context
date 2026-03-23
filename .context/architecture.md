@@ -3,8 +3,11 @@
 ## Project Type
 python
 
+## Language
+Python
+
 ## Architecture Patterns
-- **pipeline**
+- **pipeline** (medium confidence, score 0.5)
 
 ## Source Root
 `src/`
@@ -19,4 +22,6 @@ No explicit layer boundaries detected. Consider defining them in `.context/loom.
 
 ## Dependency Direction
 
-No standard architecture pattern detected. Define boundaries in `.context/loom.json`.
+```
+input → processing → output
+```

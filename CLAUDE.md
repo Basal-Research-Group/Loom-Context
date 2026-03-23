@@ -5,6 +5,7 @@
 Loom-Context is a Python CLI tool that scans software projects and generates
 a `.context/` folder with architectural metadata for AI agents.
 Deterministic core — no AI required. 24 commands, 386 tests, Apache-2.0.
+**v0.6.0**: Domain detection (code, brand, research, data) with domain-aware prompts.
 
 ## Architecture
 
@@ -49,7 +50,8 @@ knowledge/
 ├── docs.json           ← documentation classification rules
 ├── design_patterns.json ← 22 GoF + modern patterns with detection signals
 ├── stop_words.json     ← EN + ES stop words for query tokenization
-└── domains/            ← domain definitions (code, research, data)
+├── domain_detector.py  ← DomainDetector: auto-infers project domain
+└── domains/            ← domain definitions (code, research, data, brand)
 ```
 
 To add a new language or pattern: edit the JSON, never modify scanner Python code.
@@ -95,10 +97,60 @@ Local overrides are **deep-merged** with built-in data:
 - **No print()**: use `console.print()` (Rich) in CLI, or `click.echo()` for stdout piping
 - **No project-specific references**: keep docs generic, no named projects
 
+## Domain Detection (v0.6.0)
+
+Loom auto-detects project domain by matching file tree against `knowledge/domains/*.json`.
+
+- **Domains**: `code`, `research`, `brand`, `data`, `mixed`, `unknown`
+- **Detection**: `DomainDetector` scores markers, extensions, and directory patterns
+- **Result**: `ScanResult.domain` + `.domain_confidence` + `.domain_details`
+- **Prompts**: `.prompts/` include domain + governance rules automatically
+- **Override**: `.loom/config.json` → `"domain": "research"` (not yet implemented)
+
+### Domain-specific governance rules
+
+`brand.json` defines rules enforced in generated prompts:
+- i18n sync: docs must be kept in sync across languages
+- Token consistency: design tokens are source of truth
+- Asset naming: icons/logos follow naming conventions
+
+### Adding a domain
+
+1. Create `knowledge/domains/yourdomain.json` with markers, extensions, patterns
+2. Optionally add `governance_rules` for domain-specific validation
+3. Run `loom scan .` — DomainDetector picks it up automatically
+
+## Security Rules
+
+**CRITICAL — these rules are non-negotiable:**
+
+1. **Never expose secrets**: `.env`, API keys, credentials, tokens MUST never appear
+   in `.context/`, `.prompts/`, bundles, handoffs, or any Loom output
+2. **Metadata only**: Loom outputs architectural metadata, NEVER source code content
+3. **No absolute paths**: outputs must not contain system paths (`/Users/`, `/home/`)
+4. **Treat agents as untrusted**: AI agents receive context, rules, and boundaries —
+   never secrets, credentials, or unrestricted access
+5. **3-layer file filter**: gitignore + hardcoded exclusions + secret pattern detection
+6. **No admin privileges**: Loom runs as normal user, reads/writes only `.context/` and `.loom/`
+7. **Local-first**: no data leaves the machine, no cloud, no telemetry
+8. **Protected knowledge files**: `security.json`, `infrastructure.json`, `markers.json`
+   cannot be overridden via `.loom/knowledge/`
+
+### What agents receive from Loom
+
+| Allowed | Forbidden |
+|---|---|
+| Project type, architecture, domain | Source code content |
+| Naming conventions, layer boundaries | API keys, tokens, passwords |
+| Dependency names and categories | .env file contents |
+| File structure (paths, not content) | Absolute system paths |
+| Governance rules and violations | Credentials or secrets |
+| Quick rules and prompt templates | Internal IPs or infrastructure details |
+
 ## Git Conventions
 
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
-- **Scopes**: `scanner`, `generator`, `auditor`, `cli`, `security`, `engine`, `docs`
+- **Scopes**: `scanner`, `generator`, `auditor`, `cli`, `security`, `engine`, `docs`, `knowledge`
 - **Branches**: `feat/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`
 - **Flow**: develop → release/vX.Y.Z → PR to main → tag → PyPI via CI
 - **Never commit directly to main**
@@ -119,3 +171,5 @@ Local overrides are **deep-merged** with built-in data:
 6. **Stay fast** — scanning 700 files must complete in < 2 seconds
 7. **Stay light** — 4 runtime dependencies only
 8. **Axiomatic context** — rules as invariants, not probability
+9. **Domain-aware** — detect domain, apply domain-specific rules and governance
+10. **Loom coordinates, agents execute** — Loom provides context, agents do the work

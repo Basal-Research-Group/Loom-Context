@@ -91,6 +91,12 @@ class LoomEngine:
         # Add project name
         structure_raw["project_name"] = self.config.root.name
 
+        # Detect domain
+        from loom_context.knowledge.domain_detector import DomainDetector
+
+        domain_detector = DomainDetector(self.config.root, self.file_filter)
+        domain_result = domain_detector.detect()
+
         result = ScanResult(
             structure=StructureFacts(**structure_raw),
             deps=DependencyInfo(
@@ -108,6 +114,9 @@ class LoomEngine:
                 by_type=docs_raw["by_type"],
             ),
             scanned_at=datetime.now(timezone.utc).isoformat(),
+            domain=domain_result.primary,
+            domain_confidence=domain_result.primary_confidence,
+            domain_details=domain_result.to_dict(),
         )
 
         # Save to cache
@@ -288,4 +297,7 @@ class LoomEngine:
                 by_type=data.get("docs", {}).get("by_type", {}),
             ),
             scanned_at=data.get("scanned_at", ""),
+            domain=data.get("domain", "unknown"),
+            domain_confidence=data.get("domain_confidence", 0.0),
+            domain_details=data.get("domain_details", {}),
         )

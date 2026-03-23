@@ -84,6 +84,15 @@ class IndexGenerator:
         if ecosystem != "unknown":
             project["ecosystem"] = ecosystem
 
+        # Domain
+        domain = scan_result.get("domain", "unknown")
+        if domain != "unknown":
+            project["domain"] = domain
+            project["domain_confidence"] = scan_result.get("domain_confidence", 0.0)
+            domain_details = scan_result.get("domain_details", {})
+            if domain_details.get("active"):
+                project["domain_active"] = domain_details["active"]
+
         return {
             "loom_version": version,
             "project": project,

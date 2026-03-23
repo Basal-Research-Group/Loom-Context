@@ -116,6 +116,9 @@ temp/
 .context/cache/
 .context/tmp/
 
+# Loom auto-generated prompts — regenerated on each scan
+.prompts/
+
 # Loom live state — local per user, never commit
 .loom/*
 !.loom/reports/

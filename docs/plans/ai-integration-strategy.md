@@ -1,11 +1,17 @@
 ---
 type: architecture
 scope: infra, generator
-status: future
-target_version: "future"
+status: superseded
+target_version: "0.9.0"
+superseded_by: ".loom/projects/basal/axolotl/loom-context/decisiones.md"
 ---
 
 # Estrategia de Integracion de IA Local
+
+> **NOTA (2026-03-23):** Este documento fue supersedido por `decisiones.md` en `.loom/projects/`.
+> La estrategia actual prioriza OllamaRanker local sobre sentence-transformers,
+> ContextRanker con strategy pattern, y IA solo para ranking (no generacion).
+> Ver `decisiones.md` seccion "v0.9.0" para el plan vigente.
 
 > Objetivo: usar modelos abiertos para mejorar seleccion, resumen y handoff, sin convertir a Loom en una herramienta dependiente de LLMs.
 

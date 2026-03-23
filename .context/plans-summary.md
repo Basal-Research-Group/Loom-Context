@@ -2,12 +2,6 @@
 
 ## Architecture Documentation
 
-- **Project Context for Claude** (`CLAUDE.md`, 7.9KB)
-  - Quick Rules (MUST follow)
-  - Project Type
-  - Architecture Patterns
-  - Source Root
-  - Layer Boundaries
 - **Estructura de Directorios de Loom-Context** (`docs/architecture/directory-structure.md`, 6.6KB)
   - Vista General
   - Métricas del Código
@@ -25,13 +19,13 @@
   - Hexagonal (Ports & Adapters)
   - MVC (Model-View-Controller)
   - Feature-Based
-- **Estrategia de Integracion de IA Local** (`docs/plans/ai-integration-strategy.md`, 6.1KB)
+- **Estrategia de Integracion de IA Local** (`docs/plans/ai-integration-strategy.md`, 6.4KB)
   - Estado (2026-03-16)
   - Decision Principal
   - Donde Agrega Valor la IA
   - Seleccion
   - Sintesis
-- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 10.8KB)
+- **Plan de Hardening Arquitectonico** (`docs/plans/architecture-hardening-plan.md`, 11.1KB)
   - Estado (actualizado 2026-03-16)
   - Ya completado
   - Pendiente
@@ -55,19 +49,18 @@
   - Por que es posible
   - Analogia
   - Dominio: Research
-- **Demo Cross-Platform Readiness Plan** (`docs/plans/demo-cross-platform-plan.md`, 0.9KB)
-  - [ ] Validar la detección de SO en Git Bash/WSL
-  - [ ] Documentar las instrucciones de shell requerido
-  - [ ] Compartir el plan generado en `.loom/reports/`
 
 ## Other Documentation
 
+- **agent-guidelines**: 1 file(s)
 - **changelog**: 1 file(s)
 - **code-of-conduct**: 1 file(s)
 - **contributing**: 1 file(s)
-- **delivery**: 5 file(s)
-- **general**: 7 file(s)
+- **delivery**: 6 file(s)
+- **general**: 5 file(s)
 - **guide**: 12 file(s)
-- **roadmap**: 1 file(s)
+- **readme**: 2 file(s)
+- **release**: 1 file(s)
+- **roadmap**: 2 file(s)
 - **scope**: 1 file(s)
 - **security**: 1 file(s)
