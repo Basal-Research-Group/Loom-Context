@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `DataAdapter`: structure + docs + deps + code, generates `data-pipelines.md`
 - Adapter registry: `get_adapter(domain)` resolves domain → adapter automatically
 - Engine now selects adapter dynamically by detected domain
-- Brand projects (Kinsignia) get domain-specific `.context/` files (brand.md, governance.md)
+- Brand-domain projects get domain-specific `.context/` files (brand.md, governance.md)
 - `ContextRanker` interface with strategy pattern for file ranking
 - `HeuristicRanker`: keyword + path matching ranker (default, no AI deps)
 - `RankedFile` and `RankingResult` typed models for ranking output

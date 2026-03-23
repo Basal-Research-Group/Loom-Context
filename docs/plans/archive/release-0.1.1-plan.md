@@ -69,10 +69,10 @@ Loom-Context ya puede:
 
 ## Archivos a Actualizar Antes del Tag
 
-- [pyproject.toml](/Users/joseruiz/Documents/Code/Python/Loom-Context/pyproject.toml)
-- [src/loom_context/__init__.py](/Users/joseruiz/Documents/Code/Python/Loom-Context/src/loom_context/__init__.py)
-- [CHANGELOG.md](/Users/joseruiz/Documents/Code/Python/Loom-Context/CHANGELOG.md)
-- [README.md](/Users/joseruiz/Documents/Code/Python/Loom-Context/README.md) si cambia wording o guidance
+- `pyproject.toml`
+- `src/loom_context/__init__.py`
+- `CHANGELOG.md`
+- `README.md` si cambia wording o guidance
 
 ## Checklist Tecnico Pre-Release
 
