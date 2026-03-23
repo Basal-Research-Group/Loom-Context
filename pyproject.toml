@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "loom-context"
-version = "0.8.0"
+version = "0.9.0"
 description = "Architecture Context Engine for AI-First Engineering"
 readme = "README.md"
 license = "Apache-2.0"
@@ -55,6 +55,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+ai = [
+    "sentence-transformers>=2.2",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",

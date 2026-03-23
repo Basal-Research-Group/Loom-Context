@@ -8,6 +8,21 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-03-23
+
+### Added — AI Rankers: Optional Intelligence for Better Context Selection
+- `EmbeddingRanker`: semantic file ranking using sentence-transformers/all-MiniLM-L6-v2 (22MB, no GPU)
+- `OllamaRanker`: file ranking via local LLM (Ollama localhost:11434, 0 Python deps)
+- `HybridRanker`: heuristic pre-filter + AI re-rank (0.4 heuristic + 0.6 AI score)
+- `RankerFactory`: `get_ranker("off"|"local"|"ollama"|"hybrid")` resolves strategy to ranker
+- `pip install loom-context[ai]` — optional extra for sentence-transformers
+- Graceful fallback: Ollama unavailable → heuristic, import fail → heuristic
+- All rankers implement `ContextRanker` interface (strategy pattern from v0.7.0)
+- 19 new tests for rankers + factory (457 total)
+
+### Changed
+- `pyproject.toml`: added `[ai]` optional dependency group
+
 ## [0.8.0] - 2026-03-23
 
 ### Added — Traces + Governance: Loom Remembers and Enforces
