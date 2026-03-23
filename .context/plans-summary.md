@@ -31,7 +31,7 @@
   - Pendiente
   - Principios de Diseno
   - 1. Contratos antes que diccionarios
-- **Plan de Release 0.1.1** (`docs/plans/archive/release-0.1.1-plan.md`, 6.1KB)
+- **Plan de Release 0.1.1** (`docs/plans/archive/release-0.1.1-plan.md`, 5.9KB)
   - Decision
   - Por que `0.1.1`
   - Por que no `0.2.0-beta.1`

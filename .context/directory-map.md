@@ -6,9 +6,9 @@
 ```
 loom_context/  # (10 files)
   adapters/  # Adapter implementations (Ports & Adapters pattern) (7 files)
-  auditors/  # Rule validators (pipeline pattern) (4 files)
+  auditors/  # Rule validators (pipeline pattern) (5 files)
   cli/  # (1 files)
-    commands/  # Command objects (CQRS/command pattern) (24 files)
+    commands/  # Command objects (CQRS/command pattern) (25 files)
 
   exporters/  # (8 files)
   generators/  # Output generators (pipeline pattern) (7 files)
@@ -20,7 +20,7 @@ loom_context/  # (10 files)
   selector/  # (6 files)
     strategies/  # Strategy pattern implementations (2 files)
 
-  store/  # State store / persistence layer (9 files)
+  store/  # State store / persistence layer (10 files)
   templates/  # Page templates / Jinja2 templates (5 files)
 
 

@@ -14,9 +14,9 @@ created: 2026-03-20
 ```
 v0.1-v0.4  → Prueba de concepto: pipeline funcional, 4 lenguajes, 9 arquitecturas
 v0.5       → Cerebro: Knowledge Registry centralizada, 20+ lenguajes, scoring multicapa [DONE]
-v0.6       → Deteccion: DomainDetector, domain-aware prompts, governance rules [DONE]
-v0.8       → Adapters: DomainAdapter base, ContextRanker, engine dinamico [DONE]
-v0.8       → Trazas [DONE]: ResolutionTrace, GovernanceAuditor, AgentHandoff tipado
+v0.6       → Deteccion: DomainDetector, domain-aware prompts, security rules [DONE]
+v0.7       → Adapters: DomainAdapter base, ContextRanker, engine dinamico [DONE]
+v0.8       → Trazas: ResolutionTrace, GovernanceAuditor, loom trace CLI [DONE]
 v0.9       → IA: OllamaRanker, HybridRanker, --ai local, benchmark
 v1.0       → Estabilidad: API publica, plugins, backward compat, 500+ tests
 ```

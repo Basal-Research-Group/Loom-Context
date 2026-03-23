@@ -6,15 +6,15 @@
     "code": {
       "classes": {
         "format": "PascalCase",
-        "count": 111
+        "count": 104
       },
       "functions": {
         "format": "mixed",
-        "count": 289
+        "count": 287
       },
       "constants": {
         "format": "UPPER_CASE",
-        "count": 47
+        "count": 42
       }
     }
   },
