@@ -30,7 +30,7 @@ With Loom:     2.6KB bundle →  agent reads what matters →  precision, consis
 
 No cloud. No LLM. No heavy deps. Deterministic analysis in <2 seconds. 91% fewer tokens.
 
-**v0.6.0**: Domain detection · 22 languages · 421 known packages · 23 architecture patterns · 47 design patterns · domain-aware prompts
+**v0.7.0**: Domain adapters · domain-specific context · 22 languages · 421 packages · 23 architecture patterns · brand/research/data support
 
 ---
 
@@ -128,7 +128,7 @@ pip install loom-context
 
 ```bash
 loom --version
-# loom, version 0.6.0
+# loom, version 0.7.0
 ```
 
 > If `loom` is not found: with pipx, run `pipx ensurepath` and restart terminal.

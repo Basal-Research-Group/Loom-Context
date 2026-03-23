@@ -6,11 +6,11 @@
     "code": {
       "classes": {
         "format": "PascalCase",
-        "count": 101
+        "count": 111
       },
       "functions": {
         "format": "mixed",
-        "count": 268
+        "count": 289
       },
       "constants": {
         "format": "UPPER_CASE",

@@ -45,6 +45,7 @@ class LoomEngine:
         get_registry().set_project_root(self.config.root)
         self.file_filter = FileFilter(self.config.root)
         self._last_scan_cached = False
+        self._last_adapter = None
 
     @property
     def was_cached(self) -> bool:
@@ -73,29 +74,45 @@ class LoomEngine:
 
         self._last_scan_cached = False
 
-        structure_scanner = StructureScanner(self.config.root, self.file_filter)
-        deps_scanner = DependencyScanner(self.config.root, self.file_filter)
-        code_scanner = CodeScanner(self.config.root, self.file_filter)
-        docs_scanner = DocsScanner(self.config.root, self.file_filter)
-
-        logger.debug("scanning structure...")
-        structure_raw = structure_scanner.scan()
-        logger.debug("scanning dependencies...")
-        deps_raw = deps_scanner.scan()
-        logger.debug("scanning code patterns...")
-        code_raw = code_scanner.scan()
-        logger.debug("scanning documentation...")
-        docs_raw = docs_scanner.scan()
-        logger.debug("scan complete")
-
-        # Add project name
-        structure_raw["project_name"] = self.config.root.name
-
-        # Detect domain
+        # Detect domain first to select adapter
         from loom_context.knowledge.domain_detector import DomainDetector
 
         domain_detector = DomainDetector(self.config.root, self.file_filter)
         domain_result = domain_detector.detect()
+        logger.debug("detected domain: %s (%.3f)", domain_result.primary, domain_result.primary_confidence)
+
+        # Select adapter by domain
+        from loom_context.adapters.registry import get_adapter
+
+        adapter = get_adapter(domain_result.primary, self.config.root, self.file_filter)
+        logger.debug("using adapter: %s", adapter.name)
+
+        # Run adapter's scanners
+        scanners = adapter.get_scanners()
+        scan_results: dict[str, dict[str, Any]] = {}
+        for scanner in scanners:
+            scanner_name = type(scanner).__name__
+            logger.debug("scanning %s...", scanner_name)
+            scan_results[scanner_name] = scanner.scan()
+
+        logger.debug("scan complete (%d scanners)", len(scanners))
+
+        # Extract results by scanner type (backward compatible)
+        structure_raw = scan_results.get("StructureScanner", {})
+        deps_raw = scan_results.get("DependencyScanner", {
+            "package_manager": "unknown", "dependency_files": [],
+            "dependencies": [], "stack_summary": {}, "ecosystem": "unknown",
+        })
+        code_raw = scan_results.get("CodeScanner", {
+            "file_naming": {}, "code_naming": {}, "suffix_patterns": [],
+            "prefix_patterns": [], "import_aliases": {}, "total_code_files": 0,
+        })
+        docs_raw = scan_results.get("DocsScanner", {
+            "docs": [], "agents_md": None, "doc_count": 0, "by_type": {},
+        })
+
+        # Add project name
+        structure_raw["project_name"] = self.config.root.name
 
         result = ScanResult(
             structure=StructureFacts(**structure_raw),
@@ -118,6 +135,9 @@ class LoomEngine:
             domain_confidence=domain_result.primary_confidence,
             domain_details=domain_result.to_dict(),
         )
+
+        # Store adapter for post_generate use
+        self._last_adapter = adapter
 
         # Save to cache
         try:
@@ -165,6 +185,14 @@ class LoomEngine:
         # Generate all context files
         ctx_gen = ContextGenerator(self.config.context_dir)
         generated = ctx_gen.generate_all(scan_dict, index_data)
+
+        # Domain-specific post-generation (brand.md, governance.md, research.md, etc.)
+        try:
+            if hasattr(self, "_last_adapter") and self._last_adapter:
+                domain_files = self._last_adapter.post_generate(scan_dict, self.config.context_dir)
+                generated.extend(domain_files)
+        except Exception:  # noqa: S110 — domain post-generation is best-effort
+            pass
 
         # Generate .prompts/ directory
         try:

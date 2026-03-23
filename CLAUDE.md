@@ -21,12 +21,13 @@ security/filter.py    ← foundation, depends on knowledge only
 scanners/*            ← depend on knowledge + security + base
 generators/*          ← depend on scan results, no scanner imports
 auditors/*            ← depend on knowledge + security + rules.json
+adapters/*            ← domain-specific pipelines (code, brand, research, data)
 store/*               ← .loom/ persistence (sessions, findings, decisions, mutations)
-selector/*            ← bundle, handoff, compact, heuristic strategy
+selector/*            ← bundle, handoff, compact, heuristic strategy, ranker
 exporters/*           ← agent-specific output (claude, cursor, codex, generic)
 models.py             ← typed contracts (frozen dataclasses)
 metrics.py            ← per-layer health metrics
-engine.py             ← orchestrates scanners + generators + audit
+engine.py             ← orchestrates adapters + generators + audit (domain-driven)
 cli/commands/*.py     ← one file per command, no business logic
 ```
 

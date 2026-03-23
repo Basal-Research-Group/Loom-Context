@@ -8,6 +8,27 @@ All notable changes to Loom-Context will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-03-23
+
+### Added — Domain Adapters: Loom Adapts to What It Scans
+- `DomainAdapter` base class: defines scanners + generators per domain
+- `CodeAdapter`: default adapter, runs all 4 original scanners (backward compatible)
+- `BrandAdapter`: structure + docs scanners, generates `brand.md` + `governance.md`
+- `ResearchAdapter`: structure + docs + deps + code, generates `research.md`
+- `DataAdapter`: structure + docs + deps + code, generates `data-pipelines.md`
+- Adapter registry: `get_adapter(domain)` resolves domain → adapter automatically
+- Engine now selects adapter dynamically by detected domain
+- Brand projects (Kinsignia) get domain-specific `.context/` files (brand.md, governance.md)
+- `ContextRanker` interface with strategy pattern for file ranking
+- `HeuristicRanker`: keyword + path matching ranker (default, no AI deps)
+- `RankedFile` and `RankingResult` typed models for ranking output
+
+### Changed
+- `engine.py`: refactored from 4 hardcoded scanners to adapter-driven pipeline
+- Engine stores `_last_adapter` for domain-specific post-generation
+- Adapters provide default empty dicts for missing scanner results (backward compat)
+- Brand projects generate 14 files (vs 12 for code projects)
+
 ## [0.6.0] - 2026-03-23
 
 ### Added — Domain Detection: Loom Knows What It's Scanning
