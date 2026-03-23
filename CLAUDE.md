@@ -197,9 +197,52 @@ Even trusted tools must be verified:
 - **Flow**: develop → release/vX.Y.Z → PR to main → tag → PyPI via CI
 - **Never commit directly to main**
 
+## Extension Rules
+
+**Loom is extensible through defined contracts, not ad-hoc expansion.**
+
+### What Loom IS and IS NOT
+
+| Loom IS | Loom IS NOT |
+|---|---|
+| Compiler/orchestrator of operational context | General planner or autonomous agent |
+| Domain-aware adapter system | Universal knowledge graph |
+| Trace/audit recorder | LLM wrapper or chatbot framework |
+| Agent context exporter | Business logic engine |
+
+### Official extension points (v0.7.0)
+
+These are the only stable interfaces for extending Loom:
+
+1. `DomainAdapter` — add scanners/generators per domain
+2. `ContextRanker` — swap ranking strategy (heuristic, hybrid, AI)
+3. `GovernanceRule` — domain-specific validation rules (in domains/*.json)
+4. `Exporter` — agent-specific output format
+5. `DomainDetector` — domain inference from file tree (via domains/*.json)
+
+### Rules for extensions
+
+1. An extension MUST NOT change the core contract (ScanResult, Violation, etc.)
+2. An extension MUST NOT depend on another extension
+3. The core MUST work without AI — AI is always optional enhancement
+4. Every extension MUST declare: input, output, side effects, fallback
+5. Every extension MUST be disableable without breaking the base flow
+6. Extensions write through ports only: trace store, exporter, adapter registry
+7. Governance rules execute outside the agent — agent proposes, Loom validates
+
+### Layer responsibilities
+
+| Layer | Owns | Does NOT own |
+|---|---|---|
+| **Core** | detect, select, compact, export, trace, audit | planning, execution, AI decisions |
+| **Adapters** | domain-specific scanners + generators | core contracts, cross-adapter deps |
+| **IA (optional)** | ranking improvement, semantic matching | domain rules, policy decisions |
+| **Agents** | task execution, code generation | Loom rules, trace mutation, audit bypass |
+| **Observability** | metrics, cost tracking | functional decisions |
+
 ## Testing
 
-- Run: `pytest` (386+ tests, 95% coverage)
+- Run: `pytest` (419+ tests, 95% coverage)
 - Fixture `tmp_project` in `conftest.py` provides a complete mock project
 - Quality: `make qa` runs lint + format + types + security + tests
 
