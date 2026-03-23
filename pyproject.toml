@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "loom-context"
-version = "0.6.0"
+version = "0.7.0"
 description = "Architecture Context Engine for AI-First Engineering"
 readme = "README.md"
 license = "Apache-2.0"

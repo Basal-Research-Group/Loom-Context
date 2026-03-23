@@ -5,6 +5,7 @@
 
 ```
 loom_context/  # (10 files)
+  adapters/  # Adapter implementations (Ports & Adapters pattern) (7 files)
   auditors/  # Rule validators (pipeline pattern) (4 files)
   cli/  # (1 files)
     commands/  # Command objects (CQRS/command pattern) (24 files)
@@ -16,7 +17,7 @@ loom_context/  # (10 files)
 
   scanners/  # Input scanners (pipeline pattern) (9 files)
   security/  # (2 files)
-  selector/  # (5 files)
+  selector/  # (6 files)
     strategies/  # Strategy pattern implementations (2 files)
 
   store/  # State store / persistence layer (9 files)
