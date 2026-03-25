@@ -11,7 +11,6 @@
     ],
     "other": [
       "pathspec@0.12",
-      "sentence-transformers@2.2",
       "build@1.0",
       "twine@5.0"
     ],
@@ -29,5 +28,5 @@
       "mypy@1.0"
     ]
   },
-  "total_dependencies": 11
+  "total_dependencies": 10
 }

@@ -1,5 +1,5 @@
 {
-  "loom_version": "0.9.0",
+  "loom_version": "0.8.0",
   "project": {
     "name": "Loom-Context",
     "type": "python",
@@ -31,13 +31,13 @@
   },
   "agents_md": "CLAUDE.md",
   "quick_rules": [
-    "Files use mixed naming (87% of codebase)"
+    "Files use mixed naming (91% of codebase)"
   ],
   "stats": {
-    "total_files": 123,
-    "total_code_files": 110,
+    "total_files": 119,
+    "total_code_files": 105,
     "total_docs": 42,
-    "total_dependencies": 11
+    "total_dependencies": 10
   },
-  "generated_at": "2026-03-25T20:49:45.376119+00:00"
+  "generated_at": "2026-03-23T16:55:34.851403+00:00"
 }

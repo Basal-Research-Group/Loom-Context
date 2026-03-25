@@ -8353,6 +8353,3 @@
 {"timestamp": "2026-03-23T19:16:51.022724+00:00", "command": "trace", "duration_ms": 0, "success": true, "git_sha": "f259c7d"}
 {"timestamp": "2026-03-23T19:16:51.046330+00:00", "command": "trace", "duration_ms": 11, "success": true, "git_sha": "f259c7d"}
 {"timestamp": "2026-03-23T19:16:51.057322+00:00", "command": "trace", "duration_ms": 0, "success": true, "git_sha": "f259c7d"}
-{"timestamp": "2026-03-25T20:49:45.397921+00:00", "command": "scan", "duration_ms": 591, "success": true, "git_sha": "9be8dc6"}
-{"timestamp": "2026-03-25T20:49:45.619487+00:00", "command": "status", "duration_ms": 98, "success": true, "git_sha": "9be8dc6"}
-{"timestamp": "2026-03-25T20:49:57.204837+00:00", "command": "trace", "duration_ms": 33, "success": true, "git_sha": "9be8dc6"}
