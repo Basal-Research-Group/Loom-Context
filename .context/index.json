@@ -1,5 +1,5 @@
 {
-  "loom_version": "0.3.0",
+  "loom_version": "0.9.0",
   "project": {
     "name": "Loom-Context",
     "type": "python",
@@ -7,7 +7,19 @@
       "pipeline"
     ],
     "language": "Python",
-    "runtime": "Python"
+    "runtime": "Python",
+    "architecture_confidence": {
+      "pipeline": {
+        "score": 0.5,
+        "confidence": "medium"
+      }
+    },
+    "ecosystem": "pip",
+    "domain": "code",
+    "domain_confidence": 0.724,
+    "domain_active": [
+      "code"
+    ]
   },
   "context_files": {
     "architecture": ".context/architecture.md",
@@ -19,13 +31,13 @@
   },
   "agents_md": "CLAUDE.md",
   "quick_rules": [
-    "Files use camelCase naming (80% of codebase)"
+    "Files use mixed naming (87% of codebase)"
   ],
   "stats": {
-    "total_files": 68,
-    "total_code_files": 66,
-    "total_docs": 37,
-    "total_dependencies": 12
+    "total_files": 123,
+    "total_code_files": 110,
+    "total_docs": 42,
+    "total_dependencies": 11
   },
-  "generated_at": "2026-03-18T08:16:35.087221+00:00"
+  "generated_at": "2026-03-25T20:49:45.376119+00:00"
 }

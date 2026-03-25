@@ -2,8 +2,8 @@
 
 ## File Naming
 
-- **Dominant style:** camelCase (80% of files)
-- Distribution: mixed: 18% camelCase: 80% snake_case: 2% 
+- **Dominant style:** mixed (87% of files)
+- Distribution: mixed: 87% snake_case: 13% 
 
 ## Suffix Patterns
 
@@ -17,8 +17,8 @@ No consistent prefix patterns detected.
 
 ## Code-Level Naming
 
-- **Classes:** PascalCase (64 found)
-- **Functions:** camelCase (148 found)
+- **Classes:** PascalCase (94 found)
+- **Functions:** mixed (293 found)
 
 ## Import Aliases
 
